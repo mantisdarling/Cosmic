@@ -317,7 +317,7 @@ const TopicPanel = memo(function TopicPanel({
                   }}>
                     <span style={{ fontSize: '1rem' }}>✦</span>
                     <span style={{ fontSize: '0.75rem', color: '#737373', flex: 1 }}>
-                      Explained by <strong style={{ color: '#F5A623' }}>Gemini 1.5 Flash</strong>
+                      Explained by <strong style={{ color: '#F5A623' }}>Llama 3.1 (Groq)</strong>
                     </span>
                     <button
                       onClick={regenerate}

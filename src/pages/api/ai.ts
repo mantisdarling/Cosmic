@@ -1,33 +1,29 @@
 /**
  * src/pages/api/ai.ts
- * Serverless endpoint — proxies Gemini 1.5 Flash using the GEMINI_API_KEY
- * environment variable set in Vercel. The key is NEVER exposed to the browser.
+ * Serverless endpoint — proxies Groq (llama-3.1-8b-instant, free tier)
+ * Uses GROQ_API_KEY env variable set in Vercel. Never exposed to browser.
  *
  * POST /api/ai
  * Body: { topic: string, roadmap: string }
- * Returns: { html: string } (markdown rendered server-side)
+ * Returns: { text: string }
  */
 
 import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export const POST: APIRoute = async ({ request }) => {
-  // ── Validate API key is configured ──────────────────────────────────────
-  const apiKey = import.meta.env.GEMINI_API_KEY;
+  const apiKey = import.meta.env.GROQ_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'AI Tutor is not configured. Set GEMINI_API_KEY in Vercel.' }),
+      JSON.stringify({ error: 'AI Tutor not configured. Set GROQ_API_KEY in Vercel.' }),
       { status: 503, headers: { 'Content-Type': 'application/json' } },
     );
   }
 
-  // ── Parse body ───────────────────────────────────────────────────────────
-  let topic = '';
-  let roadmap = '';
+  let topic = '', roadmap = '';
   try {
     const body = await request.json();
     topic   = String(body?.topic   ?? '').slice(0, 200);
@@ -44,7 +40,6 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  // ── Build prompt ─────────────────────────────────────────────────────────
   const prompt = `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
 
 Explain this topic clearly with the following sections using markdown:
@@ -64,44 +59,45 @@ Bullet list of the 4–6 most important things to understand.
 ## Common mistakes to avoid
 2–3 pitfalls beginners often hit, and how to avoid them.
 
-Be friendly, practical, and motivating. Use markdown formatting. Around 400–550 words total.`;
+Be friendly, practical, and motivating. Use markdown. Around 400–500 words total.`;
 
-  // ── Call Gemini ──────────────────────────────────────────────────────────
   try {
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    const res = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 900, temperature: 0.7 },
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 900,
+        temperature: 0.7,
       }),
     });
 
-    const data = await geminiRes.json();
+    const data = await res.json();
 
-    if (!geminiRes.ok) {
-      const msg = data?.error?.message ?? 'Gemini API error';
+    if (!res.ok) {
+      const msg = data?.error?.message ?? 'Groq API error';
       return new Response(JSON.stringify({ error: msg }), {
         status: 502, headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const text: string = data?.choices?.[0]?.message?.content ?? '';
     if (!text) {
-      return new Response(JSON.stringify({ error: 'Empty response from Gemini.' }), {
+      return new Response(JSON.stringify({ error: 'Empty response from AI.' }), {
         status: 502, headers: { 'Content-Type': 'application/json' },
       });
     }
 
     return new Response(JSON.stringify({ text }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: 'Failed to reach Gemini API.' }), {
+  } catch {
+    return new Response(JSON.stringify({ error: 'Failed to reach AI service.' }), {
       status: 502, headers: { 'Content-Type': 'application/json' },
     });
   }
