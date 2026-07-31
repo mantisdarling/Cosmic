@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+---
+<BaseLayout title="404 — Not Found | Cosmic" description="Page not found.">
+  <Nav />
+  <main class="flex flex-col items-center justify-center min-h-screen text-center px-6">
+    <p class="font-mono text-xs text-[var(--text-muted)] tracking-widest uppercase mb-4">Error 404</p>
+    <h1 class="font-display text-[clamp(6rem,20vw,14rem)] leading-none tracking-wider text-[var(--text-primary)] mb-6"
+        style="color: transparent; -webkit-text-stroke: 1px rgba(167,139,250,0.4);">
+      LOST
+    </h1>
+    <p class="font-sans text-lg text-[var(--text-secondary)] mb-8 max-w-sm">
+      This page doesn't exist. But your roadmap is still out there.
+    </p>
+    <a
+      href="/"
+      class="font-mono text-sm px-6 py-3 rounded-xl bg-[rgba(124,58,237,0.1)] border border-[var(--accent-purple)] text-[var(--accent-purple-light)] hover:bg-[rgba(124,58,237,0.2)] transition-all duration-200"
+    >
+      ← Back to roadmaps
+    </a>
+  </main>
+</BaseLayout>

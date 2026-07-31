@@ -1,0 +1,80 @@
+rules_version = '2';
+
+//
+// Firestore Security Rules for Cosmic Roadmap
+//
+// Security model:
+//  1. Deny-all by default — no rule grants access unless explicitly allowed.
+//  2. Users can ONLY access their own document subtree (users/{their-uid}/...).
+//  3. Public roadmap/topic content is read-only and served statically — never stored in Firestore.
+//  4. All writes are validated: status must be one of the allowed enum values,
+//     updatedAt must be the server timestamp (prevents client clock manipulation),
+//     and no extra fields are accepted.
+//  5. Rate limiting is enforced at the client level AND via Firebase quotas.
+//     Cloudflare WAF rules provide an additional layer.
+//
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── DENY ALL by default ─────────────────────────────────────────────────
+    // Every path not explicitly matched is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ── USER PROGRESS ───────────────────────────────────────────────────────
+    // Path: users/{uid}/roadmaps/{roadmapId}/nodes/{nodeId}
+    //
+    // Rules:
+    //  - Must be authenticated.
+    //  - The UID in the path must exactly match the caller's auth UID.
+    //  - On write: status must be one of the allowed enum values.
+    //  - No extra fields beyond {status, updatedAt} are allowed.
+    //  - updatedAt must use the server timestamp (prevents forgery).
+    match /users/{uid} {
+      // Users can read their own top-level doc (for profile metadata if needed)
+      allow get: if isOwner(uid);
+
+      match /roadmaps/{roadmapId} {
+        // Allow listing roadmap sub-documents
+        allow list: if isOwner(uid);
+
+        match /nodes/{nodeId} {
+          // READ: only the authenticated owner
+          allow get, list: if isOwner(uid);
+
+          // CREATE / UPDATE: owner only + validated payload
+          allow create, update: if isOwner(uid) && isValidNodeProgress();
+
+          // DELETE: owner only (used when resetting a node to "todo")
+          allow delete: if isOwner(uid);
+        }
+      }
+    }
+
+    // ── HELPER FUNCTIONS ────────────────────────────────────────────────────
+
+    /** True if the caller is authenticated and their UID matches the path UID */
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    /** Validates node progress document shape and value constraints */
+    function isValidNodeProgress() {
+      let data = request.resource.data;
+
+      // Must have exactly these two keys — no extra fields allowed
+      let hasOnlyAllowedKeys = data.keys().hasOnly(['status', 'updatedAt']);
+
+      // Status must be one of the allowed enum values
+      let validStatuses = ['todo', 'in-progress', 'done', 'bookmarked'];
+      let hasValidStatus = data.status is string && data.status in validStatuses;
+
+      // updatedAt must be a server timestamp (prevents client-side timestamp forgery)
+      let hasServerTimestamp = data.updatedAt == request.time;
+
+      return hasOnlyAllowedKeys && hasValidStatus && hasServerTimestamp;
+    }
+  }
+}

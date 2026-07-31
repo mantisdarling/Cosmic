@@ -1,0 +1,85 @@
+---
+/**
+ * src/pages/roadmap/[slug].astro
+ *
+ * Security: slug validated → JSON topic files loaded → Zod-validated → passed as static props.
+ * No MDX native bindings, no runtime file system access, no user-controlled paths.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/Nav.astro';
+import RoadmapCanvas from '../../components/RoadmapCanvas';
+import { RoadmapSchema, TopicSchema, SlugSchema, type Roadmap, type Topic } from '../../lib/security';
+
+export async function getStaticPaths() {
+  const roadmapModules = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
+
+  return Object.values(roadmapModules)
+    .map((mod: any) => {
+      const result = RoadmapSchema.safeParse(mod.default ?? mod);
+      if (!result.success) return null;
+      return { params: { slug: result.data.id } };
+    })
+    .filter(Boolean);
+}
+
+// ── Validate URL slug ─────────────────────────────────────────────────────
+const { slug } = Astro.params;
+const slugResult = SlugSchema.safeParse(slug);
+if (!slugResult.success) return Astro.redirect('/404');
+const safeSlug = slugResult.data;
+
+// ── Load roadmap ─────────────────────────────────────────────────────────
+const roadmapModules = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
+let roadmap: Roadmap | null = null;
+for (const mod of Object.values(roadmapModules)) {
+  const raw = (mod as any).default ?? mod;
+  const result = RoadmapSchema.safeParse(raw);
+  if (result.success && result.data.id === safeSlug) { roadmap = result.data; break; }
+}
+if (!roadmap) return Astro.redirect('/404');
+
+// ── Load topic JSON files ─────────────────────────────────────────────────
+const topicModules = import.meta.glob('../../content/topics/*.json', { eager: true });
+
+// Build validated topic map
+const topicMap = new Map<string, Topic>();
+for (const [path, mod] of Object.entries(topicModules)) {
+  const raw = (mod as any).default ?? mod;
+  const result = TopicSchema.safeParse(raw);
+  if (result.success) {
+    topicMap.set(result.data.id, result.data);
+  }
+}
+
+// Build topic contents array for RoadmapCanvas
+const topicContents = roadmap.nodes.map((node) => {
+  const topic = topicMap.get(node.id);
+  return {
+    nodeId: node.id,
+    markdownBody: topic?.body ?? '',
+    resources: topic?.resources ?? [],
+  };
+});
+---
+
+<BaseLayout
+  title={`${roadmap.title} — Cosmic Roadmap`}
+  description={roadmap.description}
+>
+  <Nav />
+
+  <div class="flex flex-col" style="height: 100dvh; padding-top: 65px;">
+    <RoadmapCanvas
+      roadmap={roadmap}
+      topicContents={topicContents}
+      client:only="react"
+    />
+  </div>
+
+  <!-- Hidden SEO content -->
+  <div class="sr-only" aria-hidden="true">
+    <h1>{roadmap.title}</h1>
+    <p>{roadmap.description}</p>
+    <ul>{roadmap.nodes.map((n) => <li>{n.label}</li>)}</ul>
+  </div>
+</BaseLayout>

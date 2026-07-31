@@ -1,0 +1,181 @@
+---
+/**
+ * Nav.astro — Top navigation bar
+ * Security: theme toggle uses strict whitelist; no user input reaches DOM attributes.
+ */
+---
+
+<nav
+  id="mainNav"
+  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur-md border-b border-[var(--border-default)] bg-[rgba(8,8,16,0.8)] transition-all duration-300"
+  role="navigation"
+  aria-label="Main navigation"
+>
+  <!-- Logo -->
+  <a
+    href="/"
+    class="font-display text-2xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors duration-200 select-none"
+    aria-label="Cosmic Roadmap home"
+  >
+    COSMIC
+  </a>
+
+  <!-- Center links -->
+  <ul class="hidden md:flex items-center gap-8 list-none" role="list">
+    <li>
+      <a
+        href="/"
+        class="font-mono text-xs tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase"
+      >
+        Roadmaps
+      </a>
+    </li>
+    <li>
+      <a
+        href="/#about"
+        class="font-mono text-xs tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase"
+      >
+        About
+      </a>
+    </li>
+  </ul>
+
+  <!-- Right side: theme toggle + search trigger -->
+  <div class="flex items-center gap-4">
+    <!-- Theme Toggle -->
+    <button
+      id="themeToggle"
+      aria-label="Toggle light/dark theme"
+      title="Toggle theme"
+      class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--accent-purple)] hover:text-[var(--accent-purple-light)] transition-all duration-200 font-mono text-xs"
+    >
+      <span id="themeIcon" aria-hidden="true">◐</span>
+      <span id="themeLabel" class="hidden sm:inline">Light</span>
+    </button>
+
+    <!-- Mobile menu button -->
+    <button
+      id="mobileMenuBtn"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="mobileMenu"
+      class="md:hidden flex flex-col gap-1.5 p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+    >
+      <span class="block w-5 h-0.5 bg-current rounded transition-all" id="hamburger1"></span>
+      <span class="block w-5 h-0.5 bg-current rounded transition-all" id="hamburger2"></span>
+      <span class="block w-3.5 h-0.5 bg-current rounded transition-all" id="hamburger3"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div
+  id="mobileMenu"
+  role="dialog"
+  aria-label="Mobile navigation menu"
+  aria-modal="true"
+  hidden
+  class="fixed inset-0 z-40 md:hidden"
+>
+  <!-- Backdrop -->
+  <div
+    id="mobileMenuBackdrop"
+    class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+    aria-hidden="true"
+  ></div>
+  <!-- Drawer -->
+  <div class="absolute top-0 right-0 bottom-0 w-72 bg-[var(--bg-secondary)] border-l border-[var(--border-default)] flex flex-col p-8 pt-20">
+    <ul class="list-none flex flex-col gap-6" role="list">
+      <li>
+        <a href="/" class="font-display text-3xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors">
+          ROADMAPS
+        </a>
+      </li>
+      <li>
+        <a href="/#about" class="font-display text-3xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors">
+          ABOUT
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // ─── Theme Toggle ────────────────────────────────────────────────────
+  // SECURITY: only "dark" or "light" are valid — enforced by strict whitelist.
+  // No user-supplied string ever reaches setAttribute directly.
+  const VALID_THEMES = ['dark', 'light'] as const;
+  type Theme = typeof VALID_THEMES[number];
+
+  function getTheme(): Theme {
+    const stored = localStorage.getItem('cosmic-theme');
+    return (VALID_THEMES as readonly string[]).includes(stored ?? '') ? stored as Theme : 'dark';
+  }
+
+  function applyTheme(theme: Theme) {
+    // Whitelist-only: never setAttribute with arbitrary input
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+
+    const label = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeIcon');
+    if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    if (icon) icon.textContent = theme === 'dark' ? '◐' : '◑';
+
+    // Safe localStorage write
+    localStorage.setItem('cosmic-theme', theme);
+  }
+
+  const themeBtn = document.getElementById('themeToggle');
+  themeBtn?.addEventListener('click', () => {
+    const next: Theme = getTheme() === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  });
+
+  // Initialize label on load
+  applyTheme(getTheme());
+
+  // ─── Mobile Menu ────────────────────────────────────────────────────
+  const menuBtn = document.getElementById('mobileMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+
+  function openMenu() {
+    mobileMenu?.removeAttribute('hidden');
+    menuBtn?.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    mobileMenu?.setAttribute('hidden', '');
+    menuBtn?.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn?.addEventListener('click', () => {
+    const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  backdrop?.addEventListener('click', closeMenu);
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  // Close mobile menu when navigating to a link
+  mobileMenu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // ─── Nav shadow on scroll ───────────────────────────────────────────
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      nav?.classList.add('shadow-lg', 'shadow-black/30');
+    } else {
+      nav?.classList.remove('shadow-lg', 'shadow-black/30');
+    }
+  }, { passive: true });
+</script>
