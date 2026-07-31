@@ -1,0 +1,271 @@
+/* ============================================================
+   COSMIC ROADMAP — Global Styles (Tailwind v4)
+   ============================================================ */
+
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* ---------- Tailwind v4 Theme Tokens ---------- */
+@theme {
+  --font-display: "Bebas Neue", sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Space Mono", monospace;
+
+  --color-bg-primary: #080810;
+  --color-bg-secondary: #0f0f1a;
+  --color-bg-tertiary: #161625;
+  --color-bg-card: #12121e;
+  --color-bg-hover: #1a1a2e;
+
+  --color-accent-purple: #7c3aed;
+  --color-accent-purple-light: #a78bfa;
+  --color-accent-purple-dim: #4c1d95;
+  --color-accent-violet: #6d28d9;
+  --color-accent-cyan: #06b6d4;
+  --color-accent-green: #10b981;
+  --color-accent-amber: #f59e0b;
+
+  --color-border-default: #1e1e35;
+  --color-border-subtle: #161625;
+  --color-border-accent: #7c3aed;
+
+  --color-text-primary: #f0f0ff;
+  --color-text-secondary: #9898c0;
+  --color-text-muted: #5a5a80;
+  --color-text-accent: #a78bfa;
+
+  --shadow-glow-purple: 0 0 20px rgba(124,58,237,0.4);
+  --shadow-glow-sm: 0 0 10px rgba(124,58,237,0.2);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-panel: 0 0 60px rgba(0,0,0,0.6);
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-pulse-slow: pulse 3s ease-in-out infinite;
+  --animate-fade-up: fadeUp 0.6s ease forwards;
+  --animate-slide-in-right: slideInRight 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------- CSS Custom Properties ---------- */
+:root {
+  --bg-primary: #080810;
+  --bg-secondary: #0f0f1a;
+  --bg-tertiary: #161625;
+  --bg-card: #12121e;
+  --accent-purple: #7c3aed;
+  --accent-purple-light: #a78bfa;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --border-default: #1e1e35;
+  --text-primary: #f0f0ff;
+  --text-secondary: #9898c0;
+  --text-muted: #5a5a80;
+  --panel-width: clamp(320px, 40vw, 520px);
+  --shadow-panel: 0 0 60px rgba(0,0,0,0.6);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg-primary: #fafafa;
+  --bg-secondary: #f4f4f8;
+  --bg-tertiary: #eeeef4;
+  --bg-card: #ffffff;
+  --border-default: #e0e0ea;
+  --text-primary: #0a0a14;
+  --text-secondary: #46466a;
+  --text-muted: #9898b8;
+  color-scheme: light;
+}
+
+/* ---------- Base Reset ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- Noise texture overlay ---------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: overlay;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+/* ---------- Selection ---------- */
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: var(--text-primary);
+}
+
+/* ---------- Focus styles ---------- */
+:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Scroll-reveal ---------- */
+.rv {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.rv.visible { opacity: 1; transform: translateY(0); }
+.rv.d1 { transition-delay: 0.1s; }
+.rv.d2 { transition-delay: 0.2s; }
+.rv.d3 { transition-delay: 0.3s; }
+.rv.d4 { transition-delay: 0.4s; }
+.rv.d5 { transition-delay: 0.5s; }
+
+/* ---------- React Flow overrides ---------- */
+.react-flow__background { background-color: var(--bg-secondary) !important; }
+
+.react-flow__controls {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  overflow: hidden;
+}
+.react-flow__controls-button {
+  background: var(--bg-card) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border-default) !important;
+  color: var(--text-secondary) !important;
+}
+.react-flow__controls-button:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--accent-purple-light) !important;
+}
+.react-flow__controls-button svg { fill: currentColor !important; }
+.react-flow__minimap {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: 10px !important;
+}
+.react-flow__minimap-mask { fill: rgba(8,8,16,0.7) !important; }
+.react-flow__minimap-node { fill: rgba(124,58,237,0.5) !important; }
+.react-flow__edge-path { stroke: rgba(80,80,120,0.5) !important; }
+
+/* ---------- MDX content styles ---------- */
+.mdx-content {
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+.mdx-content h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  margin: 1.5rem 0 0.75rem;
+}
+.mdx-content h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent-purple-light);
+  margin: 1.25rem 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.mdx-content p { margin-bottom: 0.875rem; }
+.mdx-content ul, .mdx-content ol { padding-left: 1.25rem; margin-bottom: 0.875rem; }
+.mdx-content li { margin-bottom: 0.25rem; }
+.mdx-content strong { color: var(--text-primary); font-weight: 600; }
+.mdx-content code {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8em;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: var(--accent-purple-light);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+.mdx-content pre {
+  background: #0d0d1a;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.mdx-content pre code {
+  background: none; border: none; padding: 0;
+  font-size: 0.82rem; color: #c4b5fd;
+}
+.mdx-content table {
+  width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem;
+}
+.mdx-content th {
+  background: rgba(124,58,237,0.1);
+  border: 1px solid var(--border-default);
+  padding: 0.5rem 0.75rem;
+  text-align: left; font-weight: 600;
+  color: var(--accent-purple-light);
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.mdx-content td {
+  border: 1px solid var(--border-default);
+  padding: 0.5rem 0.75rem;
+  color: var(--text-secondary);
+}
+.mdx-content a {
+  color: var(--accent-purple-light);
+  text-decoration: underline;
+  text-decoration-color: rgba(167,139,250,0.4);
+}
+.mdx-content a:hover { text-decoration-color: var(--accent-purple-light); }
+
+/* ---------- Screen reader only ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
