@@ -215,12 +215,14 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.1, maxZoom: 1.4, minZoom: 0.3 }}
-        minZoom={0.15}
-        maxZoom={3}
+        minZoom={0.3}
+        maxZoom={1.4}
         zoomOnScroll={false}
         zoomOnPinch={false}
         zoomOnDoubleClick={false}
-        panOnScroll={true}
+        panOnScroll={false}
+        panOnDrag={false}
+        preventScrolling={false}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}

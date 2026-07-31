@@ -119,25 +119,9 @@ const topicContents = roadmap.nodes.map((node) => {
       </div>
     </header>
 
-    <!-- Legend -->
-    <div class="legend" role="note" aria-label="Node status legend">
-      <div class="legend-item">
-        <span class="legend-dot" style="background:#2a2a2a; border: 1px solid #333;" aria-hidden="true"></span>
-        <span class="legend-label">Not started</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:#F5A623;" aria-hidden="true"></span>
-        <span class="legend-label">In progress</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:#22C55E;" aria-hidden="true"></span>
-        <span class="legend-label">Completed</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:#3B82F6;" aria-hidden="true"></span>
-        <span class="legend-label">Bookmarked</span>
-      </div>
-      <span class="legend-hint">Click any node to open topic ↗</span>
+    <!-- Slim hint bar -->
+    <div style="flex-shrink:0;padding:6px 20px;background:#0f0f0f;border-bottom:1px solid #161616;display:flex;align-items:center;justify-content:flex-end;">
+      <span style="font-size:0.68rem;color:#333;font-family:'Space Mono',monospace;">Click any node to explore ↗</span>
     </div>
 
     <!-- Interactive Canvas (React island) -->
