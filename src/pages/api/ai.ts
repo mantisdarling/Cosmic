@@ -42,15 +42,40 @@ export const POST: APIRoute = async ({ request }) => {
 
   let promptText = customPrompt;
 
-  if (action === 'quiz') {
+  if (action === 'generate') {
+    promptText = `Generate a learning roadmap for the topic: "${topic}".
+You MUST return ONLY a raw, valid JSON object (no markdown formatting, no code blocks, no text before or after).
+The JSON object MUST EXACTLY match this schema:
+{
+  "id": "slug-for-topic",
+  "title": "Human readable title",
+  "description": "One sentence description",
+  "icon": "emoji",
+  "color": "#hexcolor",
+  "nodes": [
+    { "id": "unique-id", "label": "Label", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "unique-id-2", "label": "Subtopic", "parentId": "unique-id", "status": "todo", "type": "topic" }
+  ]
+}
+Rules:
+- EXACTLY ONE node MUST have "type": "root" and "parentId": null.
+- All other nodes MUST have a valid "parentId" referencing another node in the array.
+- "type" MUST be exactly one of: "root", "topic", or "optional".
+- "status" MUST be "todo".
+- Create between 15 and 25 nodes to ensure a detailed roadmap.
+- Provide a coherent hierarchy.
+- Prefix all node IDs with a short version of the topic to ensure uniqueness (e.g., if topic is "Web3", ids could be "web3-root", "web3-blockchain", etc).
+DO NOT wrap the response in \`\`\`json. Return ONLY the raw JSON string.`;
+  } else if (action === 'quiz') {
     promptText = `Generate a 3-question multiple-choice quiz about "${topic}" in the context of ${roadmap}.
 Return ONLY a valid JSON array. Each object in the array must have:
 - "question": string
 - "options": array of 4 string options
 - "answerIndex": number (0-3) indicating the correct option
-- "explanation": string explaining why it is correct
-
-Do not include markdown blocks or any other text, just the JSON array.`;
+- "explanation": string explaining why the answer is correct
+DO NOT wrap the response in \`\`\`json. Return ONLY the raw JSON string.`;
+  } else if (topic.startsWith('next-after-')) {
+    promptText = customPrompt; // Using the provided custom prompt for recommendations
   } else if (!promptText) {
     promptText = `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
 

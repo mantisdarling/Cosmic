@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CustomRoadmapLoader from '../../components/CustomRoadmapLoader';
+---
+
+<BaseLayout title="Custom Roadmap | Cosmic" description="Your AI-generated learning roadmap">
+  <main class="w-full h-screen bg-[#0B0D14] text-[#E5E5E5]">
+    <CustomRoadmapLoader client:only="react" />
+  </main>
+</BaseLayout>

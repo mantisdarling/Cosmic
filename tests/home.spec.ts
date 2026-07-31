@@ -32,7 +32,7 @@ test.describe('Cosmic Home Page', () => {
     await page.goto('/');
     
     // Wait for React to hydrate
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     
     // Press '?'
     await page.keyboard.press('?');
@@ -44,5 +44,49 @@ test.describe('Cosmic Home Page', () => {
     // Press 'Escape' to close
     await page.keyboard.press('Escape');
     await expect(modalHeading).not.toBeVisible();
+  });
+
+  test('should open AI generator panel and successfully redirect to custom roadmap', async ({ page }) => {
+    // Intercept /api/ai and mock custom roadmap response
+    await page.route('**/api/ai', async route => {
+      const json = {
+        text: JSON.stringify({
+          id: 'test-custom',
+          title: 'Test Custom Roadmap',
+          description: 'A mock roadmap generated for testing',
+          icon: '🚀',
+          color: '#F5A623',
+          nodes: [
+            { id: 'test-root', label: 'Test Root Node', parentId: null, status: 'todo', type: 'root' },
+            { id: 'test-sub1', label: 'Test Sub Node 1', parentId: 'test-root', status: 'todo', type: 'topic' }
+          ]
+        })
+      };
+      await route.fulfill({ json });
+    });
+
+    await page.goto('/');
+
+    // Click "Generate with AI" button
+    const generateBtn = page.locator('#ai-generate-btn');
+    await expect(generateBtn).toBeVisible();
+    await generateBtn.click();
+
+    // Verify panel appears
+    const aiPanel = page.locator('#ai-generator-panel');
+    await expect(aiPanel).toBeVisible();
+
+    // Type a topic and submit
+    const topicInput = page.locator('#ai-topic-input');
+    await topicInput.fill('Quantum Coding');
+    const submitBtn = page.locator('#ai-submit-btn');
+    await submitBtn.click();
+
+    // Verify it redirects to /roadmap/custom and shows the custom roadmap
+    await page.waitForURL('**/roadmap/custom');
+    await expect(page.locator('#custom-header-title')).toContainText('Test Custom Roadmap');
+
+    // Verify custom nodes render in React Flow
+    await expect(page.locator('.react-flow__node:has-text("Test Root Node")')).toBeVisible();
   });
 });

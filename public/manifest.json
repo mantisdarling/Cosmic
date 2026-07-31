@@ -1,0 +1,18 @@
+{
+  "short_name": "Cosmic",
+  "name": "Cosmic Developer Roadmaps",
+  "description": "Interactive developer roadmaps, guides, and career learning paths.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B0D14",
+  "theme_color": "#F5A623",
+  "display": "standalone",
+  "orientation": "portrait"
+}

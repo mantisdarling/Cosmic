@@ -287,9 +287,27 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       </p>
       <div class="hero-actions" data-reveal>
         <a href="#roadmaps" class="hero-primary">Browse Roadmaps</a>
+        <button id="ai-generate-btn" class="hero-secondary" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          🪄 Generate with AI
+        </button>
         <a href="https://github.com/mantisdarling/cosmic" class="hero-secondary" target="_blank" rel="noopener noreferrer">
           ⭐ Star on GitHub
         </a>
+      </div>
+
+      <!-- AI Generate Modal / Input -->
+      <div id="ai-generator-panel" style="display: none; max-width: 540px; margin: 0 auto 32px; background: #141722; border: 1px solid #1E2333; padding: 20px; border-radius: 12px; text-align: left;" data-reveal>
+        <h3 style="color: #F5A623; font-size: 1rem; margin: 0 0 12px; font-weight: 700;">Build a custom roadmap</h3>
+        <p style="color: #A3A3A3; font-size: 0.85rem; margin: 0 0 16px; line-height: 1.5;">Type any topic (e.g., 'Web3 with Rust' or 'Game Design') and our AI will generate an interactive roadmap instantly.</p>
+        <form id="ai-generate-form" style="display: flex; gap: 8px;">
+          <input type="text" id="ai-topic-input" placeholder="Enter a topic..." required style="flex: 1; padding: 10px 16px; border-radius: 8px; border: 1px solid #2A3147; background: #0E1017; color: #F5F5F5; font-size: 0.9rem;" />
+          <button type="submit" id="ai-submit-btn" style="padding: 10px 20px; border-radius: 8px; background: #F5A623; color: #0D0D0D; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s;">Generate</button>
+        </form>
+        <div id="ai-loading" style="display: none; margin-top: 16px; color: #00E5FF; font-size: 0.85rem; align-items: center; gap: 8px;">
+          <div style="width: 16px; height: 16px; border: 2px solid rgba(0,229,255,0.2); border-top-color: #00E5FF; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          Generating your roadmap... (this usually takes 5-10s)
+        </div>
+        <div id="ai-error" style="display: none; margin-top: 16px; color: #EF4444; font-size: 0.85rem; background: rgba(239,68,68,0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.2);"></div>
       </div>
 
       <!-- ── SEARCH ──────────────────────────────────────── -->
@@ -577,11 +595,69 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
     // Global shortcut to focus search
     window.addEventListener('keydown', (event) => {
-      if (event.key === '/' && document.activeElement !== searchInput) {
-        event.preventDefault(); // prevent typing '/' immediately
+      if (event.key === '/' && document.activeElement !== searchInput && document.activeElement !== document.getElementById('ai-topic-input')) {
+        event.preventDefault();
         searchInput.focus();
       }
     });
+
+    // ── AI GENERATOR LOGIC ──────────────────────────────────────────
+    const aiBtn = document.getElementById('ai-generate-btn');
+    const aiPanel = document.getElementById('ai-generator-panel');
+    const aiForm = document.getElementById('ai-generate-form');
+    const aiInput = document.getElementById('ai-topic-input') as HTMLInputElement | null;
+    const aiSubmitBtn = document.getElementById('ai-submit-btn') as HTMLButtonElement | null;
+    const aiLoading = document.getElementById('ai-loading');
+    const aiError = document.getElementById('ai-error');
+
+    if (aiBtn && aiPanel && aiForm && aiInput && aiSubmitBtn && aiLoading && aiError) {
+      aiBtn.addEventListener('click', () => {
+        const isHidden = aiPanel.style.display === 'none';
+        aiPanel.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) aiInput.focus();
+      });
+
+      aiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const topic = aiInput.value.trim();
+        if (!topic) return;
+
+        aiSubmitBtn.disabled = true;
+        aiSubmitBtn.style.opacity = '0.6';
+        aiLoading.style.display = 'flex';
+        aiError.style.display = 'none';
+
+        try {
+          const response = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic, action: 'generate' }),
+          });
+          const data = await response.json();
+          if (!response.ok || data.error) {
+            throw new Error(data.error ?? 'Generation failed.');
+          }
+
+          let rawText = data.text;
+          if (rawText.includes('```json')) {
+            rawText = rawText.split('```json')[1].split('```')[0].trim();
+          } else if (rawText.includes('```')) {
+            rawText = rawText.split('```')[1].split('```')[0].trim();
+          }
+
+          const parsed = JSON.parse(rawText);
+          sessionStorage.setItem('custom_roadmap_data', JSON.stringify(parsed));
+          window.location.href = '/roadmap/custom';
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Failed to parse AI response. Please try another topic.';
+          aiError.textContent = msg;
+          aiError.style.display = 'block';
+          aiSubmitBtn.disabled = false;
+          aiSubmitBtn.style.opacity = '1';
+          aiLoading.style.display = 'none';
+        }
+      });
+    }
   }
   
   if (favoritesBtn) {
