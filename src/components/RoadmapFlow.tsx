@@ -19,11 +19,12 @@ import type { Roadmap } from '../lib/security';
 import '@xyflow/react/dist/style.css';
 
 // ── Layout constants ─────────────────────────────────────────────
-const NW = 240;   // node width
-const NH = 54;    // node height
-const RH = 66;    // root height
-const RS = 80;    // rank separation
-const NS = 16;    // node separation
+const NW = 220;   // node width
+const NH = 48;    // node height
+const RW = 240;   // root width
+const RH = 60;    // root height
+const RS = 60;    // rank separation (horizontal gap between levels)
+const NS = 10;    // node separation (vertical gap between siblings)
 
 // ── Custom Node ──────────────────────────────────────────────────
 const FlowNode = memo(({ data }: {
@@ -38,7 +39,7 @@ const FlowNode = memo(({ data }: {
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
-          width: NW, height: RH,
+          width: RW, height: RH,
           background: `linear-gradient(135deg, ${accent}ee, ${accent}aa)`,
           border: `2px solid ${accent}`,
           borderRadius: 12,
@@ -115,14 +116,20 @@ const nodeTypes: NodeTypes = { flowNode: FlowNode as any };
 function applyLayout(nodes: Node[], edges: Edge[]) {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: RS, nodesep: NS, marginx: 40, marginy: 40 });
-  nodes.forEach(n => g.setNode(n.id, { width: NW, height: (n.data as any).isRoot ? RH : NH }));
+  // LR = left-to-right: root on left, topics spread rightward in neat vertical columns
+  g.setGraph({ rankdir: 'LR', ranksep: RS, nodesep: NS, marginx: 40, marginy: 40 });
+  nodes.forEach(n => {
+    const isRoot = (n.data as any).isRoot;
+    g.setNode(n.id, { width: isRoot ? RW : NW, height: isRoot ? RH : NH });
+  });
   edges.forEach(e => g.setEdge(e.source, e.target));
   dagre.layout(g);
   return nodes.map(n => {
     const { x, y } = g.node(n.id);
-    const h = (n.data as any).isRoot ? RH : NH;
-    return { ...n, position: { x: x - NW / 2, y: y - h / 2 } };
+    const isRoot = (n.data as any).isRoot;
+    const w = isRoot ? RW : NW;
+    const h = isRoot ? RH : NH;
+    return { ...n, position: { x: x - w / 2, y: y - h / 2 } };
   });
 }
 
