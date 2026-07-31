@@ -10,10 +10,10 @@
 
 import type { APIRoute } from 'astro';
 
-export const prerender = false;   // this route is server-rendered
+export const prerender = false;
 
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 export const POST: APIRoute = async ({ request }) => {
   // ── Validate API key is configured ──────────────────────────────────────
