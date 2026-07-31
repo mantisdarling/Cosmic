@@ -114,13 +114,11 @@ const SearchBar = memo(function SearchBar({ roadmaps }: SearchBarProps) {
   }
 
   // Validate input before storing in state
-  const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const result = SearchQuerySchema.safeParse(raw);
-    // Accept raw input (validated on search, not on keystroke for UX)
-    // but enforce the max length hard limit
-    if (raw.length <= 100) {
-      setQuery(raw);
+  const handleInput = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value;
+    const parsedQuery = SearchQuerySchema.safeParse(rawValue);
+    if (parsedQuery.success && rawValue.length <= 100) {
+      setQuery(rawValue);
     }
   }, []);
 

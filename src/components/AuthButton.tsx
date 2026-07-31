@@ -51,10 +51,9 @@ export default function AuthButton() {
   }, [isFirebaseAvailable]);
 
   useEffect(() => {
-    if (isModalOpen) {
-      const timer = setTimeout(() => emailInputRef.current?.focus(), 80);
-      return () => clearTimeout(timer);
-    }
+    if (!isModalOpen) return;
+    const timer = setTimeout(() => emailInputRef.current?.focus(), 80);
+    return () => clearTimeout(timer);
   }, [isModalOpen]);
 
   function validateInputForm(): string | null {

@@ -35,8 +35,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonicalURL} />
+  <meta property="og:image" content={new URL(ogImage, canonicalURL)} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
+  <meta name="twitter:image" content={new URL(ogImage, canonicalURL)} />
 
   <title>{title}</title>
 

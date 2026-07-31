@@ -10,7 +10,7 @@
  */
 
 import Fuse from 'fuse.js';
-import { SearchQuerySchema, type Roadmap, type RoadmapNode } from './security';
+import { SearchQuerySchema, type Roadmap } from './security';
 
 export interface SearchResult {
   type: 'roadmap' | 'node';

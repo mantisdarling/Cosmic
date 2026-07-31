@@ -191,8 +191,8 @@ interface RoadmapFlowProps {
 }
 
 export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: RoadmapFlowProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [isReady, setIsReady] = useState(false);
 
   const { flowNodes, flowEdges } = useMemo(() => {
@@ -233,7 +233,7 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Roadmap
     return () => clearTimeout(timer);
   }, [flowNodes, flowEdges]);
 
-  const handleNodeClick: NodeMouseHandler = (event, node) => onNodeClick(node.id);
+  const handleNodeClick: NodeMouseHandler = (_, node) => onNodeClick(node.id);
 
   return (
     <div

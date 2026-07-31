@@ -31,7 +31,7 @@ function isSafeUrl(targetUrl: string): boolean {
 
 // Parses markdown content into sanitized HTML
 async function renderMarkdownContent(text: string): Promise<string> {
-  const rawHtml = (await marked.parse(text, { async: false })) as string;
+  const rawHtml = marked.parse(text, { async: false }) as string;
   return await sanitizeHtml(rawHtml);
 }
 
@@ -111,10 +111,9 @@ const TopicPanel = memo(function TopicPanel({
 
   // Handle auto-focus when panel opens
   useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => closeButtonRef.current?.focus(), 60);
-      return () => clearTimeout(timer);
-    }
+    if (!isOpen) return;
+    const timer = setTimeout(() => closeButtonRef.current?.focus(), 60);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   // Handle escape key listener to close panel
