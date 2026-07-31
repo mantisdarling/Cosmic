@@ -1,85 +1,155 @@
 ---
 /**
- * src/pages/roadmap/[slug].astro
- *
- * Security: slug validated → JSON topic files loaded → Zod-validated → passed as static props.
- * No MDX native bindings, no runtime file system access, no user-controlled paths.
+ * src/pages/roadmap/[slug].astro — validated, secure static routing
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Nav from '../../components/Nav.astro';
 import RoadmapCanvas from '../../components/RoadmapCanvas';
 import { RoadmapSchema, TopicSchema, SlugSchema, type Roadmap, type Topic } from '../../lib/security';
 
 export async function getStaticPaths() {
-  const roadmapModules = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
-
-  return Object.values(roadmapModules)
-    .map((mod: any) => {
-      const result = RoadmapSchema.safeParse(mod.default ?? mod);
-      if (!result.success) return null;
-      return { params: { slug: result.data.id } };
-    })
+  const mods = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
+  return Object.values(mods)
+    .map((m: any) => { const r = RoadmapSchema.safeParse(m.default ?? m); return r.success ? { params: { slug: r.data.id } } : null; })
     .filter(Boolean);
 }
 
-// ── Validate URL slug ─────────────────────────────────────────────────────
 const { slug } = Astro.params;
 const slugResult = SlugSchema.safeParse(slug);
 if (!slugResult.success) return Astro.redirect('/404');
 const safeSlug = slugResult.data;
 
-// ── Load roadmap ─────────────────────────────────────────────────────────
-const roadmapModules = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
+const roadmapMods = import.meta.glob('../../content/roadmaps/*.json', { eager: true });
 let roadmap: Roadmap | null = null;
-for (const mod of Object.values(roadmapModules)) {
-  const raw = (mod as any).default ?? mod;
-  const result = RoadmapSchema.safeParse(raw);
-  if (result.success && result.data.id === safeSlug) { roadmap = result.data; break; }
+for (const m of Object.values(roadmapMods)) {
+  const r = RoadmapSchema.safeParse((m as any).default ?? m);
+  if (r.success && r.data.id === safeSlug) { roadmap = r.data; break; }
 }
 if (!roadmap) return Astro.redirect('/404');
 
-// ── Load topic JSON files ─────────────────────────────────────────────────
-const topicModules = import.meta.glob('../../content/topics/*.json', { eager: true });
-
-// Build validated topic map
+const topicMods = import.meta.glob('../../content/topics/*.json', { eager: true });
 const topicMap = new Map<string, Topic>();
-for (const [path, mod] of Object.entries(topicModules)) {
-  const raw = (mod as any).default ?? mod;
-  const result = TopicSchema.safeParse(raw);
-  if (result.success) {
-    topicMap.set(result.data.id, result.data);
-  }
+for (const [, m] of Object.entries(topicMods)) {
+  const r = TopicSchema.safeParse((m as any).default ?? m);
+  if (r.success) topicMap.set(r.data.id, r.data);
 }
 
-// Build topic contents array for RoadmapCanvas
 const topicContents = roadmap.nodes.map((node) => {
-  const topic = topicMap.get(node.id);
-  return {
-    nodeId: node.id,
-    markdownBody: topic?.body ?? '',
-    resources: topic?.resources ?? [],
-  };
+  const t = topicMap.get(node.id);
+  return { nodeId: node.id, markdownBody: t?.body ?? '', resources: t?.resources ?? [] };
 });
 ---
 
-<BaseLayout
-  title={`${roadmap.title} — Cosmic Roadmap`}
-  description={roadmap.description}
->
-  <Nav />
+<BaseLayout title={`${roadmap.title} — Cosmic`} description={roadmap.description}>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    .page { display: flex; flex-direction: column; height: 100dvh; background: #0D0D0D; }
 
-  <div class="flex flex-col" style="height: 100dvh; padding-top: 65px;">
-    <RoadmapCanvas
-      roadmap={roadmap}
-      topicContents={topicContents}
-      client:only="react"
-    />
+    /* ── Top Bar ── */
+    .topbar {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px; padding: 0 20px;
+      background: rgba(13,13,13,0.95);
+      border-bottom: 1px solid #1f1f1f;
+      backdrop-filter: blur(10px);
+      position: relative; z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .back-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 500; color: #525252;
+      text-decoration: none; padding: 5px 8px;
+      border-radius: 6px; transition: color .15s, background .15s;
+    }
+    .back-link:hover { color: #A3A3A3; background: #1a1a1a; }
+    .topbar-sep { color: #2a2a2a; font-size: 0.9rem; }
+    .topbar-title { display: flex; align-items: center; gap: 10px; }
+    .topbar-icon { font-size: 1.2rem; }
+    .topbar-name {
+      font-size: 0.92rem; font-weight: 700; color: #E5E5E5;
+      letter-spacing: -0.02em; white-space: nowrap;
+    }
+    .topbar-count {
+      font-size: 0.72rem; font-weight: 500; color: #525252;
+      background: #1a1a1a; border: 1px solid #222; border-radius: 999px;
+      padding: 2px 8px; white-space: nowrap;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Legend ── */
+    .legend {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 18px;
+      padding: 7px 20px;
+      border-bottom: 1px solid #161616;
+      background: #111;
+      overflow-x: auto;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { font-size: 0.72rem; font-weight: 500; color: #525252; font-family: 'Space Mono', monospace; }
+    .legend-hint { margin-left: auto; font-size: 0.72rem; color: #333; font-family: 'Space Mono', monospace; white-space: nowrap; }
+    @media (max-width: 640px) { .legend-hint { display: none; } }
+
+    /* ── Canvas ── */
+    .canvas-wrap { flex: 1; overflow: hidden; position: relative; }
+  </style>
+
+  <div class="page">
+    <!-- Top Bar -->
+    <header class="topbar" role="banner">
+      <div class="topbar-left">
+        <a href="/" class="back-link" aria-label="Back to all roadmaps">
+          ← All Roadmaps
+        </a>
+        <span class="topbar-sep" aria-hidden="true">/</span>
+        <div class="topbar-title">
+          <span class="topbar-icon" role="img" aria-label={`${roadmap.title} icon`}>{roadmap.icon}</span>
+          <span class="topbar-name">{roadmap.title}</span>
+          <span class="topbar-count">{roadmap.nodes.length} topics</span>
+        </div>
+      </div>
+      <div class="topbar-right" id="auth-slot">
+        <!-- Auth button rendered by React island -->
+      </div>
+    </header>
+
+    <!-- Legend -->
+    <div class="legend" role="note" aria-label="Node status legend">
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#2a2a2a; border: 1px solid #333;" aria-hidden="true"></span>
+        <span class="legend-label">Not started</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#F5A623;" aria-hidden="true"></span>
+        <span class="legend-label">In progress</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#22C55E;" aria-hidden="true"></span>
+        <span class="legend-label">Completed</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#3B82F6;" aria-hidden="true"></span>
+        <span class="legend-label">Bookmarked</span>
+      </div>
+      <span class="legend-hint">Click any node to open topic ↗</span>
+    </div>
+
+    <!-- Interactive Canvas (React island) -->
+    <div class="canvas-wrap">
+      <RoadmapCanvas
+        roadmap={roadmap}
+        topicContents={topicContents}
+        client:only="react"
+      />
+    </div>
   </div>
 
-  <!-- Hidden SEO content -->
+  <!-- SEO -->
   <div class="sr-only" aria-hidden="true">
     <h1>{roadmap.title}</h1>
     <p>{roadmap.description}</p>
-    <ul>{roadmap.nodes.map((n) => <li>{n.label}</li>)}</ul>
+    <ul>{roadmap.nodes.map(n => <li>{n.label}</li>)}</ul>
   </div>
 </BaseLayout>

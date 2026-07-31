@@ -3,7 +3,7 @@
   "title": "Full Stack Web Development",
   "description": "A complete roadmap from zero to full stack developer — covering frontend, backend, databases, and deployment.",
   "icon": "🌐",
-  "color": "#6366f1",
+  "color": "#F5A623",
   "nodes": [
     {
       "id": "fullstack-root",
