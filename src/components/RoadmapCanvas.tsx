@@ -1,8 +1,10 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import RoadmapFlow from './RoadmapFlow';
 import TopicPanel from './TopicPanel';
 import { NodeIdSchema } from '../lib/security';
 import type { Roadmap } from '../lib/security';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface TopicContent {
   nodeId: string;
@@ -24,6 +26,10 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [showCompletionBadge, setShowCompletionBadge] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // Restore completed nodes from browser local storage on component mount
   useEffect(() => {
@@ -91,6 +97,44 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
   const progressPercentage =
     totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0;
   const isRoadmapFullyCompleted = progressPercentage === 100;
+
+  const handleExport = async (format: 'png' | 'pdf') => {
+    if (!canvasRef.current) return;
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      // Small delay to allow menu to hide
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(canvasRef.current, {
+        backgroundColor: '#0B0C10',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+      
+      if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = `cosmic-${roadmap.id}-roadmap.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } else {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`cosmic-${roadmap.id}-roadmap.pdf`);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Render linear list view for small mobile viewports
   if (isMobileViewport) {
@@ -187,6 +231,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
   // Desktop interactive canvas view
   return (
     <div
+      ref={canvasRef}
       style={{
         width: '100%',
         height: '100%',
@@ -226,6 +271,74 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
         onNodeClick={handleNodeClick}
         doneNodes={doneNodes}
       />
+
+      {/* Export Button */}
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
+        <button
+          onClick={() => setShowExportMenu(!showExportMenu)}
+          disabled={isExporting}
+          style={{
+            background: 'rgba(20,23,34,0.9)',
+            border: '1px solid #2A3147',
+            color: '#E5E5E5',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            cursor: isExporting ? 'wait' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backdropFilter: 'blur(8px)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {isExporting ? 'Exporting...' : 'Export'} 
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </button>
+        
+        {showExportMenu && (
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            right: 0,
+            background: '#141722',
+            border: '1px solid #2A3147',
+            borderRadius: '8px',
+            padding: '4px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            minWidth: '140px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          }}>
+            <button
+              onClick={() => handleExport('png')}
+              style={{
+                background: 'transparent', border: 'none', color: '#A3A3A3',
+                padding: '8px 12px', textAlign: 'left', fontSize: '0.85rem',
+                cursor: 'pointer', borderRadius: '4px', transition: 'all 0.2s'
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#A3A3A3'; }}
+            >
+              Download PNG
+            </button>
+            <button
+              onClick={() => handleExport('pdf')}
+              style={{
+                background: 'transparent', border: 'none', color: '#A3A3A3',
+                padding: '8px 12px', textAlign: 'left', fontSize: '0.85rem',
+                cursor: 'pointer', borderRadius: '4px', transition: 'all 0.2s'
+              }}
+              onMouseOver={e => { e.currentTarget.style.background = '#1a1a1a'; e.currentTarget.style.color = '#fff'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#A3A3A3'; }}
+            >
+              Download PDF
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Completion Banner Trigger */}
       {isRoadmapFullyCompleted && !showCompletionBadge && (

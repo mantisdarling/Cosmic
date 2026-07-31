@@ -77,17 +77,25 @@ const TopicPanel = memo(function TopicPanel({
 }: TopicPanelProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [contentHtml, setContentHtml] = useState('');
-  const [activeTab, setActiveTab] = useState<'content' | 'ai'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'ai' | 'quiz'>('content');
   const [aiHtml, setAiHtml] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
   const [nextTopic, setNextTopic] = useState('');
+
+  const [quizData, setQuizData] = useState<any[] | null>(null);
+  const [isQuizLoading, setIsQuizLoading] = useState(false);
+  const [quizError, setQuizError] = useState('');
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
 
   // Reset tab state when selected node changes
   useEffect(() => {
     setAiHtml('');
     setAiError('');
     setIsAiLoading(false);
+    setQuizData(null);
+    setQuizError('');
+    setQuizAnswers({});
     setActiveTab('content');
   }, [nodeLabel]);
 
@@ -171,6 +179,40 @@ const TopicPanel = memo(function TopicPanel({
       setAiError(err?.message ?? 'Failed to refresh AI response.');
     }
     setIsAiLoading(false);
+  };
+
+  const handleAskQuiz = async () => {
+    setActiveTab('quiz');
+    if (quizData || isQuizLoading) return;
+    setIsQuizLoading(true);
+    setQuizError('');
+
+    try {
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: nodeLabel, roadmap: roadmapTitle, action: 'quiz' }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data.error ?? 'Unable to generate quiz.');
+      }
+      
+      // Parse JSON from markdown block if Llama wraps it
+      let rawText = data.text as string;
+      if (rawText.includes('```json')) {
+        rawText = rawText.split('```json')[1].split('```')[0].trim();
+      } else if (rawText.includes('```')) {
+        rawText = rawText.split('```')[1].split('```')[0].trim();
+      }
+      
+      const parsed = JSON.parse(rawText);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('Invalid quiz format');
+      setQuizData(parsed);
+    } catch (err: any) {
+      setQuizError(err?.message ?? 'Failed to generate quiz.');
+    }
+    setIsQuizLoading(false);
   };
 
   const safeResources = resources.filter(
@@ -352,6 +394,27 @@ const TopicPanel = memo(function TopicPanel({
             >
               <span>✦</span> AI Tutor
             </button>
+
+            <button
+              onClick={handleAskQuiz}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px 8px 0 0',
+                cursor: 'pointer',
+                border: activeTab === 'quiz' ? '1px solid rgba(0,229,255,0.3)' : '1px solid transparent',
+                borderBottom: activeTab === 'quiz' ? '1px solid #141722' : '1px solid transparent',
+                background: activeTab === 'quiz' ? 'rgba(0,229,255,0.06)' : 'transparent',
+                color: activeTab === 'quiz' ? '#00E5FF' : '#737373',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                transition: 'color 0.15s ease',
+              }}
+            >
+              <span>🎯</span> Quiz
+            </button>
           </div>
         </div>
 
@@ -465,7 +528,111 @@ const TopicPanel = memo(function TopicPanel({
             </>
           )}
 
-          {/* AI Tutor Explanation Tab */}
+          {/* Quiz Tab */}
+          {activeTab === 'quiz' && (
+            <div style={{ animation: 'fadeUp 0.3s ease both' }}>
+              {isQuizLoading ? (
+                <div style={{ padding: '40px 0', textAlign: 'center' }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      margin: '0 auto 16px',
+                      border: '2px solid rgba(0,229,255,0.2)',
+                      borderTopColor: '#00E5FF',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                    }}
+                  />
+                  <p style={{ color: '#A3A3A3', fontSize: '0.9rem' }}>
+                    Generating quiz for {nodeLabel}...
+                  </p>
+                </div>
+              ) : quizError ? (
+                <div
+                  style={{
+                    padding: 16,
+                    borderRadius: 8,
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    color: '#EF4444',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <p style={{ margin: '0 0 12px' }}>
+                    <strong>Error:</strong> {quizError}
+                  </p>
+                  <button
+                    onClick={handleAskQuiz}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 6,
+                      background: 'rgba(239,68,68,0.2)',
+                      border: 'none',
+                      color: '#EF4444',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : quizData ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                  {quizData.map((q, qIndex) => {
+                    const selected = quizAnswers[qIndex];
+                    const isAnswered = selected !== undefined;
+                    return (
+                      <div key={qIndex} style={{ borderBottom: '1px solid #1E2333', paddingBottom: 24 }}>
+                        <h3 style={{ color: '#F5F5F5', fontSize: '1rem', marginBottom: 16 }}>{q.question}</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {q.options.map((opt: string, optIndex: number) => {
+                            const isSelected = selected === optIndex;
+                            const isCorrect = q.answerIndex === optIndex;
+                            let bg = '#10121A';
+                            let border = '#2A3147';
+                            let color = '#A3A3A3';
+
+                            if (isAnswered) {
+                              if (isCorrect) {
+                                bg = 'rgba(34,197,94,0.1)'; border = '#22C55E'; color = '#22C55E';
+                              } else if (isSelected) {
+                                bg = 'rgba(239,68,68,0.1)'; border = '#EF4444'; color = '#EF4444';
+                              }
+                            }
+
+                            return (
+                              <button
+                                key={optIndex}
+                                disabled={isAnswered}
+                                onClick={() => setQuizAnswers(prev => ({ ...prev, [qIndex]: optIndex }))}
+                                style={{
+                                  textAlign: 'left', padding: '12px 16px', borderRadius: 8,
+                                  background: bg, border: `1px solid ${border}`, color: color,
+                                  cursor: isAnswered ? 'default' : 'pointer', transition: 'all 0.2s'
+                                }}
+                              >
+                                {opt}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {isAnswered && (
+                          <div style={{ marginTop: 12, padding: 12, borderRadius: 8, background: '#10121A', border: '1px solid #1E2333', color: '#E5E5E5', fontSize: '0.85rem' }}>
+                            <strong>Explanation:</strong> {q.explanation}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* AI Tutor Tab */}
           {activeTab === 'ai' && (
             <>
               {/* Spinner while waiting for server response */}

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
 
 export interface Props {
   title: string;
@@ -48,6 +49,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <KeyboardShortcutsModal client:load />
   <slot />
 
   <!-- Scroll reveal handler -->

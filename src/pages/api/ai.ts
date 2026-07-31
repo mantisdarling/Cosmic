@@ -18,12 +18,14 @@ export const POST: APIRoute = async ({ request }) => {
   let topic = '';
   let roadmap = '';
   let customPrompt = '';
+  let action = '';
 
   try {
     const payload = await request.json();
     topic = String(payload?.topic ?? '').slice(0, 200);
     roadmap = String(payload?.roadmap ?? '').slice(0, 100);
     customPrompt = String(payload?.prompt ?? '').slice(0, 600);
+    action = String(payload?.action ?? '');
   } catch {
     return new Response(
       JSON.stringify({ error: 'Invalid JSON request payload.' }),
@@ -38,8 +40,19 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // Construct structured teaching prompt for the requested topic
-  const defaultPrompt = `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
+  let promptText = customPrompt;
+
+  if (action === 'quiz') {
+    promptText = `Generate a 3-question multiple-choice quiz about "${topic}" in the context of ${roadmap}.
+Return ONLY a valid JSON array. Each object in the array must have:
+- "question": string
+- "options": array of 4 string options
+- "answerIndex": number (0-3) indicating the correct option
+- "explanation": string explaining why it is correct
+
+Do not include markdown blocks or any other text, just the JSON array.`;
+  } else if (!promptText) {
+    promptText = `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
 
 Explain this topic clearly with the following sections using markdown:
 
@@ -59,8 +72,7 @@ Bullet list of the 4–6 most important things to understand.
 2–3 pitfalls beginners often hit, and how to avoid them.
 
 Be friendly, practical, and motivating. Use markdown. Around 400–500 words total.`;
-
-  const promptText = customPrompt || defaultPrompt;
+  }
 
   try {
     const response = await fetch(GROQ_API_ENDPOINT, {
