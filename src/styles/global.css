@@ -9,12 +9,12 @@
 
 /* ── CSS Variables ─────────────────────────────────────────── */
 :root {
-  /* Backgrounds */
-  --bg:          #0D0D0D;
-  --bg-surface:  #141414;
-  --bg-card:     #1A1A1A;
-  --bg-hover:    #222222;
-  --bg-input:    #111111;
+  /* Backgrounds — deep space navy (Athena-inspired) */
+  --bg:          #0D0F1A;
+  --bg-surface:  #0f1120;
+  --bg-card:     #131628;
+  --bg-hover:    #1a1d38;
+  --bg-input:    #0b0d1c;
 
   /* Brand Yellow */
   --yellow:      #F5A623;
@@ -23,9 +23,9 @@
   --yellow-glow: rgba(245,166,35,0.14);
   --yellow-border: rgba(245,166,35,0.3);
 
-  /* Borders */
-  --border:      #262626;
-  --border-light:#303030;
+  /* Borders — navy tinted */
+  --border:      #1e2035;
+  --border-light:#2a2d50;
 
   /* Text */
   --text:        #F5F5F5;
@@ -52,10 +52,16 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 body {
-  font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Subtle starfield texture */
+  background-image: radial-gradient(circle at 20% 50%, rgba(30,32,53,0.4) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(30,32,53,0.3) 0%, transparent 40%);
 }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; font-family: inherit; }
