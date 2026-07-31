@@ -1,11 +1,13 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
   integrations: [react()],
   output: 'static',
-  site: 'https://cosmic-roadmap.pages.dev',
+  adapter: vercel(),
+  site: 'https://cosmic-nu-ebonvercel.app',
   vite: {
     plugins: [tailwindcss()],
     build: { sourcemap: false },
