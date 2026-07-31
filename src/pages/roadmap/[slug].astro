@@ -4,6 +4,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RoadmapCanvas from '../../components/RoadmapCanvas';
+import BookmarkToggle from '../../components/BookmarkToggle';
 import { RoadmapSchema, TopicSchema, SlugSchema, type Roadmap, type Topic } from '../../lib/security';
 
 export async function getStaticPaths() {
@@ -101,6 +102,7 @@ const topicContents = roadmap.nodes.map((node) => {
         </div>
       </div>
       <div class="topbar-right">
+        <BookmarkToggle client:only="react" roadmapId={roadmap.id} />
         <button id="share-btn" aria-label="Share this roadmap"
           style="font-size:0.72rem;color:#525252;background:none;border:1px solid #1f1f1f;border-radius:6px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;font-family:inherit;"
           onmouseover="this.style.color='#A3A3A3';this.style.borderColor='#2a2a2a';"
