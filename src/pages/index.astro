@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BookmarkToggle from '../components/BookmarkToggle';
-import { RoadmapSchema, type Roadmap } from '../lib/security';
+import { RoadmapSchema, cleanAndParseJSON, type Roadmap } from '../lib/security';
 
 // Load all roadmaps
 const modules = import.meta.glob('../content/roadmaps/*.json', { eager: true });
@@ -470,6 +470,8 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 </footer>
 
 <script>
+  import { cleanAndParseJSON } from '../lib/security';
+
   // Scroll reveal animation observer
   const revealObserver = new IntersectionObserver(
     (entries) =>
@@ -635,14 +637,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
             throw new Error(data.error ?? 'Generation failed.');
           }
 
-          let rawText = data.text;
-          if (rawText.includes('```json')) {
-            rawText = rawText.split('```json')[1].split('```')[0].trim();
-          } else if (rawText.includes('```')) {
-            rawText = rawText.split('```')[1].split('```')[0].trim();
-          }
-
-          const parsed = JSON.parse(rawText);
+          const parsed = cleanAndParseJSON(data.text);
           sessionStorage.setItem('custom_roadmap_data', JSON.stringify(parsed));
           window.location.href = '/roadmap/custom';
         } catch (err) {

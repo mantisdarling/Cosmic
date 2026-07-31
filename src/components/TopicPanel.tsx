@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { marked } from 'marked';
-import { sanitizeHtml } from '../lib/security';
+import { sanitizeHtml, cleanAndParseJSON } from '../lib/security';
 
 interface Resource {
   label: string;
@@ -198,15 +198,7 @@ const TopicPanel = memo(function TopicPanel({
         throw new Error(data.error ?? 'Unable to generate quiz.');
       }
       
-      // Parse JSON from markdown block if Llama wraps it
-      let rawText = data.text as string;
-      if (rawText.includes('```json')) {
-        rawText = rawText.split('```json')[1].split('```')[0].trim();
-      } else if (rawText.includes('```')) {
-        rawText = rawText.split('```')[1].split('```')[0].trim();
-      }
-      
-      const parsed = JSON.parse(rawText);
+      const parsed = cleanAndParseJSON(data.text);
       if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('Invalid quiz format');
       setQuizData(parsed);
     } catch (err: any) {
