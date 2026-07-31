@@ -70,7 +70,7 @@ export default function BookmarkToggle({ roadmapId }: BookmarkToggleProps) {
     <button
       onClick={toggleBookmark}
       title={isBookmarked ? 'Remove from favorites' : 'Add to favorites'}
-      className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-[var(--bg-tertiary)] border border-[var(--border-default)] hover:bg-[#1a1a1a] transition-all hover:scale-105 shadow-sm"
+      className="relative z-10 w-8 h-8 rounded-full flex items-center justify-center bg-[#10121A] border border-[#2A3147] hover:bg-[#1B1F30] transition-all hover:scale-105 shadow-sm"
       aria-label="Bookmark Roadmap"
     >
       <svg

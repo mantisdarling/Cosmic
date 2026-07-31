@@ -371,11 +371,13 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
             aria-label={`${rm.title} — ${rm.nodes.length} topics`}
             data-reveal
           >
-            <BookmarkToggle client:only="react" roadmapId={rm.id} />
             <div class="card-accent" style={`background: ${rm.color}`} aria-hidden="true"></div>
             <div class="card-top">
-              <span class="card-icon" role="img" aria-label={`${rm.title} icon`}>{rm.icon}</span>
-              <span class="card-count">{rm.nodes.length} topics</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="card-icon" role="img" aria-label={`${rm.title} icon`}>{rm.icon}</span>
+                <span class="card-count">{rm.nodes.length} topics</span>
+              </div>
+              <BookmarkToggle client:only="react" roadmapId={rm.id} />
             </div>
             <div class="card-title">{rm.title}</div>
             <div class="card-desc">{rm.description}</div>
@@ -408,11 +410,13 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
             aria-label={`${rm.title} — ${rm.nodes.length} topics`}
             data-reveal
           >
-            <BookmarkToggle client:only="react" roadmapId={rm.id} />
             <div class="card-accent" style={`background: ${rm.color}`} aria-hidden="true"></div>
             <div class="card-top">
-              <span class="card-icon" role="img" aria-label={`${rm.title} icon`}>{rm.icon}</span>
-              <span class="card-count">{rm.nodes.length} topics</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="card-icon" role="img" aria-label={`${rm.title} icon`}>{rm.icon}</span>
+                <span class="card-count">{rm.nodes.length} topics</span>
+              </div>
+              <BookmarkToggle client:only="react" roadmapId={rm.id} />
             </div>
             <div class="card-title">{rm.title}</div>
             <div class="card-desc">{rm.description}</div>
@@ -445,11 +449,13 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
                 aria-label={`${rm.title} — ${rm.nodes.length} topics`}
                 data-reveal
               >
-                <BookmarkToggle client:only="react" roadmapId={rm.id} />
                 <div class="card-accent" style={`background: ${rm.color}`} aria-hidden="true"></div>
                 <div class="card-top">
-                  <span class="card-icon">{rm.icon}</span>
-                  <span class="card-count">{rm.nodes.length} topics</span>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="card-icon">{rm.icon}</span>
+                    <span class="card-count">{rm.nodes.length} topics</span>
+                  </div>
+                  <BookmarkToggle client:only="react" roadmapId={rm.id} />
                 </div>
                 <div class="card-title">{rm.title}</div>
                 <div class="card-desc">{rm.description}</div>
