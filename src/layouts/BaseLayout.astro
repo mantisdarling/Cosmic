@@ -8,6 +8,8 @@
  *    values never reach setAttribute as arbitrary strings.
  *  - No innerHTML usage anywhere in this file.
  */
+import '../styles/global.css';
+
 export interface Props {
   title: string;
   description?: string;
@@ -79,8 +81,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
     rel="stylesheet"
   />
 
-  <!-- Global styles (Tailwind v4 processes this via @tailwindcss/vite) -->
-  <style is:global>@import "/src/styles/global.css";</style>
+  <!-- Global styles imported in frontmatter, processed by @tailwindcss/vite -->
 
   <!-- 
     SECURITY: Theme is persisted in localStorage and applied via a strict whitelist.
@@ -106,17 +107,22 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
 
   <!-- Scroll-reveal observer -->
   <script>
+    // Show elements already in view immediately, animate the rest on scroll
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
     );
-    document.querySelectorAll('.rv').forEach((el) => observer.observe(el));
+    // Small delay so layout is complete before measuring
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.rv').forEach((el) => observer.observe(el));
+    });
   </script>
 </body>
 </html>
