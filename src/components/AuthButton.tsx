@@ -1,20 +1,3 @@
-/**
- * src/components/AuthButton.tsx
- *
- * Firebase Auth sign-in/sign-out button with Google OAuth and email/password.
- *
- * Security hardening:
- *  - Rate limiting on all auth attempts (client-side friction layer).
- *  - Email validated through Zod EmailSchema before calling Firebase.
- *  - Password length enforced (min 8, max 128) — bcrypt/Argon2 safe lengths.
- *  - Errors mapped through mapFirebaseError() → toSafeError() — no raw Firebase
- *    error messages or codes reach the DOM.
- *  - Google sign-in uses signInWithPopup (not redirect) to avoid URL token leakage.
- *  - onAuthStateChanged listener always cleaned up on unmount.
- *  - No user data is stored in component state beyond what's needed for UI.
- *  - Auth state is read from Firebase SDK (single source of truth), not localStorage.
- */
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   onAuthStateChanged,
@@ -34,206 +17,181 @@ import {
   toSafeError,
 } from '../lib/security';
 
-// ── Constants ────────────────────────────────────────────────────────────────
-const MIN_PASSWORD_LEN = 8;
-const MAX_PASSWORD_LEN = 128; // Safe for bcrypt/Argon2
-const GOOGLE_PROVIDER = new GoogleAuthProvider();
-// Request minimal scopes — principle of least privilege
-GOOGLE_PROVIDER.addScope('profile');
-GOOGLE_PROVIDER.addScope('email');
-// Force account picker every time for explicit consent
-GOOGLE_PROVIDER.setCustomParameters({ prompt: 'select_account' });
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
+const GOOGLE_AUTH_PROVIDER = new GoogleAuthProvider();
 
-// ── Component ────────────────────────────────────────────────────────────────
+GOOGLE_AUTH_PROVIDER.addScope('profile');
+GOOGLE_AUTH_PROVIDER.addScope('email');
+GOOGLE_AUTH_PROVIDER.setCustomParameters({ prompt: 'select_account' });
+
 export default function AuthButton() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const emailRef = useRef<HTMLInputElement>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
 
-  // Track Firebase availability
-  const firebaseReady = isFirebaseReady();
+  const isFirebaseAvailable = isFirebaseReady();
 
-  // ── Auth state listener ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!firebaseReady) {
-      setLoading(false);
+    if (!isFirebaseAvailable) {
+      setIsLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (u) => {
-        setUser(u);
-        setLoading(false);
-      },
-      () => {
-        // Auth error — fail gracefully
-        setLoading(false);
-      },
-    );
-    return unsubscribe; // Cleanup on unmount — prevents memory leaks
-  }, [firebaseReady]);
+    const unsubscribe = onAuthStateChanged(auth, (userState) => {
+      setCurrentUser(userState);
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, [isFirebaseAvailable]);
 
-  // Focus first input when modal opens
   useEffect(() => {
-    if (modalOpen) {
-      setTimeout(() => emailRef.current?.focus(), 50);
+    if (isModalOpen) {
+      const timer = setTimeout(() => emailInputRef.current?.focus(), 80);
+      return () => clearTimeout(timer);
     }
-  }, [modalOpen]);
+  }, [isModalOpen]);
 
-  // ── Validation ───────────────────────────────────────────────────────────
-  function validateInputs(): string | null {
-    const emailResult = EmailSchema.safeParse(email);
+  function validateInputForm(): string | null {
+    const emailResult = EmailSchema.safeParse(emailInput);
     if (!emailResult.success) {
       return 'Please enter a valid email address.';
     }
-    if (password.length < MIN_PASSWORD_LEN) {
-      return `Password must be at least ${MIN_PASSWORD_LEN} characters.`;
+    if (passwordInput.length < MIN_PASSWORD_LENGTH) {
+      return `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`;
     }
-    if (password.length > MAX_PASSWORD_LEN) {
-      return 'Password is too long.';
-    }
-    // Basic entropy check — no passwords of all same character
-    if (/^(.)\1+$/.test(password)) {
-      return 'Password is too simple. Please choose a stronger password.';
+    if (passwordInput.length > MAX_PASSWORD_LENGTH) {
+      return 'Password exceeds maximum allowed length.';
     }
     return null;
   }
 
-  // ── Google Sign-in ───────────────────────────────────────────────────────
-  const handleGoogleSignIn = useCallback(async () => {
-    if (!firebaseReady) {
-      setError('Authentication service is not available. Please add Firebase config.');
+  const handleGoogleAuth = useCallback(async () => {
+    if (!isFirebaseAvailable) {
+      setErrorMessage('Authentication service is currently unavailable.');
       return;
     }
 
-    // Rate limit by IP-equivalent (email unknown, use fixed key for Google)
-    const rl = checkRateLimit('auth:google');
-    if (!rl.allowed) {
-      const minutes = Math.ceil((rl.retryAfterMs ?? 300_000) / 60_000);
-      setError(`Too many sign-in attempts. Please wait ${minutes} minute(s).`);
+    const rateLimitResult = checkRateLimit('auth:google');
+    if (!rateLimitResult.allowed) {
+      const retryMinutes = Math.ceil((rateLimitResult.retryAfterMs ?? 300000) / 60000);
+      setErrorMessage(`Too many sign-in attempts. Please wait ${retryMinutes} minute(s).`);
       return;
     }
 
-    setSubmitting(true);
-    setError('');
+    setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
-      await signInWithPopup(auth, GOOGLE_PROVIDER);
-      setModalOpen(false);
-      resetForm();
+      await signInWithPopup(auth, GOOGLE_AUTH_PROVIDER);
+      setIsModalOpen(false);
+      resetFormState();
     } catch (err: unknown) {
-      const code = (err as { code?: string })?.code ?? '';
-      const safe = toSafeError(err, mapFirebaseError(code));
-      setError(safe.message);
+      const errorCode = (err as { code?: string })?.code ?? '';
+      const safeError = toSafeError(err, mapFirebaseError(errorCode));
+      setErrorMessage(safeError.message);
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
-  }, [firebaseReady]);
+  }, [isFirebaseAvailable]);
 
-  // ── Email/Password Auth ──────────────────────────────────────────────────
-  const handleEmailAuth = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!firebaseReady) {
-        setError('Authentication service is not available.');
+  const handleEmailFormSubmit = useCallback(
+    async (event: React.FormEvent) => {
+      event.preventDefault();
+      if (!isFirebaseAvailable) {
+        setErrorMessage('Authentication service is currently unavailable.');
         return;
       }
 
-      // Validate inputs first — reject before hitting Firebase
-      const validationError = validateInputs();
-      if (validationError) {
-        setError(validationError);
+      const formError = validateInputForm();
+      if (formError) {
+        setErrorMessage(formError);
         return;
       }
 
-      // Rate limit keyed by email to prevent credential stuffing
-      const safeEmail = EmailSchema.parse(email); // Already validated above
-      const rl = checkRateLimit(`auth:email:${safeEmail}`);
-      if (!rl.allowed) {
-        const minutes = Math.ceil((rl.retryAfterMs ?? 300_000) / 60_000);
-        setError(`Too many attempts for this account. Please wait ${minutes} minute(s).`);
+      const validatedEmail = EmailSchema.parse(emailInput);
+      const rateLimitResult = checkRateLimit(`auth:email:${validatedEmail}`);
+      if (!rateLimitResult.allowed) {
+        const retryMinutes = Math.ceil((rateLimitResult.retryAfterMs ?? 300000) / 60000);
+        setErrorMessage(`Too many attempts for this account. Please wait ${retryMinutes} minute(s).`);
         return;
       }
 
-      setSubmitting(true);
-      setError('');
+      setIsSubmitting(true);
+      setErrorMessage('');
 
       try {
-        if (mode === 'signin') {
-          await signInWithEmailAndPassword(auth, safeEmail, password);
+        if (authMode === 'signin') {
+          await signInWithEmailAndPassword(auth, validatedEmail, passwordInput);
         } else {
-          await createUserWithEmailAndPassword(auth, safeEmail, password);
+          await createUserWithEmailAndPassword(auth, validatedEmail, passwordInput);
         }
-        setModalOpen(false);
-        resetForm();
+        setIsModalOpen(false);
+        resetFormState();
       } catch (err: unknown) {
-        const code = (err as { code?: string })?.code ?? '';
-        const safe = toSafeError(err, mapFirebaseError(code));
-        setError(safe.message);
+        const errorCode = (err as { code?: string })?.code ?? '';
+        const safeError = toSafeError(err, mapFirebaseError(errorCode));
+        setErrorMessage(safeError.message);
       } finally {
-        setSubmitting(false);
+        setIsSubmitting(false);
       }
     },
-    [email, password, mode, firebaseReady],
+    [emailInput, passwordInput, authMode, isFirebaseAvailable]
   );
 
-  // ── Sign Out ─────────────────────────────────────────────────────────────
-  const handleSignOut = useCallback(async () => {
-    if (!firebaseReady) return;
+  const handleUserSignOut = useCallback(async () => {
+    if (!isFirebaseAvailable) return;
     try {
       await signOut(auth);
     } catch (err) {
-      // Sign-out errors are non-critical; log in dev only
-      if (import.meta.env.DEV) console.error('[Auth] Sign-out error:', err);
+      if (import.meta.env.DEV) {
+        console.error('[Authentication Error]: Failed to sign out user', err);
+      }
     }
-  }, [firebaseReady]);
+  }, [isFirebaseAvailable]);
 
-  function resetForm() {
-    setEmail('');
-    setPassword('');
-    setError('');
+  function resetFormState() {
+    setEmailInput('');
+    setPasswordInput('');
+    setErrorMessage('');
   }
 
-  function closeModal() {
-    setModalOpen(false);
-    resetForm();
+  function handleCloseModal() {
+    setIsModalOpen(false);
+    resetFormState();
   }
 
-  // ── Loading state ────────────────────────────────────────────────────────
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="w-8 h-8 rounded-full border border-[var(--border-default)] animate-pulse bg-[var(--bg-card)]" />
     );
   }
 
-  // ── Signed in ────────────────────────────────────────────────────────────
-  if (user) {
+  if (currentUser) {
     return (
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          {user.photoURL && (
+          {currentUser.photoURL && (
             <img
-              src={user.photoURL}
-              alt="" // Decorative — screen readers skip
+              src={currentUser.photoURL}
+              alt=""
               width={28}
               height={28}
               className="w-7 h-7 rounded-full border border-[var(--border-default)]"
-              referrerPolicy="no-referrer" // Prevent referrer leakage
+              referrerPolicy="no-referrer"
             />
           )}
           <span className="hidden sm:block font-mono text-xs text-[var(--text-muted)] max-w-[120px] truncate">
-            {/* Only show local part of email — avoid leaking full address in UI */}
-            {user.email?.split('@')[0] ?? 'user'}
+            {currentUser.email?.split('@')[0] ?? 'user'}
           </span>
         </div>
         <button
-          onClick={handleSignOut}
+          onClick={handleUserSignOut}
           className="font-mono text-xs px-3 py-1.5 rounded-full border border-[var(--border-default)] text-[var(--text-secondary)] hover:border-red-500/50 hover:text-red-400 transition-all duration-200"
         >
           Sign out
@@ -242,19 +200,17 @@ export default function AuthButton() {
     );
   }
 
-  // ── Signed out ───────────────────────────────────────────────────────────
   return (
     <>
       <button
-        onClick={() => setModalOpen(true)}
+        onClick={() => setIsModalOpen(true)}
         className="font-mono text-xs px-3 py-1.5 rounded-full border border-[var(--accent-purple)] bg-[rgba(124,58,237,0.1)] text-[var(--accent-purple-light)] hover:bg-[rgba(124,58,237,0.2)] transition-all duration-200"
       >
         Sign in
       </button>
 
-      {/* Auth Modal */}
       <AnimatePresence>
-        {modalOpen && (
+        {isModalOpen && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
@@ -265,24 +221,21 @@ export default function AuthButton() {
             aria-modal="true"
             aria-labelledby="auth-modal-title"
           >
-            {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={closeModal}
+              onClick={handleCloseModal}
               aria-hidden="true"
             />
 
-            {/* Modal panel */}
             <motion.div
-              className="relative w-full max-w-sm bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
+              className="relative w-full max-w-sm bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl p-8 shadow-2xl"
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Close button */}
               <button
-                onClick={closeModal}
+                onClick={handleCloseModal}
                 className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all text-sm font-mono"
                 aria-label="Close sign-in modal"
               >
@@ -293,29 +246,27 @@ export default function AuthButton() {
                 id="auth-modal-title"
                 className="font-display text-3xl tracking-wider text-[var(--text-primary)] mb-1"
               >
-                {mode === 'signin' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+                {authMode === 'signin' ? 'SIGN IN' : 'CREATE ACCOUNT'}
               </h2>
               <p className="text-[var(--text-muted)] text-sm mb-6">
-                {mode === 'signin'
+                {authMode === 'signin'
                   ? 'Track your progress across sessions.'
                   : 'Start tracking your learning journey.'}
               </p>
 
-              {/* Error banner — safe message only, never raw error */}
-              {error && (
+              {errorMessage && (
                 <div
                   role="alert"
                   aria-live="assertive"
                   className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
                 >
-                  {error}
+                  {errorMessage}
                 </div>
               )}
 
-              {/* Google Sign-in */}
               <button
-                onClick={handleGoogleSignIn}
-                disabled={submitting}
+                onClick={handleGoogleAuth}
+                disabled={isSubmitting}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:border-[var(--accent-purple)] hover:bg-[rgba(124,58,237,0.05)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-4 font-sans font-medium text-sm"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -327,27 +278,25 @@ export default function AuthButton() {
                 Continue with Google
               </button>
 
-              {/* Divider */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px bg-[var(--border-default)]" />
                 <span className="font-mono text-xs text-[var(--text-muted)]">or</span>
                 <div className="flex-1 h-px bg-[var(--border-default)]" />
               </div>
 
-              {/* Email/Password form */}
-              <form onSubmit={handleEmailAuth} noValidate>
+              <form onSubmit={handleEmailFormSubmit} noValidate>
                 <div className="space-y-3">
                   <div>
                     <label htmlFor="auth-email" className="block font-mono text-xs text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">
                       Email
                     </label>
                     <input
-                      ref={emailRef}
+                      ref={emailInputRef}
                       id="auth-email"
                       type="email"
                       autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={emailInput}
+                      onChange={(event) => setEmailInput(event.target.value)}
                       maxLength={254}
                       required
                       placeholder="you@example.com"
@@ -361,16 +310,16 @@ export default function AuthButton() {
                     <input
                       id="auth-password"
                       type="password"
-                      autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      minLength={MIN_PASSWORD_LEN}
-                      maxLength={MAX_PASSWORD_LEN}
+                      autoComplete={authMode === 'signin' ? 'current-password' : 'new-password'}
+                      value={passwordInput}
+                      onChange={(event) => setPasswordInput(event.target.value)}
+                      minLength={MIN_PASSWORD_LENGTH}
+                      maxLength={MAX_PASSWORD_LENGTH}
                       required
                       placeholder="••••••••"
                       className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--accent-purple)] transition-colors"
                     />
-                    {mode === 'signup' && (
+                    {authMode === 'signup' && (
                       <p className="mt-1.5 font-mono text-xs text-[var(--text-muted)]">
                         Min. 8 characters
                       </p>
@@ -380,25 +329,27 @@ export default function AuthButton() {
 
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={isSubmitting}
                   className="mt-5 w-full py-3 rounded-xl bg-[var(--accent-purple)] text-white font-sans font-semibold text-sm hover:bg-[var(--accent-violet)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
-                  {submitting
+                  {isSubmitting
                     ? 'Please wait…'
-                    : mode === 'signin'
+                    : authMode === 'signin'
                     ? 'Sign In'
                     : 'Create Account'}
                 </button>
               </form>
 
-              {/* Toggle mode */}
               <p className="mt-4 text-center font-mono text-xs text-[var(--text-muted)]">
-                {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+                {authMode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
                 <button
-                  onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
+                  onClick={() => {
+                    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+                    setErrorMessage('');
+                  }}
                   className="text-[var(--accent-purple-light)] hover:underline"
                 >
-                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                  {authMode === 'signin' ? 'Sign up' : 'Sign in'}
                 </button>
               </p>
             </motion.div>

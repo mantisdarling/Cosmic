@@ -1,7 +1,3 @@
-/**
- * RoadmapFlow.tsx — Bigger nodes, better visual hierarchy, static canvas
- */
-
 import { useMemo, useEffect, useState, memo } from 'react';
 import {
   ReactFlow,
@@ -18,45 +14,58 @@ import dagre from 'dagre';
 import type { Roadmap } from '../lib/security';
 import '@xyflow/react/dist/style.css';
 
-// ── Layout constants ─────────────────────────────────────────────
-const NW = 220;   // node width
-const NH = 48;    // node height
-const RW = 240;   // root width
-const RH = 60;    // root height
-const RS = 60;    // rank separation (horizontal gap between levels)
-const NS = 10;    // node separation (vertical gap between siblings)
+// Node dimension and layout spacing configuration
+const NODE_WIDTH = 220;
+const NODE_HEIGHT = 48;
+const ROOT_WIDTH = 240;
+const ROOT_HEIGHT = 60;
+const LEVEL_SEPARATION = 60;
+const SIBLING_SEPARATION = 10;
 
-// ── Custom Node ──────────────────────────────────────────────────
+// Custom rendered node component for the roadmap graph
 const FlowNode = memo(({ data }: {
   data: { label: string; isRoot: boolean; accent: string; done: boolean };
 }) => {
-  const [hov, setHov] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { isRoot, accent, label, done } = data;
 
   if (isRoot) {
     return (
       <div
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         style={{
-          width: RW, height: RH,
+          width: ROOT_WIDTH,
+          height: ROOT_HEIGHT,
           background: `linear-gradient(135deg, ${accent}ee, ${accent}aa)`,
           border: `2px solid ${accent}`,
           borderRadius: 12,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           cursor: 'pointer',
-          boxShadow: hov ? `0 0 40px ${accent}66, 0 8px 32px rgba(0,0,0,0.4)` : `0 0 24px ${accent}44`,
-          transition: 'box-shadow .2s',
+          boxShadow: isHovered
+            ? `0 0 40px ${accent}66, 0 8px 32px rgba(0,0,0,0.4)`
+            : `0 0 24px ${accent}44`,
+          transition: 'box-shadow 0.2s ease',
           fontFamily: 'Inter, system-ui, sans-serif',
           userSelect: 'none',
         }}
       >
-        <span style={{
-          fontSize: 15, fontWeight: 800, color: '#0D0D0D',
-          letterSpacing: '-0.03em', lineHeight: 1.2,
-          textAlign: 'center', padding: '0 16px',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#0D0D0D',
+            letterSpacing: '-0.03em',
+            lineHeight: 1.2,
+            textAlign: 'center',
+            padding: '0 16px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {label}
         </span>
       </div>
@@ -65,127 +74,176 @@ const FlowNode = memo(({ data }: {
 
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         position: 'relative',
-        width: NW, height: NH,
-        background: done ? `${accent}12` : (hov ? '#1e1e1e' : '#161616'),
-        border: `1.5px solid ${done ? accent : (hov ? accent : '#2a2a2a')}`,
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
+        background: done ? `${accent}12` : isHovered ? '#1E2333' : '#141722',
+        border: `1.5px solid ${done ? accent : isHovered ? accent : '#1E2333'}`,
         borderRadius: 10,
-        display: 'flex', alignItems: 'center',
-        padding: '0 14px 0 18px', gap: 10,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 14px 0 18px',
+        gap: 10,
         cursor: 'pointer',
-        boxShadow: hov ? `0 0 0 1px ${accent}30, 0 8px 24px rgba(0,0,0,0.5)` : (done ? `0 0 0 1px ${accent}20` : 'none'),
-        transition: 'all .18s',
+        boxShadow: isHovered
+          ? `0 0 0 1px ${accent}30, 0 8px 24px rgba(0,0,0,0.5)`
+          : done
+          ? `0 0 0 1px ${accent}20`
+          : 'none',
+        transition: 'all 0.18s ease',
         fontFamily: 'Inter, system-ui, sans-serif',
         userSelect: 'none',
       }}
     >
-      {/* Left accent bar */}
-      <span style={{
-        position: 'absolute', left: 0, top: 8, bottom: 8, width: 3,
-        borderRadius: '0 3px 3px 0',
-        background: (hov || done) ? accent : 'transparent',
-        transition: 'background .18s',
-      }} />
+      {/* Left indicator accent bar */}
+      <span
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 8,
+          bottom: 8,
+          width: 3,
+          borderRadius: '0 3px 3px 0',
+          background: isHovered || done ? accent : 'transparent',
+          transition: 'background 0.18s ease',
+        }}
+      />
 
-      <span style={{
-        fontSize: 13.5, fontWeight: 500,
-        color: done ? accent : (hov ? '#F5F5F5' : '#A3A3A3'),
-        letterSpacing: '-0.01em', lineHeight: 1.25,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        flex: 1, transition: 'color .18s',
-      }}>
+      <span
+        style={{
+          fontSize: 13.5,
+          fontWeight: 500,
+          color: done ? accent : isHovered ? '#F5F5F5' : '#A3A3A3',
+          letterSpacing: '-0.01em',
+          lineHeight: 1.25,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          flex: 1,
+          transition: 'color 0.18s ease',
+        }}
+      >
         {label}
       </span>
 
       {done ? (
         <span style={{ fontSize: 13, color: accent, flexShrink: 0, fontWeight: 700 }}>✓</span>
       ) : (
-        <span style={{ fontSize: 10, color: hov ? accent : '#333', flexShrink: 0, transition: 'color .18s' }}>→</span>
+        <span
+          style={{
+            fontSize: 10,
+            color: isHovered ? accent : '#404040',
+            flexShrink: 0,
+            transition: 'color 0.18s ease',
+          }}
+        >
+          →
+        </span>
       )}
     </div>
   );
 });
+
 FlowNode.displayName = 'FlowNode';
 
-const nodeTypes: NodeTypes = { flowNode: FlowNode as any };
+const customNodeTypes: NodeTypes = { flowNode: FlowNode as any };
 
-// ── Dagre layout ─────────────────────────────────────────────────
-function applyLayout(nodes: Node[], edges: Edge[]) {
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  // LR = left-to-right: root on left, topics spread rightward in neat vertical columns
-  g.setGraph({ rankdir: 'LR', ranksep: RS, nodesep: NS, marginx: 40, marginy: 40 });
-  nodes.forEach(n => {
-    const isRoot = (n.data as any).isRoot;
-    g.setNode(n.id, { width: isRoot ? RW : NW, height: isRoot ? RH : NH });
+// Calculates automatic left-to-right tree layout using Dagre
+function calculateLayout(nodes: Node[], edges: Edge[]) {
+  const layoutGraph = new dagre.graphlib.Graph();
+  layoutGraph.setDefaultEdgeLabel(() => ({}));
+  layoutGraph.setGraph({
+    rankdir: 'LR',
+    ranksep: LEVEL_SEPARATION,
+    nodesep: SIBLING_SEPARATION,
+    marginx: 40,
+    marginy: 40,
   });
-  edges.forEach(e => g.setEdge(e.source, e.target));
-  dagre.layout(g);
-  return nodes.map(n => {
-    const { x, y } = g.node(n.id);
+
+  nodes.forEach((n) => {
     const isRoot = (n.data as any).isRoot;
-    const w = isRoot ? RW : NW;
-    const h = isRoot ? RH : NH;
+    layoutGraph.setNode(n.id, {
+      width: isRoot ? ROOT_WIDTH : NODE_WIDTH,
+      height: isRoot ? ROOT_HEIGHT : NODE_HEIGHT,
+    });
+  });
+
+  edges.forEach((e) => layoutGraph.setEdge(e.source, e.target));
+  dagre.layout(layoutGraph);
+
+  return nodes.map((n) => {
+    const { x, y } = layoutGraph.node(n.id);
+    const isRoot = (n.data as any).isRoot;
+    const w = isRoot ? ROOT_WIDTH : NODE_WIDTH;
+    const h = isRoot ? ROOT_HEIGHT : NODE_HEIGHT;
     return { ...n, position: { x: x - w / 2, y: y - h / 2 } };
   });
 }
 
-// ── Main component ────────────────────────────────────────────────
-interface Props {
+interface RoadmapFlowProps {
   roadmap: Roadmap;
-  progress: Record<string, string>;
+  progress?: Record<string, string>;
   onNodeClick: (id: string) => void;
   doneNodes?: Set<string>;
 }
 
-export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Props) {
+export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: RoadmapFlowProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [ready, setReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  const { rfNodes, rfEdges } = useMemo(() => {
-    const accent = roadmap.color || '#F5A623';
-    const rfNodes: Node[] = roadmap.nodes.map(n => ({
+  const { flowNodes, flowEdges } = useMemo(() => {
+    const accentColor = roadmap.color || '#F5A623';
+
+    const flowNodes: Node[] = roadmap.nodes.map((n) => ({
       id: n.id,
       type: 'flowNode',
       position: { x: 0, y: 0 },
       data: {
         label: n.label,
         isRoot: n.type === 'root',
-        accent,
+        accent: accentColor,
         done: doneNodes?.has(n.id) ?? false,
       },
       draggable: false,
     }));
 
-    const rfEdges: Edge[] = roadmap.nodes
-      .filter(n => n.parentId !== null)
-      .map(n => ({
-        id: `e-${n.parentId}-${n.id}`,
+    const flowEdges: Edge[] = roadmap.nodes
+      .filter((n) => n.parentId !== null)
+      .map((n) => ({
+        id: `edge-${n.parentId}-${n.id}`,
         source: n.parentId!,
         target: n.id,
         type: 'smoothstep',
-        style: { stroke: '#2a2a2a', strokeWidth: 1.5 },
+        style: { stroke: '#2A3147', strokeWidth: 1.5 },
         animated: doneNodes?.has(n.id) ?? false,
       }));
 
-    return { rfNodes, rfEdges };
+    return { flowNodes, flowEdges };
   }, [roadmap, doneNodes]);
 
   useEffect(() => {
-    const laid = applyLayout(rfNodes, rfEdges);
-    setNodes(laid);
-    setEdges(rfEdges);
-    setTimeout(() => setReady(true), 60);
-  }, [rfNodes, rfEdges]);
+    const laidOutNodes = calculateLayout(flowNodes, flowEdges);
+    setNodes(laidOutNodes);
+    setEdges(flowEdges);
+    const timer = setTimeout(() => setIsReady(true), 60);
+    return () => clearTimeout(timer);
+  }, [flowNodes, flowEdges]);
 
-  const handleNodeClick: NodeMouseHandler = (_e, node) => onNodeClick(node.id);
+  const handleNodeClick: NodeMouseHandler = (event, node) => onNodeClick(node.id);
 
   return (
-    <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .4s' }}>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        opacity: isReady ? 1 : 0,
+        transition: 'opacity 0.4s ease',
+      }}
+    >
       <style>{`
         .react-flow { background: transparent !important; }
         .react-flow__background { background: transparent !important; }
@@ -195,12 +253,13 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Props) 
         .react-flow__node-flowNode.selected { outline: none !important; }
         .react-flow__edge-path { stroke-width: 1.5 !important; }
       `}</style>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
+        nodeTypes={customNodeTypes}
         onNodeClick={handleNodeClick}
         fitView
         fitViewOptions={{ padding: 0.15, maxZoom: 1.3 }}
@@ -217,7 +276,7 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Props) 
         proOptions={{ hideAttribution: true }}
         aria-label={`${roadmap.title} roadmap diagram`}
       >
-        <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="#1a1a1a" />
+        <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="#1E2333" />
       </ReactFlow>
     </div>
   );

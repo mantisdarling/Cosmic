@@ -1,17 +1,13 @@
-/**
- * TopicPanel.tsx
- * - Slide-in panel: Content tab + AI Tutor tab
- * - AI calls /api/ai (serverless) — no API key needed from user
- * - Security: marked → DOMPurify, HTTPS-only resource URLs
- */
-
 import { useEffect, useRef, useState, memo } from 'react';
 import { marked } from 'marked';
 import { sanitizeHtml } from '../lib/security';
 
-interface Resource { label: string; url: string; }
+interface Resource {
+  label: string;
+  url: string;
+}
 
-interface Props {
+interface TopicPanelProps {
   isOpen: boolean;
   onClose: () => void;
   nodeLabel: string;
@@ -24,232 +20,335 @@ interface Props {
 
 marked.setOptions({ gfm: true, breaks: false });
 
-function isSafeUrl(u: string) {
-  try { return new URL(u).protocol === 'https:'; } catch { return false; }
+// Validates that resource URLs use secure HTTPS protocol
+function isSafeUrl(targetUrl: string): boolean {
+  try {
+    return new URL(targetUrl).protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
 
-async function renderMd(text: string): Promise<string> {
-  const raw = await marked.parse(text, { async: false }) as string;
-  return await sanitizeHtml(raw);
+// Parses markdown content into sanitized HTML
+async function renderMarkdownContent(text: string): Promise<string> {
+  const rawHtml = (await marked.parse(text, { async: false })) as string;
+  return await sanitizeHtml(rawHtml);
 }
 
-// ── AI fetch via our serverless proxy ────────────────────────────
-async function fetchAI(topic: string, roadmap: string): Promise<string> {
-  const res = await fetch('/api/ai', {
+// Fetches AI explanations from our serverless proxy endpoint
+async function fetchAIExplanation(topic: string, roadmap: string): Promise<string> {
+  const response = await fetch('/api/ai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ topic, roadmap }),
   });
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error ?? 'AI request failed');
+  const data = await response.json();
+  if (!response.ok || data.error) {
+    throw new Error(data.error ?? 'Unable to generate AI explanation.');
+  }
   return data.text as string;
 }
 
-async function fetchNextTopic(topic: string, roadmap: string): Promise<string> {
-  const res = await fetch('/api/ai', {
+// Requests recommended follow-up topic recommendations from AI
+async function fetchNextTopicRecommendation(topic: string, roadmap: string): Promise<string> {
+  const response = await fetch('/api/ai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      topic: `_next_after_${topic}`,
+      topic: `next-after-${topic}`,
       roadmap,
       prompt: `A student just finished learning "${topic}" in their ${roadmap} journey. In ONE short sentence, tell them the single most logical next topic to study after this. Format: "Next, learn **[Topic Name]** — [one-line reason why]." Be concise and direct.`,
     }),
   });
-  const data = await res.json();
-  if (!res.ok || data.error) return '';
+  const data = await response.json();
+  if (!response.ok || data.error) return '';
   return data.text as string;
 }
 
-// ── Component ─────────────────────────────────────────────────────
 const TopicPanel = memo(function TopicPanel({
-  isOpen, onClose, nodeLabel, roadmapTitle, markdownBody, resources, onMarkDone, isDone,
-}: Props) {
-  const closeRef = useRef<HTMLButtonElement>(null);
+  isOpen,
+  onClose,
+  nodeLabel,
+  roadmapTitle,
+  markdownBody,
+  resources,
+  onMarkDone,
+  isDone,
+}: TopicPanelProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [contentHtml, setContentHtml] = useState('');
-  const [tab, setTab] = useState<'content' | 'ai'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'ai'>('content');
   const [aiHtml, setAiHtml] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
   const [nextTopic, setNextTopic] = useState('');
 
-  // Reset state when topic changes
+  // Reset tab state when selected node changes
   useEffect(() => {
     setAiHtml('');
     setAiError('');
-    setAiLoading(false);
-    setTab('content');
+    setIsAiLoading(false);
+    setActiveTab('content');
   }, [nodeLabel]);
 
-  // Render static markdown
+  // Render provided static topic markdown
   useEffect(() => {
     if (!markdownBody) {
-      setContentHtml('<p style="color:#525252;font-size:0.9rem;line-height:1.75;">No written content yet — try the <strong style="color:#F5A623">AI Tutor</strong> tab for an instant explanation!</p>');
+      setContentHtml(
+        '<p style="color:#525252;font-size:0.9rem;line-height:1.75;">No written content available yet — try the <strong style="color:#F5A623">AI Tutor</strong> tab for an instant explanation!</p>'
+      );
       return;
     }
-    let cancelled = false;
+    let isCancelled = false;
     (async () => {
-      const safe = await renderMd(markdownBody);
-      if (!cancelled) setContentHtml(safe);
+      const safe = await renderMarkdownContent(markdownBody);
+      if (!isCancelled) setContentHtml(safe);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      isCancelled = true;
+    };
   }, [markdownBody]);
 
-  // Focus + Escape + scroll lock
-  useEffect(() => { if (isOpen) setTimeout(() => closeRef.current?.focus(), 60); }, [isOpen]);
+  // Handle auto-focus when panel opens
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape' && isOpen) onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [isOpen, onClose]);
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (isOpen) {
+      const timer = setTimeout(() => closeButtonRef.current?.focus(), 60);
+      return () => clearTimeout(timer);
+    }
   }, [isOpen]);
 
-  // Ask AI
+  // Handle escape key listener to close panel
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Prevent background scrolling when panel is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Handler to fetch and render AI explanation
   const handleAskAI = async () => {
-    setTab('ai');
-    if (aiHtml || aiLoading) return;
-    setAiLoading(true);
+    setActiveTab('ai');
+    if (aiHtml || isAiLoading) return;
+    setIsAiLoading(true);
     setAiError('');
     setNextTopic('');
+
     try {
-      const text = await fetchAI(nodeLabel, roadmapTitle);
-      const safe = await renderMd(text);
-      setAiHtml(safe);
-      // Fetch "what to learn next" in background
-      fetchNextTopic(nodeLabel, roadmapTitle).then(t => setNextTopic(t.replace(/\*\*/g, '').trim()));
-    } catch (e: any) {
-      setAiError(e?.message ?? 'Something went wrong. Please try again.');
+      const text = await fetchAIExplanation(nodeLabel, roadmapTitle);
+      const safeHtml = await renderMarkdownContent(text);
+      setAiHtml(safeHtml);
+      fetchNextTopicRecommendation(nodeLabel, roadmapTitle).then((recommendedTopic) =>
+        setNextTopic(recommendedTopic.replace(/\*\*/g, '').trim())
+      );
+    } catch (err: any) {
+      setAiError(err?.message ?? 'Failed to get response from AI Tutor.');
     }
-    setAiLoading(false);
+    setIsAiLoading(false);
   };
 
-  const regenerate = async () => {
+  const handleRegenerateAI = async () => {
     setAiHtml('');
     setAiError('');
     setNextTopic('');
-    setAiLoading(true);
+    setIsAiLoading(true);
+
     try {
-      const text = await fetchAI(nodeLabel, roadmapTitle);
-      const safe = await renderMd(text);
-      setAiHtml(safe);
-      fetchNextTopic(nodeLabel, roadmapTitle).then(t => setNextTopic(t.replace(/\*\*/g, '').trim()));
-    } catch (e: any) {
-      setAiError(e?.message ?? 'Something went wrong.');
+      const text = await fetchAIExplanation(nodeLabel, roadmapTitle);
+      const safeHtml = await renderMarkdownContent(text);
+      setAiHtml(safeHtml);
+      fetchNextTopicRecommendation(nodeLabel, roadmapTitle).then((recommendedTopic) =>
+        setNextTopic(recommendedTopic.replace(/\*\*/g, '').trim())
+      );
+    } catch (err: any) {
+      setAiError(err?.message ?? 'Failed to refresh AI response.');
     }
-    setAiLoading(false);
+    setIsAiLoading(false);
   };
 
-  const safeResources = resources.filter(r =>
-    typeof r.label === 'string' && r.label.length > 0 && r.label.length <= 120 && isSafeUrl(r.url)
+  const safeResources = resources.filter(
+    (resource) =>
+      typeof resource.label === 'string' &&
+      resource.label.length > 0 &&
+      resource.label.length <= 120 &&
+      isSafeUrl(resource.url)
   );
 
   return (
     <>
-      {/* ── Backdrop ── */}
+      {/* Background Backdrop Overlay */}
       <div
-        onClick={onClose} aria-hidden="true"
+        onClick={onClose}
+        aria-hidden="true"
         style={{
-          position: 'fixed', inset: 0, zIndex: 40,
-          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
-          opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none',
-          transition: 'opacity .25s',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 40,
+          background: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(4px)',
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? 'auto' : 'none',
+          transition: 'opacity 0.25s ease',
         }}
       />
 
-      {/* ── Panel ── */}
+      {/* Main Slide-in Topic Details Drawer */}
       <aside
-        role="complementary" aria-label="Topic details"
+        role="complementary"
+        aria-label="Topic details"
         style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50,
-          width: 500, maxWidth: '100vw',
-          background: '#141414', borderLeft: '1px solid #1f1f1f',
-          display: 'flex', flexDirection: 'column',
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 50,
+          width: 500,
+          maxWidth: '100vw',
+          background: '#141722',
+          borderLeft: '1px solid #1E2333',
+          display: 'flex',
+          flexDirection: 'column',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform .35s cubic-bezier(0.16,1,0.3,1)',
+          transition: 'transform 0.35s cubic-bezier(0.16,1,0.3,1)',
           boxShadow: '-20px 0 60px rgba(0,0,0,0.7)',
         }}
       >
-        {/* ── Header + Tabs ── */}
-        <div style={{ flexShrink: 0, padding: '20px 24px 0', borderBottom: '1px solid #1f1f1f' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+        {/* Header containing title, mark done action, and tabs */}
+        <div style={{ flexShrink: 0, padding: '20px 24px 0', borderBottom: '1px solid #1E2333' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}
+          >
             <div style={{ flex: 1, minWidth: 0, paddingRight: 16 }}>
-              <p style={{
-                fontSize: '0.65rem', fontWeight: 700, color: '#F5A623',
-                fontFamily: '"Space Mono", monospace', letterSpacing: '0.14em',
-                textTransform: 'uppercase', margin: '0 0 8px',
-              }}>
+              <p
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#F5A623',
+                  fontFamily: '"Space Mono", monospace',
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  margin: '0 0 8px',
+                }}
+              >
                 {roadmapTitle}
               </p>
-              <h2 style={{
-                fontSize: '1.1rem', fontWeight: 800, color: '#F5F5F5',
-                letterSpacing: '-0.03em', lineHeight: 1.3, margin: 0,
-              }}>
+              <h2
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 800,
+                  color: '#F5F5F5',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.3,
+                  margin: 0,
+                }}
+              >
                 {nodeLabel || '—'}
               </h2>
             </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {onMarkDone && (
                 <button
                   onClick={onMarkDone}
                   title={isDone ? 'Mark as undone' : 'Mark as done'}
                   style={{
-                    height: 32, padding: '0 12px',
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    borderRadius: 8, border: `1px solid ${isDone ? '#22C55E' : '#222'}`,
-                    background: isDone ? 'rgba(34,197,94,0.1)' : '#1a1a1a',
-                    color: isDone ? '#22C55E' : '#525252',
-                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
-                    transition: 'all .15s', fontFamily: 'inherit',
+                    height: 32,
+                    padding: '0 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    borderRadius: 8,
+                    border: `1px solid ${isDone ? '#22C55E' : '#2A3147'}`,
+                    background: isDone ? 'rgba(34,197,94,0.1)' : '#10121A',
+                    color: isDone ? '#22C55E' : '#A3A3A3',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    fontFamily: 'inherit',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#22C55E'; e.currentTarget.style.color = '#22C55E'; }}
-                  onMouseLeave={e => { if (!isDone) { e.currentTarget.style.borderColor = '#222'; e.currentTarget.style.color = '#525252'; } }}
                 >
                   {isDone ? '✓ Done' : '◯ Mark Done'}
                 </button>
               )}
+
               <button
-                ref={closeRef} onClick={onClose} aria-label="Close panel"
+                ref={closeButtonRef}
+                onClick={onClose}
+                aria-label="Close panel"
                 style={{
-                  flexShrink: 0, width: 32, height: 32,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 8, border: '1px solid #222', background: '#1a1a1a',
-                  color: '#525252', fontSize: '1.1rem', lineHeight: 1,
-                  cursor: 'pointer', transition: 'color .15s',
+                  flexShrink: 0,
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                  border: '1px solid #2A3147',
+                  background: '#10121A',
+                  color: '#A3A3A3',
+                  fontSize: '1.1rem',
+                  lineHeight: 1,
+                  cursor: 'pointer',
+                  transition: 'color 0.15s ease',
                 }}
-                onMouseEnter={e => e.currentTarget.style.color = '#F5F5F5'}
-                onMouseLeave={e => e.currentTarget.style.color = '#525252'}
-              >×</button>
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F5F5F5')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#A3A3A3')}
+              >
+                ×
+              </button>
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Navigation Tabs */}
           <div style={{ display: 'flex', gap: 4, marginBottom: '-1px' }}>
             <button
-              onClick={() => setTab('content')}
+              onClick={() => setActiveTab('content')}
               style={{
-                padding: '8px 16px', borderRadius: '8px 8px 0 0', cursor: 'pointer',
+                padding: '8px 16px',
+                borderRadius: '8px 8px 0 0',
+                cursor: 'pointer',
                 border: '1px solid transparent',
-                borderBottom: tab === 'content' ? '1px solid #141414' : '1px solid transparent',
-                background: tab === 'content' ? '#141414' : 'transparent',
-                color: tab === 'content' ? '#F5F5F5' : '#525252',
-                fontSize: '0.82rem', fontWeight: 600, transition: 'color .15s',
+                borderBottom: activeTab === 'content' ? '1px solid #141722' : '1px solid transparent',
+                background: activeTab === 'content' ? '#141722' : 'transparent',
+                color: activeTab === 'content' ? '#F5F5F5' : '#737373',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                transition: 'color 0.15s ease',
               }}
             >
               📄 Content
             </button>
+
             <button
               onClick={handleAskAI}
               style={{
-                padding: '8px 16px', borderRadius: '8px 8px 0 0', cursor: 'pointer',
-                border: tab === 'ai' ? '1px solid rgba(245,166,35,0.3)' : '1px solid transparent',
-                borderBottom: tab === 'ai' ? '1px solid #141414' : '1px solid transparent',
-                background: tab === 'ai' ? 'rgba(245,166,35,0.06)' : 'transparent',
-                color: tab === 'ai' ? '#F5A623' : '#737373',
-                fontSize: '0.82rem', fontWeight: 600,
-                display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'color .15s',
+                padding: '8px 16px',
+                borderRadius: '8px 8px 0 0',
+                cursor: 'pointer',
+                border: activeTab === 'ai' ? '1px solid rgba(245,166,35,0.3)' : '1px solid transparent',
+                borderBottom: activeTab === 'ai' ? '1px solid #141722' : '1px solid transparent',
+                background: activeTab === 'ai' ? 'rgba(245,166,35,0.06)' : 'transparent',
+                color: activeTab === 'ai' ? '#F5A623' : '#737373',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                transition: 'color 0.15s ease',
               }}
             >
               <span>✦</span> AI Tutor
@@ -257,38 +356,84 @@ const TopicPanel = memo(function TopicPanel({
           </div>
         </div>
 
-        {/* ── Body ── */}
+        {/* Scrollable Drawer Body Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px', overscrollBehavior: 'contain' }}>
-
-          {/* ── CONTENT TAB ── */}
-          {tab === 'content' && (
+          {/* Static Content Tab */}
+          {activeTab === 'content' && (
             <>
               <div className="prose" dangerouslySetInnerHTML={{ __html: contentHtml }} />
 
               {safeResources.length > 0 && (
-                <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #1f1f1f' }}>
-                  <p style={{
-                    fontSize: '0.68rem', fontWeight: 700, color: '#525252',
-                    fontFamily: '"Space Mono", monospace', letterSpacing: '0.14em',
-                    textTransform: 'uppercase', margin: '0 0 12px',
-                  }}>Resources</p>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {safeResources.map((r, i) => (
-                      <li key={i}>
+                <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #1E2333' }}>
+                  <p
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#525252',
+                      fontFamily: '"Space Mono", monospace',
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      margin: '0 0 12px',
+                    }}
+                  >
+                    Resources
+                  </p>
+                  <ul
+                    style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
+                    {safeResources.map((resource, index) => (
+                      <li key={index}>
                         <a
-                          href={r.url} target="_blank" rel="noopener noreferrer"
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            gap: 12, padding: '10px 14px', borderRadius: 8,
-                            border: '1px solid #1f1f1f', background: '#1a1a1a',
-                            color: '#A3A3A3', fontSize: '0.84rem', fontWeight: 500,
-                            textDecoration: 'none', transition: 'all .15s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 12,
+                            padding: '10px 14px',
+                            borderRadius: 8,
+                            border: '1px solid #1E2333',
+                            background: '#10121A',
+                            color: '#A3A3A3',
+                            fontSize: '0.84rem',
+                            fontWeight: 500,
+                            textDecoration: 'none',
+                            transition: 'all 0.15s ease',
                           }}
-                          onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = '#F5A623'; el.style.color = '#F5F5F5'; el.style.background = 'rgba(245,166,35,0.05)'; }}
-                          onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = '#1f1f1f'; el.style.color = '#A3A3A3'; el.style.background = '#1a1a1a'; }}
+                          onMouseEnter={(e) => {
+                            const element = e.currentTarget;
+                            element.style.borderColor = '#F5A623';
+                            element.style.color = '#F5F5F5';
+                            element.style.background = 'rgba(245,166,35,0.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            const element = e.currentTarget;
+                            element.style.borderColor = '#1E2333';
+                            element.style.color = '#A3A3A3';
+                            element.style.background = '#10121A';
+                          }}
                         >
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</span>
-                          <span style={{ fontSize: '0.75rem', color: '#525252', flexShrink: 0 }} aria-hidden="true">↗</span>
+                          <span
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {resource.label}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#525252', flexShrink: 0 }} aria-hidden="true">
+                            ↗
+                          </span>
                         </a>
                       </li>
                     ))}
@@ -296,17 +441,23 @@ const TopicPanel = memo(function TopicPanel({
                 </div>
               )}
 
-              {/* AI nudge */}
+              {/* Callout box triggering AI explanation */}
               <div
-                onClick={handleAskAI} role="button" tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && handleAskAI()}
+                onClick={handleAskAI}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleAskAI()}
                 style={{
-                  marginTop: 24, padding: '14px 16px', borderRadius: 10, cursor: 'pointer',
-                  background: 'rgba(245,166,35,0.05)', border: '1px solid rgba(245,166,35,0.2)',
-                  transition: 'background .15s',
+                  marginTop: 24,
+                  padding: '14px 16px',
+                  borderRadius: 10,
+                  cursor: 'pointer',
+                  background: 'rgba(245,166,35,0.05)',
+                  border: '1px solid rgba(245,166,35,0.2)',
+                  transition: 'background 0.15s ease',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,166,35,0.1)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(245,166,35,0.05)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(245,166,35,0.1)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(245,166,35,0.05)')}
               >
                 <p style={{ fontSize: '0.84rem', color: '#A3A3A3', margin: 0, lineHeight: 1.6 }}>
                   ✦ <strong style={{ color: '#F5A623' }}>Ask AI</strong> to explain <em>{nodeLabel}</em> — click the AI Tutor tab or here →
@@ -315,76 +466,128 @@ const TopicPanel = memo(function TopicPanel({
             </>
           )}
 
-          {/* ── AI TUTOR TAB ── */}
-          {tab === 'ai' && (
+          {/* AI Tutor Explanation Tab */}
+          {activeTab === 'ai' && (
             <>
-              {/* Loading */}
-              {aiLoading && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '52px 0', gap: 16 }}>
-                  <div style={{
-                    width: 38, height: 38, borderRadius: '50%',
-                    border: '3px solid #1f1f1f', borderTopColor: '#F5A623',
-                    animation: 'ai-spin 0.75s linear infinite',
-                  }} />
+              {/* Spinner while waiting for server response */}
+              {isAiLoading && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '52px 0',
+                    gap: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: '50%',
+                      border: '3px solid #1E2333',
+                      borderTopColor: '#F5A623',
+                      animation: 'aiSpin 0.75s linear infinite',
+                    }}
+                  />
                   <p style={{ fontSize: '0.84rem', color: '#525252', margin: 0, textAlign: 'center' }}>
-                    Asking Gemini about <strong style={{ color: '#A3A3A3' }}>{nodeLabel}</strong>…
+                    Generating response for <strong style={{ color: '#A3A3A3' }}>{nodeLabel}</strong>…
                   </p>
-                  <style>{`@keyframes ai-spin { to { transform: rotate(360deg); } }`}</style>
+                  <style>{`@keyframes aiSpin { to { transform: rotate(360deg); } }`}</style>
                 </div>
               )}
 
-              {/* Error */}
-              {aiError && !aiLoading && (
-                <div style={{
-                  padding: '16px', borderRadius: 10, marginBottom: 16,
-                  background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)',
-                }}>
+              {/* Error Callout */}
+              {aiError && !isAiLoading && (
+                <div
+                  style={{
+                    padding: '16px',
+                    borderRadius: 10,
+                    marginBottom: 16,
+                    background: 'rgba(239,68,68,0.07)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}
+                >
                   <p style={{ fontSize: '0.84rem', color: '#FCA5A5', margin: '0 0 10px', lineHeight: 1.6 }}>
                     ⚠ {aiError}
                   </p>
-                  <button onClick={regenerate} style={{
-                    fontSize: '0.78rem', color: '#F5A623', background: 'none',
-                    border: 'none', cursor: 'pointer', padding: 0,
-                  }}>
+                  <button
+                    onClick={handleRegenerateAI}
+                    style={{
+                      fontSize: '0.78rem',
+                      color: '#F5A623',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
                     Try again →
                   </button>
                 </div>
               )}
 
-              {/* AI Response */}
-              {aiHtml && !aiLoading && (
+              {/* AI Generated Content */}
+              {aiHtml && !isAiLoading && (
                 <>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    marginBottom: 18, padding: '8px 12px', borderRadius: 8,
-                    background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.15)',
-                  }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginBottom: 18,
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      background: 'rgba(245,166,35,0.06)',
+                      border: '1px solid rgba(245,166,35,0.15)',
+                    }}
+                  >
                     <span style={{ fontSize: '1rem' }}>✦</span>
                     <span style={{ fontSize: '0.75rem', color: '#737373', flex: 1 }}>
                       Explained by <strong style={{ color: '#F5A623' }}>Llama 3.1 (Groq)</strong>
                     </span>
                     <button
-                      onClick={regenerate}
+                      onClick={handleRegenerateAI}
                       style={{
-                        fontSize: '0.72rem', color: '#525252', background: 'none',
-                        border: '1px solid #222', borderRadius: 6,
-                        padding: '3px 8px', cursor: 'pointer', transition: 'color .15s',
+                        fontSize: '0.72rem',
+                        color: '#737373',
+                        background: 'none',
+                        border: '1px solid #2A3147',
+                        borderRadius: 6,
+                        padding: '3px 8px',
+                        cursor: 'pointer',
+                        transition: 'color 0.15s ease',
                       }}
-                      onMouseEnter={e => e.currentTarget.style.color = '#A3A3A3'}
-                      onMouseLeave={e => e.currentTarget.style.color = '#525252'}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#F5F5F5')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#737373')}
                     >
                       ↺ Regenerate
                     </button>
                   </div>
                   <div className="prose" dangerouslySetInnerHTML={{ __html: aiHtml }} />
 
-                  {/* What to learn next */}
+                  {/* Recommendation Card */}
                   {nextTopic && (
-                    <div style={{
-                      marginTop: 20, padding: '14px 16px', borderRadius: 10,
-                      background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.2)',
-                    }}>
-                      <p style={{ fontSize: '0.68rem', fontWeight: 700, color: '#F5A623', margin: '0 0 6px', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: '"Space Mono", monospace' }}>
+                    <div
+                      style={{
+                        marginTop: 20,
+                        padding: '14px 16px',
+                        borderRadius: 10,
+                        background: 'rgba(245,166,35,0.06)',
+                        border: '1px solid rgba(245,166,35,0.2)',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          color: '#F5A623',
+                          margin: '0 0 6px',
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          fontFamily: '"Space Mono", monospace',
+                        }}
+                      >
                         ✦ What to learn next
                       </p>
                       <p style={{ fontSize: '0.85rem', color: '#A3A3A3', margin: 0, lineHeight: 1.6 }}>

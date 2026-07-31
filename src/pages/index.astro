@@ -445,73 +445,110 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 </footer>
 
 <script>
-  // ── Scroll reveal ─────────────────────────────────────
-  const io = new IntersectionObserver(
-    entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
+  // Scroll reveal animation observer
+  const revealObserver = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          revealObserver.unobserve(entry.target);
+        }
+      }),
     { threshold: 0.05, rootMargin: '0px 0px -10px 0px' }
   );
-  requestAnimationFrame(() => document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el)));
 
-  // ── Scrambled hero text (Athena-style) ───────────────────
-  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
-  const ROLES = [
-    'Frontend Developers.', 'Backend Engineers.', 'DevOps Pros.',
-    'Full-Stack Builders.', 'AI/ML Learners.', 'Cyber Security folks.', 'Open Source contributors.',
+  requestAnimationFrame(() =>
+    document.querySelectorAll('[data-reveal]').forEach((element) => revealObserver.observe(element))
+  );
+
+  // Hero title text scrambling animation
+  const SCRAMBLE_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+  const DEVELOPER_ROLES = [
+    'Frontend Developers.',
+    'Backend Engineers.',
+    'DevOps Pros.',
+    'Full-Stack Builders.',
+    'AI/ML Learners.',
+    'Cyber Security folks.',
+    'Open Source contributors.',
   ];
-  const scrambleEl = document.getElementById('scramble-text');
-  let roleIdx = 0;
-  function scrambleTo(target: string) {
-    let iter = 0;
-    const total = target.length * 3;
-    const interval = setInterval(() => {
-      if (!scrambleEl) return;
-      scrambleEl.textContent = target.split('').map((ch, i) => {
-        if (ch === ' ') return ' ';
-        if (i < Math.floor(iter / 3)) return target[i];
-        return CHARS[Math.floor(Math.random() * CHARS.length)];
-      }).join('');
-      iter++;
-      if (iter > total) { clearInterval(interval); scrambleEl.textContent = target; }
+
+  const scrambleElement = document.getElementById('scramble-text');
+  let currentRoleIndex = 0;
+
+  function runScrambleAnimation(targetText: string) {
+    let iteration = 0;
+    const maxIterations = targetText.length * 3;
+
+    const scrambleInterval = setInterval(() => {
+      if (!scrambleElement) return;
+      scrambleElement.textContent = targetText
+        .split('')
+        .map((char, index) => {
+          if (char === ' ') return ' ';
+          if (index < Math.floor(iteration / 3)) return targetText[index];
+          return SCRAMBLE_CHARACTERS[Math.floor(Math.random() * SCRAMBLE_CHARACTERS.length)];
+        })
+        .join('');
+
+      iteration++;
+      if (iteration > maxIterations) {
+        clearInterval(scrambleInterval);
+        scrambleElement.textContent = targetText;
+      }
     }, 28);
   }
+
   setInterval(() => {
-    roleIdx = (roleIdx + 1) % ROLES.length;
-    scrambleTo(ROLES[roleIdx]);
+    currentRoleIndex = (currentRoleIndex + 1) % DEVELOPER_ROLES.length;
+    runScrambleAnimation(DEVELOPER_ROLES[currentRoleIndex]);
   }, 3500);
 
-  // ── Search ────────────────────────────────────────────────
-  const input = document.getElementById('search-input') as HTMLInputElement;
-  const countEl = document.getElementById('search-count')!;
-  const noResults = document.getElementById('no-results')!;
-  const noResultsQuery = document.getElementById('no-results-query')!;
-  const allCards = Array.from(document.querySelectorAll<HTMLAnchorElement>('.card'));
+  // Real-time client-side roadmap filter search
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchCountElement = document.getElementById('search-count')!;
+  const noResultsElement = document.getElementById('no-results')!;
+  const noResultsQueryElement = document.getElementById('no-results-query')!;
+  const allCardElements = Array.from(document.querySelectorAll<HTMLAnchorElement>('.card'));
 
-  function updateSearch(q: string) {
-    const query = q.trim().toLowerCase();
-    let visible = 0;
-    allCards.forEach(card => {
-      const title = card.dataset.title ?? '';
-      const desc  = card.dataset.desc  ?? '';
-      const match = !query || title.includes(query) || desc.includes(query);
-      card.classList.toggle('hidden', !match);
-      if (match) visible++;
+  function filterRoadmaps(rawQuery: string) {
+    const searchQuery = rawQuery.trim().toLowerCase();
+    let visibleCardCount = 0;
+
+    allCardElements.forEach((card) => {
+      const cardTitle = card.dataset.title ?? '';
+      const cardDescription = card.dataset.desc ?? '';
+      const isMatch = !searchQuery || cardTitle.includes(searchQuery) || cardDescription.includes(searchQuery);
+
+      card.classList.toggle('hidden', !isMatch);
+      if (isMatch) visibleCardCount++;
     });
-    countEl.textContent = query ? `${visible} found` : '';
-    noResults.style.display = (query && visible === 0) ? 'block' : 'none';
-    noResultsQuery.textContent = query;
 
-    // Hide/show section headers based on visible cards
-    ['role','skill','other'].forEach(id => {
-      const section = document.getElementById(`section-${id}`);
-      if (!section) return;
-      const anyVisible = Array.from(section.querySelectorAll('.card')).some(c => !c.classList.contains('hidden'));
-      section.style.display = anyVisible ? '' : 'none';
+    searchCountElement.textContent = searchQuery ? `${visibleCardCount} found` : '';
+    noResultsElement.style.display = searchQuery && visibleCardCount === 0 ? 'block' : 'none';
+    noResultsQueryElement.textContent = searchQuery;
+
+    // Toggle section visibility based on matching cards
+    ['role', 'skill', 'other'].forEach((sectionId) => {
+      const sectionElement = document.getElementById(`section-${sectionId}`);
+      if (!sectionElement) return;
+      const hasVisibleCards = Array.from(sectionElement.querySelectorAll('.card')).some(
+        (card) => !card.classList.contains('hidden')
+      );
+      sectionElement.style.display = hasVisibleCards ? '' : 'none';
     });
   }
 
-  input.addEventListener('input', () => updateSearch(input.value));
-  // Clear on Escape
-  input.addEventListener('keydown', e => { if (e.key === 'Escape') { input.value = ''; updateSearch(''); input.blur(); } });
+  if (searchInput) {
+    searchInput.addEventListener('input', () => filterRoadmaps(searchInput.value));
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        searchInput.value = '';
+        filterRoadmaps('');
+        searchInput.blur();
+      }
+    });
+  }
 </script>
 
 </BaseLayout>
