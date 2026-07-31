@@ -1,217 +1,150 @@
 <div align="center">
 
-![Cosmic — Developer Roadmaps](https://raw.githubusercontent.com/mantisdarling/cosmic/main/public/banner.png)
+# ✦ Cosmic — Developer Roadmaps
 
-<br/>
+**Interactive, visual learning roadmaps for modern developers powered by AI.**
 
-**Interactive, visual learning roadmaps for developers.**  
-Click any node to explore a topic. Sign in to track your progress.
+Explore 50+ curated developer learning paths, visualize topic hierarchies in clean left-to-right graphs, track your completion progress, and learn anything instantly with the integrated AI Tutor.
 
-<br/>
-
-[![CI](https://github.com/mantisdarling/cosmic/actions/workflows/ci.yml/badge.svg)](https://github.com/mantisdarling/cosmic/actions/workflows/ci.yml)
-[![Security Audit](https://github.com/mantisdarling/cosmic/actions/workflows/security.yml/badge.svg)](https://github.com/mantisdarling/cosmic/actions/workflows/security.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-7c3aed.svg)](./LICENSE)
-[![Built with Astro](https://img.shields.io/badge/Built%20with-Astro%207-ff5d01?logo=astro&logoColor=white)](https://astro.build)
-[![Deployed on Cloudflare Pages](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Pages-f38020?logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F5A623.svg)](./LICENSE)
+[![Built with Astro](https://img.shields.io/badge/Built%20with-Astro-FF5D01?logo=astro&logoColor=white)](https://astro.build)
+[![Powered by React Flow](https://img.shields.io/badge/Diagrams-React%20Flow-00E5FF?logo=react&logoColor=white)](https://reactflow.dev)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com)
 
 </div>
 
 ---
 
-## ✨ Features
+## ⚡ Highlights
 
-| Feature | Details |
-|---------|---------|
-| 🗺️ **Interactive Diagrams** | Pan, zoom, click nodes — powered by React Flow + dagre tree layout |
-| 🔍 **Fuzzy Search** | Find any topic instantly with Fuse.js across all roadmaps |
-| 🔐 **Auth + Progress Tracking** | Google OAuth & email sign-in via Firebase Auth; progress synced to Firestore |
-| 📖 **Rich Topic Content** | Every node has a markdown explainer + curated resource links |
-| 🌗 **Dark / Light Mode** | System-aware theme with no flash of unstyled content |
-| 🛡️ **Secure by Design** | Zod validation, DOMPurify sanitization, CSP headers, strict Firestore rules |
-| ⚡ **Static-first** | Astro static output — deploys to Cloudflare Pages in seconds |
-| ♿ **Accessible** | ARIA roles, keyboard navigation, focus management throughout |
+- **50+ Comprehensive Roadmaps**: Covers Frontend, Backend, Full Stack, DevOps, AI/ML Engineering, Systems Programming, Databases, Cloud, Cyber Security, Mobile, and more.
+- **Interactive Graph Canvas**: Powered by `@xyflow/react` and `dagre` tree layout with automated left-to-right node hierarchy.
+- **✦ AI Tutor**: Instant, jargon-free topic explanations powered by Llama 3.1 (via Groq serverless proxy) along with automated follow-up topic recommendations.
+- **Progress & Completion Tracking**: Persistent progress tracking saved locally per roadmap, featuring celebratory completion badges and one-click shareable achievement cards.
+- **Instant Search**: Real-time client-side search across all 50+ role-based and skill-based roadmaps.
+- **Cyberpunk Obsidian Design System**: Deep obsidian `#0B0C10` background, electric cyan and amber accents, dynamic wallpaper support, and high-contrast accessibility.
 
 ---
 
-## 🗺️ Roadmaps
+## 🛠️ Tech Stack
 
-| Roadmap | Nodes | Status |
-|---------|-------|--------|
-| 🌐 Full Stack Web Development | 15 | ✅ Available |
-| 🤖 AI Engineering | — | 🚧 Coming soon |
-| ⚙️ DevOps & Cloud | — | 🚧 Coming soon |
-| 🎨 Frontend Mastery | — | 🚧 Coming soon |
-
----
-
-## 🛠 Tech Stack
-
-```
-Framework     Astro 7          (static output, React islands)
-UI            React 19 + TypeScript
-Diagrams      @xyflow/react    (React Flow) + dagre layout
-Styling       Tailwind CSS v4  (@tailwindcss/vite)
-Markdown      marked + DOMPurify
-Search        Fuse.js          (client-side fuzzy search)
-Auth          Firebase Auth    (Google OAuth + email)
-Database      Firestore        (user progress)
-Animation     Framer Motion
-Validation    Zod
-Hosting       Cloudflare Pages
-```
+| Component | Technology | Description |
+|-----------|------------|-------------|
+| **Core Framework** | Astro 5 | High-performance static site generator with serverless API route capabilities |
+| **UI Library** | React 19 + TypeScript | Interactive islands for canvas graph diagrams, drawers, and modal dialogs |
+| **Diagram Engine** | `@xyflow/react` (React Flow) + `dagre` | Automatic left-to-right directed graph layout calculations |
+| **AI Backend** | Groq API (`llama-3.1-8b-instant`) | Serverless proxy endpoint in `src/pages/api/ai.ts` |
+| **Styling** | Tailwind CSS v4 + Vanilla CSS | Custom Cyberpunk Obsidian design tokens and dark mode styling |
+| **Markdown Parsing** | `marked` + DOMPurify | Client-side safe markdown rendering with HTML sanitization |
+| **Validation** | Zod | Runtime schema validation for data models and API payloads |
+| **Deployment** | Vercel | Automatic CI/CD build deployment with serverless route handling |
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 20+
-- npm 10+
+### 1. Prerequisites
+- Node.js `20.x` or higher
+- npm `10.x` or higher
 
-### Local development
+### 2. Installation
 
 ```bash
-# 1. Clone
+# Clone the repository
 git clone https://github.com/mantisdarling/cosmic.git
 cd cosmic
 
-# 2. Install
+# Install dependencies
 npm install
 
-# 3. Configure environment
+# Configure environment variables
 cp .env.example .env
-# → Fill in your Firebase project values (or leave blank to run without auth)
-
-# 4. Start dev server
-npm run dev
-# → http://localhost:4321
 ```
 
-> **No Firebase?** The app runs fully without credentials. Auth features are gracefully disabled — all roadmaps, diagrams, and search still work.
+### 3. Environment Setup
 
-### Commands
+To enable the AI Tutor feature in local development, add your Groq API key to `.env`:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+> **Note**: The app operates smoothly even without an API key — all 50+ roadmap canvas diagrams, progress tracking, and search remain fully functional.
+
+### 4. Running Development Server
+
+```bash
+npm run dev
+# → Local development server running at http://localhost:4321
+```
+
+---
+
+## 💻 CLI Commands
 
 | Command | Action |
 |---------|--------|
-| `npm run dev` | Start dev server at `localhost:4321` |
-| `npm run build` | Build static site to `./dist/` |
-| `npm run preview` | Preview production build locally |
-| `npx astro check` | TypeScript type-check |
+| `npm run dev` | Starts local development server at `http://localhost:4321` |
+| `npm run build` | Builds optimized production assets to `./dist/` |
+| `npm run preview` | Runs local server preview of the `./dist/` build output |
+| `npx astro check` | Executes TypeScript type checking across all project files |
 
 ---
 
-## 📁 Project Structure
+## 📁 Repository Structure
 
 ```
 cosmic/
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml          # Build + type-check on every push
-│   │   └── security.yml    # Weekly npm audit
-│   ├── ISSUE_TEMPLATE/     # Bug, feature, and content templates
-│   └── PULL_REQUEST_TEMPLATE.md
 ├── public/
-│   └── _headers            # Cloudflare Pages security headers (CSP, HSTS…)
+│   ├── zenitsu-hero.jpg      # Homepage hero section wallpaper
+│   └── roadmap-bg.jpg        # Individual roadmap canvas background wallpaper
 ├── src/
 │   ├── components/
-│   │   ├── AuthButton.tsx      # Firebase Auth modal (Google + email)
-│   │   ├── RoadmapCanvas.tsx   # Main React island — orchestrates everything
-│   │   ├── RoadmapFlow.tsx     # React Flow diagram + dagre layout
-│   │   ├── SearchBar.tsx       # Fuse.js fuzzy search with ARIA combobox
-│   │   ├── TopicPanel.tsx      # Slide-in panel with markdown content
-│   │   ├── ProgressBar.tsx     # SVG ring progress indicator
-│   │   └── Nav.astro           # Navigation + theme toggle
+│   │   ├── RoadmapCanvas.tsx # Primary React island orchestrating graph & drawer state
+│   │   ├── RoadmapFlow.tsx   # React Flow canvas renderer with Dagre auto-layout
+│   │   ├── TopicPanel.tsx    # Slide-in details drawer & AI Tutor interface
+│   │   ├── AuthButton.tsx    # User authentication modal component
+│   │   ├── SearchBar.tsx     # Client-side roadmap filter search
+│   │   └── ProgressBar.tsx   # Visual progress indicator
 │   ├── content/
-│   │   ├── roadmaps/           # Roadmap JSON files (one per path)
-│   │   └── topics/             # Topic JSON files (one per node)
+│   │   └── roadmaps/         # 50+ JSON roadmap definition schemas
 │   ├── layouts/
-│   │   └── BaseLayout.astro    # HTML shell with CSP meta + theme script
+│   │   └── BaseLayout.astro  # Base HTML document shell with security headers
 │   ├── lib/
-│   │   ├── security.ts         # Zod schemas, rate limiter, DOMPurify, safe errors
-│   │   ├── firebase.ts         # Firebase client (Zod-validated config)
-│   │   ├── firestore.ts        # Firestore helpers (path traversal prevention)
-│   │   └── search.ts           # Fuse.js index builder
+│   │   ├── security.ts       # Zod schemas, rate limiters, HTML sanitizers
+│   │   ├── firebase.ts       # Firebase initialization helper
+│   │   └── firestore.ts      # Data persistence utilities
 │   ├── pages/
-│   │   ├── index.astro         # Landing page
-│   │   ├── 404.astro
-│   │   └── roadmap/[slug].astro # Dynamic roadmap page
+│   │   ├── api/
+│   │   │   └── ai.ts         # Serverless AI proxy endpoint for Groq Llama 3.1
+│   │   ├── index.astro       # Cosmic homepage with search and catalog grid
+│   │   ├── 404.astro         # Custom 404 error page
+│   │   └── roadmap/[slug].astro # Dynamic roadmap canvas route
 │   └── styles/
-│       └── global.css          # Tailwind v4 design tokens + global styles
-├── firestore.rules             # Firestore security rules (deny-all default)
-├── .env.example                # Environment variable template
-├── astro.config.mjs
-└── tsconfig.json               # Strict TypeScript
+│       └── global.css        # Global CSS variables and design tokens
+├── astro.config.mjs          # Astro integration configuration
+├── package.json
+└── tsconfig.json             # Strict TypeScript configuration
 ```
 
 ---
 
-## 🔐 Security
+## 🔐 Security & Best Practices
 
-Security is a first-class concern in this project. Key measures:
-
-- **Input validation** — Every external value passes through a [Zod schema](./src/lib/security.ts) before use
-- **Sanitization** — Markdown output is sanitized by DOMPurify with an allowlist of safe HTML tags
-- **Rate limiting** — Auth attempts are rate-limited client-side (5 per minute per key)
-- **Firestore rules** — Deny-all default; users can only read/write their own UID path; writes validated server-side
-- **CSP headers** — Content-Security-Policy applied both via `<meta>` and Cloudflare Pages `_headers`
-- **No stack traces** — Errors are mapped to safe generic messages via `toSafeError()` before reaching the UI
-- **Safe external links** — All outbound links use `rel="noopener noreferrer"`
-- **HTTPS-only resources** — Topic resource URLs must use `https://` (validated by Zod)
-
-See [`SECURITY.md`](./SECURITY.md) for the vulnerability disclosure process.
-
----
-
-## 🚢 Deploying to Cloudflare Pages
-
-1. Push to GitHub
-2. In Cloudflare Pages: **Create project → Connect to Git → Pick this repo**
-3. Set build settings:
-   - **Build command:** `npm run build`
-   - **Output directory:** `dist`
-4. Add environment variables (Settings → Environment variables):
-   ```
-   PUBLIC_FIREBASE_API_KEY
-   PUBLIC_FIREBASE_AUTH_DOMAIN
-   PUBLIC_FIREBASE_PROJECT_ID
-   PUBLIC_FIREBASE_STORAGE_BUCKET
-   PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-   PUBLIC_FIREBASE_APP_ID
-   ```
-5. Deploy Firestore rules: `firebase deploy --only firestore:rules`
-
-> ℹ️ The `public/_headers` file automatically applies security headers on Cloudflare Pages — no extra configuration needed.
-
----
-
-## ➕ Adding a Roadmap or Topic
-
-See [**CONTRIBUTING.md**](./CONTRIBUTING.md) for the full guide including JSON schemas, style rules, and the PR process.
-
-**Quick version:**
-
-```bash
-# Add a topic
-touch src/content/topics/your-topic-id.json
-# → { "id", "title", "description", "resources": [], "body": "## markdown..." }
-
-# Add a node to a roadmap
-# Edit src/content/roadmaps/fullstack.json → nodes[]
-```
+- **Zero API Key Leakage**: All AI requests are securely proxied through the serverless `/api/ai` endpoint; API keys are never exposed to the client.
+- **Input Validation**: All payloads, node IDs, and slugs are parsed using strict [Zod schemas](./src/lib/security.ts).
+- **DOM Sanitization**: Rendered markdown content is sanitized using DOMPurify with strict HTML element allowlists.
+- **Security Headers**: Production output enforces strict Content-Security-Policy (CSP), X-Content-Type-Options, and Frame Options.
+- **Rate Limiting**: Serverless and client authentication requests are rate-limited to protect against abuse.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
-
-- 🐛 **Bug?** → [Open a bug report](https://github.com/mantisdarling/cosmic/issues/new?template=bug_report.md)
-- 💡 **Feature idea?** → [Open a feature request](https://github.com/mantisdarling/cosmic/issues/new?template=feature_request.md)
-- 📚 **Want to add a topic or roadmap?** → [Open a content request](https://github.com/mantisdarling/cosmic/issues/new?template=content_request.md)
+We welcome contributions of new roadmaps, content updates, and feature enhancements! Please read our [**Contributing Guide**](./CONTRIBUTING.md) to get started.
 
 ---
 
-## 📄 License
+## 📜 License
 
-[MIT](./LICENSE) © 2026 [mantisdarling](https://github.com/mantisdarling)
+This project is open source and available under the [MIT License](./LICENSE).

@@ -1,169 +1,150 @@
 # Contributing to Cosmic
 
-Thank you for your interest in contributing! This guide will get you set up quickly.
-
-## Table of Contents
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Adding a Topic](#adding-a-topic)
-- [Adding a Roadmap](#adding-a-roadmap)
-- [Code Style](#code-style)
-- [Security Rules](#security-rules)
-- [Pull Request Process](#pull-request-process)
+Thank you for your interest in contributing to **Cosmic**! We welcome community contributions including new developer roadmaps, topic additions, feature enhancements, and bug fixes.
 
 ---
 
-## Getting Started
+## 📋 Table of Contents
+
+- [Code of Conduct](#code-of-conduct)
+- [Development Setup](#development-setup)
+- [Project Architecture](#project-architecture)
+- [Adding a New Roadmap](#adding-a-new-roadmap)
+- [Updating Topic Content](#updating-topic-content)
+- [Coding Guidelines](#coding-guidelines)
+- [Submitting a Pull Request](#submitting-a-pull-request)
+
+---
+
+## 📜 Code of Conduct
+
+We aim to build an inclusive, welcoming community. Please treat all contributors with respect and maintain a constructive, encouraging tone in issue discussions and pull request reviews.
+
+---
+
+## 🛠️ Development Setup
+
+### 1. Fork & Clone Repository
 
 ```bash
-# 1. Fork and clone
 git clone https://github.com/YOUR_USERNAME/cosmic.git
 cd cosmic
+```
 
-# 2. Install dependencies
+### 2. Install Dependencies
+
+```bash
 npm install
+```
 
-# 3. Copy env template
+### 3. Configure Environment
+
+Copy `.env.example` to `.env`:
+
+```bash
 cp .env.example .env
-# (Fill in your Firebase credentials, or leave as-is to run without auth)
+```
 
-# 4. Start the dev server
+If you wish to test AI Tutor features locally, add your Groq API key:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+### 4. Start Development Server
+
+```bash
 npm run dev
-# → http://localhost:4321
 ```
 
-> **No Firebase?** The app runs in offline mode without credentials — auth and progress tracking are disabled, but all roadmaps and diagrams still work.
+Open `http://localhost:4321` in your browser to test your changes live.
 
 ---
 
-## Project Structure
+## 🏗️ Project Architecture
 
-```
-src/
-├── components/         # React islands + Astro components
-│   ├── AuthButton.tsx  # Firebase Auth UI
-│   ├── RoadmapFlow.tsx # React Flow diagram canvas
-│   ├── RoadmapCanvas.tsx # Orchestrator island
-│   ├── SearchBar.tsx   # Fuse.js search
-│   ├── TopicPanel.tsx  # Side panel with markdown content
-│   └── Nav.astro       # Navigation
-├── content/
-│   ├── roadmaps/       # Roadmap JSON files (one per roadmap)
-│   └── topics/         # Topic JSON files (one per node)
-├── layouts/
-│   └── BaseLayout.astro # Shell with security headers
-├── lib/
-│   ├── security.ts     # Zod schemas, rate limiter, sanitizer
-│   ├── firebase.ts     # Firebase client init
-│   ├── firestore.ts    # Firestore helpers
-│   └── search.ts       # Fuse.js index builder
-├── pages/
-│   ├── index.astro     # Landing page
-│   ├── 404.astro
-│   └── roadmap/
-│       └── [slug].astro # Dynamic roadmap page
-└── styles/
-    └── global.css      # Tailwind v4 design system
-```
+- **`src/content/roadmaps/`**: Contains JSON definitions for each roadmap (e.g. `frontend.json`, `python.json`).
+- **`src/components/`**: React island components for interactive graph layout, slide-in details drawer, search, and progress tracking.
+- **`src/pages/api/ai.ts`**: Serverless backend proxy endpoint for Groq Llama 3.1 AI Tutor inference.
+- **`src/lib/security.ts`**: Input validation schemas (Zod), DOMPurify sanitization, and rate-limiting helpers.
 
 ---
 
-## Adding a Topic
+## 🗺️ Adding a New Roadmap
 
-1. **Create** `src/content/topics/<node-id>.json`:
+To add a new roadmap to Cosmic:
 
-```json
-{
-  "id": "your-topic-id",
-  "title": "Your Topic Title",
-  "description": "One sentence description (max 300 chars).",
-  "resources": [
-    { "label": "Official Docs", "url": "https://example.com" }
-  ],
-  "body": "## What is it?\n\nMarkdown content here...\n\n## Why it matters\n\n..."
-}
-```
-
-**Rules for `body`:**
-- Use standard Markdown (`## h2`, `### h3`, lists, backtick code, tables)
-- No raw HTML (it will be stripped by DOMPurify)
-- Max 10,000 characters
-- Keep code examples practical and concise
-
-2. **Add the node** to the relevant roadmap JSON in `src/content/roadmaps/`:
-
-```json
-{
-  "id": "your-topic-id",
-  "label": "Your Topic",
-  "parentId": "parent-node-id",
-  "status": "todo",
-  "type": "topic"
-}
-```
-
-3. Run `npm run build` to confirm no errors.
-
----
-
-## Adding a Roadmap
-
-1. **Create** `src/content/roadmaps/<slug>.json`:
+1. Create a new JSON file in `src/content/roadmaps/<roadmap-slug>.json`.
+2. Structure the JSON payload according to the following schema:
 
 ```json
 {
   "id": "your-roadmap-slug",
   "title": "Your Roadmap Title",
-  "description": "Short description (max 300 chars).",
+  "description": "A concise one-sentence overview of this learning path.",
   "icon": "🚀",
-  "color": "#7c3aed",
+  "color": "#F5A623",
   "nodes": [
     {
-      "id": "root-node",
-      "label": "Root Label",
+      "id": "your-roadmap-slug-root",
+      "label": "Root Topic Title",
       "parentId": null,
       "status": "todo",
       "type": "root"
+    },
+    {
+      "id": "your-roadmap-slug-topic-1",
+      "label": "First Core Topic",
+      "parentId": "your-roadmap-slug-root",
+      "status": "todo",
+      "type": "topic"
     }
   ]
 }
 ```
 
-- `id` must match the filename (e.g. `devops.json` → `"id": "devops"`)
-- `color` must be a 6-digit hex color (`#rrggbb`)
-- The first node must have `"parentId": null` and `"type": "root"`
-
-2. Create topic JSON files for each node.
-3. The landing page and nav will automatically include your new roadmap.
-
----
-
-## Code Style
-
-- **TypeScript**: Strict mode is enforced. No `any` unless `// eslint-disable` with reason.
-- **Security**: All new user-facing inputs must be validated through a Zod schema in `src/lib/security.ts`.
-- **External links**: Must use `rel="noopener noreferrer"` and `target="_blank"`.
-- **Errors**: Use `toSafeError()` — never expose raw error messages or stack traces to the UI.
-- **No secrets**: Never hardcode API keys. Use `.env` variables prefixed `PUBLIC_`.
+### Guidelines for Roadmaps:
+- **Node IDs**: Must be globally unique across all roadmaps. Prefix node IDs with your roadmap slug (e.g. `flutter-widgets`).
+- **Hierarchy**: Exactly one node must be designated as `"type": "root"` with `"parentId": null`.
+- **Connections**: All non-root nodes must reference a valid `parentId` in the same file.
+- **Color**: Use a valid 6-digit hex color code (`#rrggbb`).
 
 ---
 
-## Security Rules
+## 📝 Updating Topic Content
 
-> ⚠️ **Critical:** If your PR modifies `firestore.rules`, it must be reviewed by a maintainer before merge. Rules must never become _less restrictive_ than the current version.
+Topic explainers are written in Markdown. You can update topic markdown content inside `src/content/topics/` or directly within roadmap node structures.
 
-Firestore rules changes require:
-- A clear explanation of why the change is needed
-- Confirmation the deny-all default is maintained
-- Running `firebase emulators:start` and verifying rules locally
+### Content Best Practices:
+- Keep explanations clear, practical, and beginner-friendly.
+- Format sections logically using standard Markdown headings (`##`, `###`, bullet lists, code blocks).
+- Ensure all resource links use secure `https://` URLs.
 
 ---
 
-## Pull Request Process
+## 🎨 Coding Guidelines
 
-1. Branch off `main`: `git checkout -b feat/your-feature`
-2. Make your changes and run `npm run build` (must pass ✅)
-3. Open a PR — use the PR template
-4. A maintainer will review within a few days
+1. **TypeScript Strictness**: Ensure all TypeScript types are explicitly defined. Avoid using `any` types.
+2. **No Underscores in Variables**: Follow clean camelCase naming conventions for variables, functions, and properties.
+3. **Professional Comments**: Include concise, meaningful developer comments explaining rationale rather than generic boilerplate.
+4. **Validation**: Run `npx astro check` and `npm run build` before opening a pull request.
 
-For large changes, open an issue first to discuss the approach.
+---
+
+## 🚀 Submitting a Pull Request
+
+1. Create a feature branch off `main`:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+2. Commit your changes with clear, descriptive commit messages:
+   ```bash
+   git commit -m "feat: add Go developer roadmap"
+   ```
+3. Push your branch to GitHub:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+4. Open a Pull Request against `mantisdarling/cosmic:main`. Include a clear description of changes made and verification steps performed.
+
+Thank you for contributing to Cosmic!
