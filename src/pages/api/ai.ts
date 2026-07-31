@@ -106,12 +106,12 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: promptText }],
-        max_tokens: 900,
-        temperature: 0.7,
-      }),
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'user', content: promptText }],
+          max_tokens: action === 'generate' ? 2500 : 900,
+          temperature: 0.7,
+        }),
     });
 
     const responseData = await response.json();
