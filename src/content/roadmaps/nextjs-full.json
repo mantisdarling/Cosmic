@@ -1,0 +1,32 @@
+{
+  "id": "nextjs-full",
+  "title": "Next.js Developer",
+  "description": "Build full-stack React applications with Next.js App Router and modern deployment.",
+  "icon": "▲",
+  "color": "#E2E8F0",
+  "nodes": [
+    { "id": "nextjs-full-root", "label": "Next.js Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "nextjs-full-app-router", "label": "App Router", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-app-layout", "label": "Layouts & Templates", "parentId": "nextjs-full-app-router", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-app-segments", "label": "Route Segments & Groups", "parentId": "nextjs-full-app-router", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-pages-router", "label": "Pages Router", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-pages-getstaticprops", "label": "getStaticProps / getServerSideProps", "parentId": "nextjs-full-pages-router", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-server-components", "label": "Server Components", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-client-components", "label": "Client Components", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-data-fetching", "label": "Data Fetching", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-data-cache", "label": "Caching & Revalidation", "parentId": "nextjs-full-data-fetching", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-api-routes", "label": "API Routes", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-api-handlers", "label": "Route Handlers", "parentId": "nextjs-full-api-routes", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-middleware", "label": "Middleware", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-auth", "label": "Authentication (NextAuth)", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-auth-providers", "label": "OAuth Providers & Sessions", "parentId": "nextjs-full-auth", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-deployment", "label": "Deployment (Vercel)", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-deploy-env", "label": "Environment Variables", "parentId": "nextjs-full-deployment", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-image", "label": "Image Optimization", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-metadata", "label": "Metadata & SEO", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-seo-opengraph", "label": "Open Graph & Sitemap", "parentId": "nextjs-full-metadata", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-styling", "label": "Styling", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-full-style-modules", "label": "CSS Modules & Tailwind", "parentId": "nextjs-full-styling", "status": "todo", "type": "subtopic" },
+    { "id": "nextjs-full-server-actions", "label": "Server Actions", "parentId": "nextjs-full-root", "status": "todo", "type": "topic" }
+  ]
+}

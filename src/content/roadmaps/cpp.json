@@ -1,0 +1,29 @@
+{
+  "id": "cpp",
+  "title": "C++ Developer",
+  "description": "Step by step guide to becoming a C++ developer.",
+  "icon": "⚡",
+  "color": "#00599C",
+  "nodes": [
+    { "id": "cpp-root", "label": "C++", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "cpp-basics", "label": "Basics", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-variables", "label": "Variables & Types", "parentId": "cpp-basics", "status": "todo", "type": "topic" },
+    { "id": "cpp-control", "label": "Control Structures", "parentId": "cpp-basics", "status": "todo", "type": "topic" },
+    { "id": "cpp-memory", "label": "Memory Management", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-pointers", "label": "Pointers & References", "parentId": "cpp-memory", "status": "todo", "type": "topic" },
+    { "id": "cpp-smart-pointers", "label": "Smart Pointers", "parentId": "cpp-memory", "status": "todo", "type": "topic" },
+    { "id": "cpp-oop", "label": "Object-Oriented Programming", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-classes", "label": "Classes & Objects", "parentId": "cpp-oop", "status": "todo", "type": "topic" },
+    { "id": "cpp-inheritance", "label": "Inheritance & Polymorphism", "parentId": "cpp-oop", "status": "todo", "type": "topic" },
+    { "id": "cpp-stl", "label": "Standard Template Library (STL)", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-containers", "label": "Containers", "parentId": "cpp-stl", "status": "todo", "type": "topic" },
+    { "id": "cpp-algorithms", "label": "Algorithms", "parentId": "cpp-stl", "status": "todo", "type": "topic" },
+    { "id": "cpp-templates", "label": "Templates", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-modern", "label": "Modern C++ (C++11 to C++20)", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-auto", "label": "auto & lambdas", "parentId": "cpp-modern", "status": "todo", "type": "topic" },
+    { "id": "cpp-concurrency", "label": "Concurrency", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-threads", "label": "Threads & Mutexes", "parentId": "cpp-concurrency", "status": "todo", "type": "topic" },
+    { "id": "cpp-build", "label": "Build Systems (CMake)", "parentId": "cpp-root", "status": "todo", "type": "topic" },
+    { "id": "cpp-testing", "label": "Testing (GoogleTest)", "parentId": "cpp-root", "status": "todo", "type": "topic" }
+  ]
+}

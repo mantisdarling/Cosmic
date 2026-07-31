@@ -1,0 +1,29 @@
+{
+  "id": "mongodb",
+  "title": "MongoDB",
+  "description": "Guide to learning MongoDB NoSQL database.",
+  "icon": "🍃",
+  "color": "#47A248",
+  "nodes": [
+    { "id": "mongodb-root", "label": "MongoDB", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "mongodb-intro", "label": "NoSQL Concepts", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-crud", "label": "CRUD Operations", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-insert", "label": "Insert Documents", "parentId": "mongodb-crud", "status": "todo", "type": "topic" },
+    { "id": "mongodb-query", "label": "Query Documents", "parentId": "mongodb-crud", "status": "todo", "type": "topic" },
+    { "id": "mongodb-update", "label": "Update Documents", "parentId": "mongodb-crud", "status": "todo", "type": "topic" },
+    { "id": "mongodb-delete", "label": "Delete Documents", "parentId": "mongodb-crud", "status": "todo", "type": "topic" },
+    { "id": "mongodb-schema", "label": "Schema Design", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-embedding", "label": "Embedded Documents", "parentId": "mongodb-schema", "status": "todo", "type": "topic" },
+    { "id": "mongodb-referencing", "label": "References", "parentId": "mongodb-schema", "status": "todo", "type": "topic" },
+    { "id": "mongodb-aggregation", "label": "Aggregation Framework", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-pipelines", "label": "Pipelines & Stages", "parentId": "mongodb-aggregation", "status": "todo", "type": "topic" },
+    { "id": "mongodb-indexes", "label": "Indexing", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-performance", "label": "Performance & Explain", "parentId": "mongodb-indexes", "status": "todo", "type": "topic" },
+    { "id": "mongodb-transactions", "label": "ACID Transactions", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-drivers", "label": "Language Drivers", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-mongoose", "label": "Mongoose (Node.js)", "parentId": "mongodb-drivers", "status": "todo", "type": "topic" },
+    { "id": "mongodb-admin", "label": "Administration", "parentId": "mongodb-root", "status": "todo", "type": "topic" },
+    { "id": "mongodb-replica", "label": "Replica Sets", "parentId": "mongodb-admin", "status": "todo", "type": "topic" },
+    { "id": "mongodb-sharding", "label": "Sharding", "parentId": "mongodb-admin", "status": "todo", "type": "topic" }
+  ]
+}

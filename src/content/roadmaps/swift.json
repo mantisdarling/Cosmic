@@ -1,0 +1,33 @@
+{
+  "id": "swift",
+  "title": "iOS Developer (Swift)",
+  "description": "Build native iOS apps with Swift, SwiftUI, and Apple frameworks.",
+  "icon": "🍎",
+  "color": "#FA7343",
+  "nodes": [
+    { "id": "swift-root", "label": "iOS Developer (Swift)", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "swift-fundamentals", "label": "Swift Fundamentals", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-fund-types", "label": "Types & Optionals", "parentId": "swift-fundamentals", "status": "todo", "type": "subtopic" },
+    { "id": "swift-fund-closures", "label": "Closures & Functions", "parentId": "swift-fundamentals", "status": "todo", "type": "subtopic" },
+    { "id": "swift-fund-protocols", "label": "Protocols & Extensions", "parentId": "swift-fundamentals", "status": "todo", "type": "subtopic" },
+    { "id": "swift-xcode", "label": "Xcode", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-xcode-interface", "label": "Interface Builder", "parentId": "swift-xcode", "status": "todo", "type": "subtopic" },
+    { "id": "swift-xcode-debugging", "label": "Debugging & Instruments", "parentId": "swift-xcode", "status": "todo", "type": "subtopic" },
+    { "id": "swift-ui-frameworks", "label": "UIKit vs SwiftUI", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-uikit", "label": "UIKit Basics", "parentId": "swift-ui-frameworks", "status": "todo", "type": "subtopic" },
+    { "id": "swift-swiftui", "label": "SwiftUI Views & Modifiers", "parentId": "swift-ui-frameworks", "status": "todo", "type": "subtopic" },
+    { "id": "swift-layout", "label": "Auto Layout", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-navigation", "label": "Navigation", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-nav-uinav", "label": "UINavigationController", "parentId": "swift-navigation", "status": "todo", "type": "subtopic" },
+    { "id": "swift-nav-swiftui-nav", "label": "NavigationStack (SwiftUI)", "parentId": "swift-navigation", "status": "todo", "type": "subtopic" },
+    { "id": "swift-persistence", "label": "Data Persistence", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-persist-coredata", "label": "CoreData", "parentId": "swift-persistence", "status": "todo", "type": "subtopic" },
+    { "id": "swift-persist-userdefaults", "label": "UserDefaults", "parentId": "swift-persistence", "status": "todo", "type": "subtopic" },
+    { "id": "swift-networking", "label": "Networking (URLSession)", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-net-codable", "label": "Codable & JSON parsing", "parentId": "swift-networking", "status": "todo", "type": "subtopic" },
+    { "id": "swift-combine", "label": "Combine Framework", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-testing", "label": "Testing (XCTest)", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-publishing", "label": "App Store Publishing", "parentId": "swift-root", "status": "todo", "type": "topic" },
+    { "id": "swift-pub-signing", "label": "Code Signing & Certificates", "parentId": "swift-publishing", "status": "todo", "type": "subtopic" }
+  ]
+}

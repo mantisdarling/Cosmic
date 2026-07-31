@@ -1,0 +1,29 @@
+{
+  "id": "cicd",
+  "title": "CI/CD Engineer",
+  "description": "Continuous Integration and Continuous Deployment concepts and tools.",
+  "icon": "🔄",
+  "color": "#F05032",
+  "nodes": [
+    { "id": "cicd-root", "label": "CI/CD", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "cicd-vcs", "label": "Version Control (Git)", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-branching", "label": "Branching Strategies", "parentId": "cicd-vcs", "status": "todo", "type": "topic" },
+    { "id": "cicd-concepts", "label": "CI/CD Concepts", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-ci", "label": "Continuous Integration", "parentId": "cicd-concepts", "status": "todo", "type": "topic" },
+    { "id": "cicd-cd", "label": "Continuous Delivery/Deployment", "parentId": "cicd-concepts", "status": "todo", "type": "topic" },
+    { "id": "cicd-tools", "label": "CI/CD Tools", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-github-actions", "label": "GitHub Actions", "parentId": "cicd-tools", "status": "todo", "type": "topic" },
+    { "id": "cicd-gitlab-ci", "label": "GitLab CI", "parentId": "cicd-tools", "status": "todo", "type": "topic" },
+    { "id": "cicd-jenkins", "label": "Jenkins", "parentId": "cicd-tools", "status": "todo", "type": "topic" },
+    { "id": "cicd-pipelines", "label": "Pipelines", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-yaml", "label": "YAML Configuration", "parentId": "cicd-pipelines", "status": "todo", "type": "topic" },
+    { "id": "cicd-testing", "label": "Automated Testing", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-code-quality", "label": "Code Quality (SonarQube)", "parentId": "cicd-testing", "status": "todo", "type": "topic" },
+    { "id": "cicd-artifacts", "label": "Artifact Management", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-docker", "label": "Docker Integration", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-deployment", "label": "Deployment Strategies", "parentId": "cicd-root", "status": "todo", "type": "topic" },
+    { "id": "cicd-blue-green", "label": "Blue-Green Deployment", "parentId": "cicd-deployment", "status": "todo", "type": "topic" },
+    { "id": "cicd-canary", "label": "Canary Releases", "parentId": "cicd-deployment", "status": "todo", "type": "topic" },
+    { "id": "cicd-security", "label": "DevSecOps", "parentId": "cicd-root", "status": "todo", "type": "topic" }
+  ]
+}

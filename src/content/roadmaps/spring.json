@@ -1,0 +1,28 @@
+{
+  "id": "spring",
+  "title": "Spring Boot Developer",
+  "description": "Comprehensive guide to mastering Spring Boot.",
+  "icon": "🌱",
+  "color": "#6DB33F",
+  "nodes": [
+    { "id": "spring-root", "label": "Spring Boot", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "spring-java", "label": "Java Basics", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-core", "label": "Spring Core", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-ioc", "label": "IoC & DI", "parentId": "spring-core", "status": "todo", "type": "topic" },
+    { "id": "spring-beans", "label": "Bean Lifecycle", "parentId": "spring-core", "status": "todo", "type": "topic" },
+    { "id": "spring-mvc", "label": "Spring Web MVC", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-rest", "label": "RESTful APIs", "parentId": "spring-mvc", "status": "todo", "type": "topic" },
+    { "id": "spring-data", "label": "Spring Data", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-data-jpa", "label": "Spring Data JPA", "parentId": "spring-data", "status": "todo", "type": "topic" },
+    { "id": "spring-hibernate", "label": "Hibernate & ORM", "parentId": "spring-data", "status": "todo", "type": "topic" },
+    { "id": "spring-security", "label": "Spring Security", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-jwt", "label": "JWT Authentication", "parentId": "spring-security", "status": "todo", "type": "topic" },
+    { "id": "spring-oauth2", "label": "OAuth2", "parentId": "spring-security", "status": "todo", "type": "topic" },
+    { "id": "spring-actuator", "label": "Spring Boot Actuator", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-aop", "label": "Spring AOP", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-testing", "label": "Testing", "parentId": "spring-root", "status": "todo", "type": "topic" },
+    { "id": "spring-junit", "label": "JUnit & Mockito", "parentId": "spring-testing", "status": "todo", "type": "topic" },
+    { "id": "spring-test", "label": "Spring Test", "parentId": "spring-testing", "status": "todo", "type": "topic" },
+    { "id": "spring-microservices", "label": "Microservices (Spring Cloud)", "parentId": "spring-root", "status": "todo", "type": "topic" }
+  ]
+}

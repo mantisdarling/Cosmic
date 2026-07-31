@@ -23,11 +23,12 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  let topic = '', roadmap = '';
+  let topic = '', roadmap = '', customPrompt = '';
   try {
     const body = await request.json();
-    topic   = String(body?.topic   ?? '').slice(0, 200);
-    roadmap = String(body?.roadmap ?? '').slice(0, 100);
+    topic       = String(body?.topic   ?? '').slice(0, 200);
+    roadmap     = String(body?.roadmap ?? '').slice(0, 100);
+    customPrompt = String(body?.prompt ?? '').slice(0, 600);
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid request body.' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },
@@ -40,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const prompt = `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
+  const prompt = customPrompt || `You are an expert developer mentor. A student is learning "${topic}" as part of their ${roadmap} learning path.
 
 Explain this topic clearly with the following sections using markdown:
 

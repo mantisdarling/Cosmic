@@ -1,0 +1,28 @@
+{
+  "id": "terraform",
+  "title": "Terraform & IaC",
+  "description": "Master Infrastructure as Code using Terraform.",
+  "icon": "🏗️",
+  "color": "#7B42BC",
+  "nodes": [
+    { "id": "terraform-root", "label": "Terraform", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "terraform-iac", "label": "IaC Concepts", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-basics", "label": "Terraform Basics", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-hcl", "label": "HCL Syntax", "parentId": "terraform-basics", "status": "todo", "type": "topic" },
+    { "id": "terraform-providers", "label": "Providers", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-resources", "label": "Resources", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-data-sources", "label": "Data Sources", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-variables", "label": "Variables & Outputs", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-state", "label": "State Management", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-remote-state", "label": "Remote State & Locking", "parentId": "terraform-state", "status": "todo", "type": "topic" },
+    { "id": "terraform-workspaces", "label": "Workspaces", "parentId": "terraform-state", "status": "todo", "type": "topic" },
+    { "id": "terraform-modules", "label": "Modules", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-local-modules", "label": "Local Modules", "parentId": "terraform-modules", "status": "todo", "type": "topic" },
+    { "id": "terraform-registry", "label": "Terraform Registry", "parentId": "terraform-modules", "status": "todo", "type": "topic" },
+    { "id": "terraform-cli", "label": "CLI Commands", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-plan-apply", "label": "plan, apply, destroy", "parentId": "terraform-cli", "status": "todo", "type": "topic" },
+    { "id": "terraform-provisioners", "label": "Provisioners", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-cloud", "label": "Terraform Cloud/Enterprise", "parentId": "terraform-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-testing", "label": "Testing (Terratest)", "parentId": "terraform-root", "status": "todo", "type": "topic" }
+  ]
+}

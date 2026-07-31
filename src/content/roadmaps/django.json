@@ -1,0 +1,30 @@
+{
+  "id": "django",
+  "title": "Django Developer",
+  "description": "Step by step guide to becoming a Django developer.",
+  "icon": "🐍",
+  "color": "#2BA977",
+  "nodes": [
+    { "id": "django-root", "label": "Django", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "django-python", "label": "Python Basics", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-setup", "label": "Setup & Architecture (MVT)", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-models", "label": "Models & ORM", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-migrations", "label": "Migrations", "parentId": "django-models", "status": "todo", "type": "topic" },
+    { "id": "django-queries", "label": "QuerySets", "parentId": "django-models", "status": "todo", "type": "topic" },
+    { "id": "django-views", "label": "Views", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-fbv", "label": "Function-Based Views", "parentId": "django-views", "status": "todo", "type": "topic" },
+    { "id": "django-cbv", "label": "Class-Based Views", "parentId": "django-views", "status": "todo", "type": "topic" },
+    { "id": "django-urls", "label": "URLs & Routing", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-templates", "label": "Templates", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-forms", "label": "Forms", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-modelforms", "label": "ModelForms", "parentId": "django-forms", "status": "todo", "type": "topic" },
+    { "id": "django-auth", "label": "Authentication & Authorization", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-admin", "label": "Django Admin", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-drf", "label": "Django REST Framework", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-serializers", "label": "Serializers", "parentId": "django-drf", "status": "todo", "type": "topic" },
+    { "id": "django-viewsets", "label": "ViewSets & Routers", "parentId": "django-drf", "status": "todo", "type": "topic" },
+    { "id": "django-middleware", "label": "Middleware", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-testing", "label": "Testing", "parentId": "django-root", "status": "todo", "type": "topic" },
+    { "id": "django-deployment", "label": "Deployment", "parentId": "django-root", "status": "todo", "type": "topic" }
+  ]
+}

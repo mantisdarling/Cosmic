@@ -1,0 +1,28 @@
+{
+  "id": "postgresql",
+  "title": "PostgreSQL",
+  "description": "Mastering PostgreSQL database management and optimization.",
+  "icon": "🐘",
+  "color": "#336791",
+  "nodes": [
+    { "id": "postgresql-root", "label": "PostgreSQL", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "postgresql-basics", "label": "SQL Basics", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-crud", "label": "CRUD Operations", "parentId": "postgresql-basics", "status": "todo", "type": "topic" },
+    { "id": "postgresql-datatypes", "label": "Data Types", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-jsonb", "label": "JSON & JSONB", "parentId": "postgresql-datatypes", "status": "todo", "type": "topic" },
+    { "id": "postgresql-arrays", "label": "Arrays & Hstore", "parentId": "postgresql-datatypes", "status": "todo", "type": "topic" },
+    { "id": "postgresql-schema", "label": "Schema Design", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-constraints", "label": "Constraints", "parentId": "postgresql-schema", "status": "todo", "type": "topic" },
+    { "id": "postgresql-relations", "label": "Relationships", "parentId": "postgresql-schema", "status": "todo", "type": "topic" },
+    { "id": "postgresql-queries", "label": "Advanced Queries", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-joins", "label": "Joins & Subqueries", "parentId": "postgresql-queries", "status": "todo", "type": "topic" },
+    { "id": "postgresql-ctes", "label": "CTEs (WITH)", "parentId": "postgresql-queries", "status": "todo", "type": "topic" },
+    { "id": "postgresql-window", "label": "Window Functions", "parentId": "postgresql-queries", "status": "todo", "type": "topic" },
+    { "id": "postgresql-performance", "label": "Performance", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-indexes", "label": "Indexing", "parentId": "postgresql-performance", "status": "todo", "type": "topic" },
+    { "id": "postgresql-explain", "label": "EXPLAIN ANALYZE", "parentId": "postgresql-performance", "status": "todo", "type": "topic" },
+    { "id": "postgresql-plpgsql", "label": "PL/pgSQL", "parentId": "postgresql-root", "status": "todo", "type": "topic" },
+    { "id": "postgresql-triggers", "label": "Triggers & Functions", "parentId": "postgresql-plpgsql", "status": "todo", "type": "topic" },
+    { "id": "postgresql-admin", "label": "Administration & Replication", "parentId": "postgresql-root", "status": "todo", "type": "topic" }
+  ]
+}

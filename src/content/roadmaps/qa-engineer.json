@@ -1,0 +1,28 @@
+{
+  "id": "qa-engineer",
+  "title": "QA Engineer",
+  "description": "Guide to becoming a Quality Assurance Engineer.",
+  "icon": "🧪",
+  "color": "#00BFA5",
+  "nodes": [
+    { "id": "qa-engineer-root", "label": "QA Engineer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "qa-basics", "label": "Software Testing Basics", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-sdlc", "label": "SDLC & STLC", "parentId": "qa-basics", "status": "todo", "type": "topic" },
+    { "id": "qa-manual", "label": "Manual Testing", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-test-cases", "label": "Test Cases & Plans", "parentId": "qa-manual", "status": "todo", "type": "topic" },
+    { "id": "qa-bug-tracking", "label": "Bug Tracking (Jira)", "parentId": "qa-manual", "status": "todo", "type": "topic" },
+    { "id": "qa-automation", "label": "Automation Testing", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-programming", "label": "Programming (Python/Java/JS)", "parentId": "qa-automation", "status": "todo", "type": "topic" },
+    { "id": "qa-web", "label": "Web Automation", "parentId": "qa-automation", "status": "todo", "type": "topic" },
+    { "id": "qa-selenium", "label": "Selenium", "parentId": "qa-web", "status": "todo", "type": "topic" },
+    { "id": "qa-cypress", "label": "Cypress", "parentId": "qa-web", "status": "todo", "type": "topic" },
+    { "id": "qa-playwright", "label": "Playwright", "parentId": "qa-web", "status": "todo", "type": "topic" },
+    { "id": "qa-api", "label": "API Testing", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-postman", "label": "Postman", "parentId": "qa-api", "status": "todo", "type": "topic" },
+    { "id": "qa-mobile", "label": "Mobile Automation", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-appium", "label": "Appium", "parentId": "qa-mobile", "status": "todo", "type": "topic" },
+    { "id": "qa-performance", "label": "Performance Testing", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" },
+    { "id": "qa-jmeter", "label": "JMeter / k6", "parentId": "qa-performance", "status": "todo", "type": "topic" },
+    { "id": "qa-ci-cd", "label": "CI/CD Integration", "parentId": "qa-engineer-root", "status": "todo", "type": "topic" }
+  ]
+}

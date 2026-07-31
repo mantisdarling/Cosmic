@@ -43,6 +43,21 @@ async function fetchAI(topic: string, roadmap: string): Promise<string> {
   return data.text as string;
 }
 
+async function fetchNextTopic(topic: string, roadmap: string): Promise<string> {
+  const res = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic: `_next_after_${topic}`,
+      roadmap,
+      prompt: `A student just finished learning "${topic}" in their ${roadmap} journey. In ONE short sentence, tell them the single most logical next topic to study after this. Format: "Next, learn **[Topic Name]** — [one-line reason why]." Be concise and direct.`,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) return '';
+  return data.text as string;
+}
+
 // ── Component ─────────────────────────────────────────────────────
 const TopicPanel = memo(function TopicPanel({
   isOpen, onClose, nodeLabel, roadmapTitle, markdownBody, resources,
@@ -53,6 +68,7 @@ const TopicPanel = memo(function TopicPanel({
   const [aiHtml, setAiHtml] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
+  const [nextTopic, setNextTopic] = useState('');
 
   // Reset state when topic changes
   useEffect(() => {
@@ -94,10 +110,13 @@ const TopicPanel = memo(function TopicPanel({
     if (aiHtml || aiLoading) return;
     setAiLoading(true);
     setAiError('');
+    setNextTopic('');
     try {
       const text = await fetchAI(nodeLabel, roadmapTitle);
       const safe = await renderMd(text);
       setAiHtml(safe);
+      // Fetch "what to learn next" in background
+      fetchNextTopic(nodeLabel, roadmapTitle).then(t => setNextTopic(t.replace(/\*\*/g, '').trim()));
     } catch (e: any) {
       setAiError(e?.message ?? 'Something went wrong. Please try again.');
     }
@@ -107,11 +126,13 @@ const TopicPanel = memo(function TopicPanel({
   const regenerate = async () => {
     setAiHtml('');
     setAiError('');
+    setNextTopic('');
     setAiLoading(true);
     try {
       const text = await fetchAI(nodeLabel, roadmapTitle);
       const safe = await renderMd(text);
       setAiHtml(safe);
+      fetchNextTopic(nodeLabel, roadmapTitle).then(t => setNextTopic(t.replace(/\*\*/g, '').trim()));
     } catch (e: any) {
       setAiError(e?.message ?? 'Something went wrong.');
     }
@@ -333,6 +354,21 @@ const TopicPanel = memo(function TopicPanel({
                     </button>
                   </div>
                   <div className="prose" dangerouslySetInnerHTML={{ __html: aiHtml }} />
+
+                  {/* What to learn next */}
+                  {nextTopic && (
+                    <div style={{
+                      marginTop: 20, padding: '14px 16px', borderRadius: 10,
+                      background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.2)',
+                    }}>
+                      <p style={{ fontSize: '0.68rem', fontWeight: 700, color: '#F5A623', margin: '0 0 6px', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: '"Space Mono", monospace' }}>
+                        ✦ What to learn next
+                      </p>
+                      <p style={{ fontSize: '0.85rem', color: '#A3A3A3', margin: 0, lineHeight: 1.6 }}>
+                        {nextTopic}
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
             </>
