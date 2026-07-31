@@ -77,7 +77,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: Props) {
   // ── Mobile list view ──────────────────────────────────────────
   if (isMobile) {
     return (
-      <div style={{ background: '#0D0D0D', minHeight: '100%', padding: '16px' }}>
+      <div style={{ background: '#0B0C10', minHeight: '100%', padding: '16px' }}>
         {/* Progress bar */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -143,7 +143,13 @@ export default function RoadmapCanvas({ roadmap, topicContents }: Props) {
 
   // ── Desktop canvas view ───────────────────────────────────────
   return (
-    <div style={{ width: '100%', height: '100%', background: '#0B0C10', position: 'relative' }}>
+    <div style={{
+      width: '100%', height: '100%',
+      backgroundImage: `radial-gradient(circle at center, rgba(11, 12, 16, 0.75) 0%, rgba(11, 12, 16, 0.92) 75%, #0B0C10 100%), url('/roadmap-bg.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      position: 'relative',
+    }}>
       {/* Progress bar at top */}
       {doneCount > 0 && (
         <div style={{
