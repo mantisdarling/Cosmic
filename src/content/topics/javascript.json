@@ -1,0 +1,11 @@
+{
+  "id": "javascript",
+  "title": "JavaScript",
+  "description": "The programming language of the web — essential for interactivity, logic, and full stack development.",
+  "resources": [
+    { "label": "javascript.info — The Modern JavaScript Tutorial", "url": "https://javascript.info" },
+    { "label": "MDN JavaScript Guide", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide" },
+    { "label": "Eloquent JavaScript (free book)", "url": "https://eloquentjavascript.net" }
+  ],
+  "body": "## What is it?\n\nJavaScript is the only programming language that runs natively in every web browser. It adds interactivity to web pages (click handlers, form validation, animations), and — via Node.js — also runs on servers.\n\n## Why it matters\n\nJavaScript is unavoidable in web development. React, Vue, Angular, Node.js, TypeScript — they're all JavaScript. Mastering the fundamentals gives you a foundation that transfers to every framework.\n\n## Key concepts to learn\n\n- Variables (`let`, `const`), data types, operators\n- Functions (declarations, expressions, arrow functions)\n- Arrays and objects — the data structures you'll use constantly\n- Control flow: `if/else`, loops, `switch`\n- Scope, closures, `this`\n- ES6+ features: destructuring, spread/rest, template literals, modules\n- Error handling with `try/catch`"
+}

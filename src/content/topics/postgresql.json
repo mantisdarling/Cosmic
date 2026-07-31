@@ -1,0 +1,11 @@
+{
+  "id": "postgresql",
+  "title": "PostgreSQL (SQL)",
+  "description": "The world's most advanced open-source relational database — production-grade, full-featured, free.",
+  "resources": [
+    { "label": "PostgreSQL Official Tutorial", "url": "https://www.postgresql.org/docs/current/tutorial.html" },
+    { "label": "Prisma — What is PostgreSQL?", "url": "https://www.prisma.io/dataguide/postgresql" },
+    { "label": "Neon — Serverless Postgres", "url": "https://neon.tech" }
+  ],
+  "body": "## What is it?\n\nPostgreSQL (often \"Postgres\") is a powerful open-source relational database. It's the default choice for most web applications that need a relational database — free, reliable, scalable, and excellent tooling.\n\n## Why it matters\n\nPostgreSQL handles everything from tiny side projects to production systems at scale (Notion, Figma, Shopify). Learning it gives you a skill that transfers to any relational database.\n\n## Key data types\n\n```sql\nid        SERIAL PRIMARY KEY      -- auto-increment integer\nname      TEXT NOT NULL           -- variable-length string\nprice     DECIMAL(10,2)           -- currency\nactive    BOOLEAN DEFAULT true    -- true/false\ncreated   TIMESTAMPTZ DEFAULT NOW() -- timestamp with timezone\ndata      JSONB                   -- JSON stored as binary\n```\n\n## Indexes\n\n```sql\nCREATE INDEX idx_users_email ON users(email);\n```\n\n## ORMs vs Raw SQL\n\n- **ORMs** (Prisma, Drizzle): Write JS/TS — faster to develop, type-safe\n- **Raw SQL**: More control, better for complex queries\n- Learn both — ORMs abstract SQL but you'll need raw SQL when they fall short"
+}

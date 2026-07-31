@@ -1,0 +1,11 @@
+{
+  "id": "react",
+  "title": "React Fundamentals",
+  "description": "Build interactive UIs with components, props, and state — the most popular frontend library.",
+  "resources": [
+    { "label": "React Official Docs — Quick Start", "url": "https://react.dev/learn" },
+    { "label": "React Official Docs — Tutorial", "url": "https://react.dev/learn/tutorial-tic-tac-toe" },
+    { "label": "Full Stack Open — React section", "url": "https://fullstackopen.com/en/part1" }
+  ],
+  "body": "## What is it?\n\nReact is a JavaScript library for building user interfaces. You compose **components** — reusable pieces of UI — and React efficiently updates the DOM when data changes.\n\nBuilt by Meta and released in 2013, React has become the dominant frontend library with a massive ecosystem.\n\n## Why it matters\n\nMost frontend jobs require React (or a framework built on it, like Next.js). Learning React also teaches you component thinking — a pattern that applies to Vue, Angular, and Svelte.\n\n## Key concepts\n\n- **JSX**: HTML-like syntax in JavaScript files\n- **Components**: Functions that return JSX\n- **Props**: Data passed from parent to child components\n- **State**: Data that changes over time and triggers re-renders\n- **Conditional rendering**: Show/hide elements based on state\n- **Lists**: Render arrays with `.map()` and `key` props\n- **Event handlers**: Attach functions to onClick, onChange, etc.\n\n```jsx\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    <button onClick={() => setCount(count + 1)}>\n      Count: {count}\n    </button>\n  );\n}\n```"
+}

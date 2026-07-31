@@ -1,0 +1,10 @@
+{
+  "id": "rest-apis",
+  "title": "REST APIs",
+  "description": "Design and build predictable, resource-oriented HTTP APIs.",
+  "resources": [
+    { "label": "REST API Tutorial", "url": "https://restfulapi.net" },
+    { "label": "HTTP Status Codes — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" }
+  ],
+  "body": "## What is it?\n\n**REST** (Representational State Transfer) is an architectural style for building APIs over HTTP. A REST API exposes resources (users, posts, orders) at URLs and uses HTTP methods to define operations.\n\n## HTTP Methods\n\n| Method | Action | Example |\n|--------|--------|---------|\n| GET | Read | `GET /api/posts` — list all posts |\n| POST | Create | `POST /api/posts` — create a post |\n| PUT/PATCH | Update | `PUT /api/posts/1` — update post 1 |\n| DELETE | Delete | `DELETE /api/posts/1` — delete post 1 |\n\n## HTTP Status Codes\n\n- `200 OK` — success\n- `201 Created` — resource created\n- `400 Bad Request` — invalid input\n- `401 Unauthorized` — not authenticated\n- `403 Forbidden` — not authorized\n- `404 Not Found` — resource doesn't exist\n- `500 Internal Server Error` — server bug\n\n## JSON Request/Response\n\n```json\n// POST /api/posts\n{ \"title\": \"Hello World\", \"content\": \"My first post\" }\n\n// Response (201):\n{ \"id\": 42, \"title\": \"Hello World\", \"createdAt\": \"2026-01-01\" }\n```"
+}

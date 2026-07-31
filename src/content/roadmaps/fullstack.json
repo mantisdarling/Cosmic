@@ -1,0 +1,114 @@
+{
+  "id": "fullstack",
+  "title": "Full Stack Web Development",
+  "description": "A complete roadmap from zero to full stack developer — covering frontend, backend, databases, and deployment.",
+  "icon": "🌐",
+  "color": "#6366f1",
+  "nodes": [
+    {
+      "id": "fullstack-root",
+      "label": "Full Stack Web Dev",
+      "parentId": null,
+      "status": "todo",
+      "type": "root"
+    },
+    {
+      "id": "html-css",
+      "label": "HTML & CSS",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "javascript",
+      "label": "JavaScript",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "version-control",
+      "label": "Version Control (Git)",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "semantic-html",
+      "label": "Semantic HTML",
+      "parentId": "html-css",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "css-layouts",
+      "label": "Flexbox & Grid",
+      "parentId": "html-css",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "dom-events",
+      "label": "DOM & Events",
+      "parentId": "javascript",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "async-js",
+      "label": "Async / Promises",
+      "parentId": "javascript",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "react",
+      "label": "React Fundamentals",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "react-hooks",
+      "label": "React Hooks",
+      "parentId": "react",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "nodejs",
+      "label": "Node.js & Express",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "rest-apis",
+      "label": "REST APIs",
+      "parentId": "nodejs",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "databases",
+      "label": "Databases",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "postgresql",
+      "label": "PostgreSQL (SQL)",
+      "parentId": "databases",
+      "status": "todo",
+      "type": "topic"
+    },
+    {
+      "id": "deployment",
+      "label": "Deployment & CI/CD",
+      "parentId": "fullstack-root",
+      "status": "todo",
+      "type": "topic"
+    }
+  ]
+}

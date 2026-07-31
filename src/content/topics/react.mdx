@@ -1,0 +1,43 @@
+---
+id: react
+title: React Fundamentals
+description: Build interactive UIs with components, props, and state — the most popular frontend library.
+resources:
+  - label: React Official Docs — Quick Start
+    url: https://react.dev/learn
+  - label: React Official Docs — Tutorial
+    url: https://react.dev/learn/tutorial-tic-tac-toe
+  - label: Full Stack Open — React section
+    url: https://fullstackopen.com/en/part1
+---
+
+## What is it?
+
+React is a JavaScript library for building user interfaces. You compose **components** — reusable pieces of UI — and React efficiently updates the DOM when data changes.
+
+Built by Facebook/Meta and released in 2013, React has become the dominant frontend library with a massive ecosystem.
+
+## Why it matters
+
+Most frontend jobs require React (or a framework built on it, like Next.js). Learning React also teaches you component thinking — a pattern that applies to Vue, Angular, and Svelte.
+
+## Key concepts
+
+- **JSX**: HTML-like syntax in JavaScript files
+- **Components**: Functions that return JSX
+- **Props**: Data passed from parent to child components
+- **State**: Data that changes over time and triggers re-renders
+- **Conditional rendering**: Show/hide elements based on state
+- **Lists**: Render arrays with `.map()` and `key` props
+- **Event handlers**: Attach functions to onClick, onChange, etc.
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Count: {count}
+    </button>
+  );
+}
+```

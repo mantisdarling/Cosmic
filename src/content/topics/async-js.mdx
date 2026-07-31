@@ -1,0 +1,46 @@
+---
+id: async-js
+title: Async / Promises / Fetch
+description: Handle asynchronous operations — API calls, timers, file reads — without blocking the UI.
+resources:
+  - label: javascript.info — Promises
+    url: https://javascript.info/promise-basics
+  - label: javascript.info — Async/Await
+    url: https://javascript.info/async-await
+  - label: MDN — Using Fetch
+    url: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+---
+
+## What is it?
+
+JavaScript is single-threaded — it can only do one thing at a time. **Asynchronous programming** lets it start a slow operation (like an API call) and continue doing other things while waiting for it to finish.
+
+- **Callbacks**: The original async pattern — pass a function to be called when done
+- **Promises**: A cleaner API — a value that will be available in the future
+- **async/await**: Syntax sugar over Promises — write async code that *reads* synchronously
+- **Fetch API**: The modern browser API for making HTTP requests
+
+## Why it matters
+
+Every real web app talks to a server. Without async JS, the browser would freeze on every API call.
+
+## Key concepts
+
+```js
+// Fetch with async/await
+async function getUser(id) {
+  try {
+    const response = await fetch(`/api/users/${id}`);
+    if (!response.ok) throw new Error('Not found');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+```
+
+- Promise chaining: `.then().catch().finally()`
+- `Promise.all()` — run multiple async operations in parallel
+- Error handling with `try/catch` in async functions
+- `async` functions always return a Promise

@@ -1,0 +1,11 @@
+{
+  "id": "deployment",
+  "title": "Deployment & CI/CD",
+  "description": "Ship your app to the world — hosting, pipelines, and automated deployments.",
+  "resources": [
+    { "label": "Vercel — Deploy from GitHub", "url": "https://vercel.com/docs" },
+    { "label": "Cloudflare Pages", "url": "https://pages.cloudflare.com" },
+    { "label": "GitHub Actions Docs", "url": "https://docs.github.com/en/actions" }
+  ],
+  "body": "## What is it?\n\n**Deployment** is putting your application on a server so users on the internet can access it.\n\n**CI/CD** (Continuous Integration / Continuous Deployment) automates this process:\n- **CI**: Automatically run tests when you push code\n- **CD**: Automatically deploy when tests pass\n\n## Hosting options\n\n| Platform | Best for | Free tier |\n|----------|----------|-----------|\n| Vercel | Next.js, static sites | Yes |\n| Cloudflare Pages | Static sites, edge | Yes |\n| Railway | Full stack + DB | Limited |\n| Fly.io | Docker containers | Limited |\n| AWS / GCP | Enterprise | Minimal |\n\n## CI/CD with GitHub Actions\n\n```yaml\n# .github/workflows/deploy.yml\nname: Deploy\non:\n  push:\n    branches: [main]\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: '20' }\n      - run: npm ci\n      - run: npm run build\n      - run: npm test\n```\n\n## Key concepts\n\n- Environment variables: Keep secrets out of code\n- `npm ci` vs `npm install` — `ci` is faster and more reliable for automation\n- Build process: `npm run build` → static files"
+}

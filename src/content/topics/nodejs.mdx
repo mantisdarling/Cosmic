@@ -1,0 +1,56 @@
+---
+id: nodejs
+title: Node.js & Express
+description: Run JavaScript on the server, build APIs, and handle backend logic.
+resources:
+  - label: Node.js Official Docs
+    url: https://nodejs.org/en/docs
+  - label: Express.js Official Guide
+    url: https://expressjs.com/en/guide/routing.html
+  - label: Full Stack Open — Node.js & Express
+    url: https://fullstackopen.com/en/part3
+---
+
+## What is it?
+
+**Node.js** is a JavaScript runtime built on Chrome's V8 engine — it lets you run JavaScript outside the browser, on a server or your local machine.
+
+**Express** is a minimal, unopinionated web framework for Node.js that makes it easy to build HTTP servers and APIs.
+
+## Why it matters
+
+Node.js completes the "full stack" — you can use JavaScript (or TypeScript) for both frontend and backend. The npm ecosystem (the world's largest package registry) is available on both ends.
+
+## Key concepts
+
+### Node.js
+- `require()` / `import` — module system
+- `fs` module — file system operations
+- `path` module — file path utilities
+- `process.env` — environment variables
+- `npm` — package manager, `package.json`
+
+### Express
+```js
+import express from 'express';
+const app = express();
+
+app.use(express.json()); // Parse JSON request bodies
+
+app.get('/api/users', async (req, res) => {
+  const users = await db.query('SELECT * FROM users');
+  res.json(users);
+});
+
+app.post('/api/users', async (req, res) => {
+  const { name, email } = req.body;
+  const user = await db.create({ name, email });
+  res.status(201).json(user);
+});
+
+app.listen(3000);
+```
+
+- Routing: `app.get/post/put/delete`
+- Middleware: `app.use()` — runs before route handlers
+- Error handling middleware: `(err, req, res, next) => {}`

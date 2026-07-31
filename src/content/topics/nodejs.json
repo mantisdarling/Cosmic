@@ -1,0 +1,11 @@
+{
+  "id": "nodejs",
+  "title": "Node.js & Express",
+  "description": "Run JavaScript on the server, build APIs, and handle backend logic.",
+  "resources": [
+    { "label": "Node.js Official Docs", "url": "https://nodejs.org/en/docs" },
+    { "label": "Express.js Official Guide", "url": "https://expressjs.com/en/guide/routing.html" },
+    { "label": "Full Stack Open — Node.js & Express", "url": "https://fullstackopen.com/en/part3" }
+  ],
+  "body": "## What is it?\n\n**Node.js** is a JavaScript runtime built on Chrome's V8 engine — it lets you run JavaScript outside the browser, on a server or your local machine.\n\n**Express** is a minimal, unopinionated web framework for Node.js that makes it easy to build HTTP servers and APIs.\n\n## Why it matters\n\nNode.js completes the \"full stack\" — you can use JavaScript (or TypeScript) for both frontend and backend. The npm ecosystem (the world's largest package registry) is available on both ends.\n\n## Express basics\n\n```js\nimport express from 'express';\nconst app = express();\n\napp.use(express.json());\n\napp.get('/api/users', async (req, res) => {\n  const users = await db.query('SELECT * FROM users');\n  res.json(users);\n});\n\napp.listen(3000);\n```\n\n## Key concepts\n\n- Routing: `app.get/post/put/delete`\n- Middleware: `app.use()` — runs before route handlers\n- `process.env` — environment variables\n- Error handling middleware: `(err, req, res, next) => {}`\n- `npm` — package manager, `package.json`"
+}

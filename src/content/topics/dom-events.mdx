@@ -1,0 +1,30 @@
+---
+id: dom-events
+title: DOM & Events
+description: Learn how JavaScript interacts with HTML — reading, modifying, and responding to user actions.
+resources:
+  - label: javascript.info — Document
+    url: https://javascript.info/document
+  - label: MDN — Introduction to the DOM
+    url: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction
+---
+
+## What is it?
+
+The **DOM** (Document Object Model) is the browser's in-memory representation of an HTML page as a tree of objects. JavaScript can read and modify this tree to dynamically change what the user sees.
+
+**Events** are signals the browser sends when things happen — a button click, a key press, a mouse move, a form submit. You attach event listeners to respond to them.
+
+## Why it matters
+
+This is how JavaScript makes pages interactive. Every React, Vue, or Angular framework is ultimately a layer on top of the DOM and event system. Understanding it directly makes you a better framework user.
+
+## Key concepts
+
+- `document.querySelector()` and `document.querySelectorAll()`
+- `element.innerHTML`, `element.textContent`, `element.setAttribute()`
+- `element.classList.add/remove/toggle()`
+- `element.addEventListener('click', handler)`
+- Event object properties: `event.target`, `event.preventDefault()`
+- Event bubbling and event delegation
+- Creating and appending elements: `createElement`, `appendChild`, `insertBefore`

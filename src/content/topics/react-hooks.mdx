@@ -1,0 +1,57 @@
+---
+id: react-hooks
+title: React Hooks
+description: useState, useEffect, useCallback and beyond — the functions that power modern React components.
+resources:
+  - label: React Docs — Built-in Hooks reference
+    url: https://react.dev/reference/react
+  - label: useHooks.com — recipes
+    url: https://usehooks.com
+---
+
+## What is it?
+
+Hooks are special functions that let you "hook into" React features from function components. Introduced in React 16.8, they replaced class components for most use cases.
+
+## Why it matters
+
+Every React component you write will use hooks. Understanding them deeply is the difference between writing React code that works and React code that *performs well* and is easy to maintain.
+
+## Essential Hooks
+
+### useState
+```jsx
+const [value, setValue] = useState(initialValue);
+```
+Stores state in a component. Calling `setValue` triggers a re-render.
+
+### useEffect
+```jsx
+useEffect(() => {
+  // side effects: API calls, subscriptions, DOM manipulation
+  return () => { /* cleanup */ };
+}, [dependencies]);
+```
+Runs after render. Empty `[]` = run once on mount. No array = run after every render.
+
+### useCallback & useMemo
+- `useCallback`: Memoize a function reference (prevents child re-renders)
+- `useMemo`: Memoize an expensive computed value
+
+### useRef
+- Access a DOM element directly
+- Store a mutable value that doesn't trigger re-renders
+
+### Custom Hooks
+Extract reusable stateful logic into a function starting with `use`:
+```jsx
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
+}
+```

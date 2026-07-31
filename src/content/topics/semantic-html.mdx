@@ -1,0 +1,30 @@
+---
+id: semantic-html
+title: Semantic HTML
+description: Write HTML that communicates meaning — to browsers, screen readers, and search engines.
+resources:
+  - label: MDN — HTML elements reference
+    url: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+  - label: web.dev — Semantic HTML
+    url: https://web.dev/learn/html
+---
+
+## What is it?
+
+Semantic HTML means using the right HTML element for the right job. `<article>`, `<nav>`, `<main>`, `<section>`, `<header>`, `<footer>` — these communicate the *purpose* of content, not just its appearance.
+
+## Why it matters
+
+- **Accessibility**: Screen readers use semantic elements to navigate pages for blind users
+- **SEO**: Search engines understand your content structure better
+- **Maintainability**: Code is self-documenting — `<nav>` is clearer than `<div class="nav">`
+- **Browser defaults**: Browsers apply sensible default styling and behavior to semantic elements
+
+## Key elements to learn
+
+- `<header>`, `<footer>`, `<main>`, `<nav>`
+- `<article>` vs `<section>` vs `<div>` — when to use each
+- `<aside>` for supplementary content
+- `<figure>` and `<figcaption>` for images with captions
+- `<time>` for dates and times
+- ARIA attributes: `role`, `aria-label`, `aria-hidden` — the semantic layer for custom components

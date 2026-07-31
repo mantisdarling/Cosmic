@@ -1,0 +1,11 @@
+{
+  "id": "fullstack-root",
+  "title": "Full Stack Web Development",
+  "description": "Your complete guide from zero to a job-ready full stack developer.",
+  "resources": [
+    { "label": "The Odin Project (free, full curriculum)", "url": "https://www.theodinproject.com" },
+    { "label": "Full Stack Open — Helsinki University", "url": "https://fullstackopen.com/en/" },
+    { "label": "roadmap.sh — Full Stack", "url": "https://roadmap.sh/full-stack" }
+  ],
+  "body": "## What is Full Stack?\n\nA **full stack developer** works on both the frontend (what users see) and the backend (servers, databases, APIs). The \"stack\" refers to all the layers of technology that make a web application work.\n\n## The layers\n\n```\nBrowser (User)\n    ↕\nFrontend: HTML, CSS, JavaScript, React\n    ↕  HTTP\nBackend: Node.js + Express (REST API)\n    ↕\nDatabase: PostgreSQL / MongoDB\n    ↕\nInfrastructure: Servers, CDNs, CI/CD\n```\n\n## Learning path\n\nThis roadmap takes you from the very basics to deployment-ready applications. Start at the top and work your way down — each layer builds on the previous.\n\n**Estimated time**: 6–12 months of focused study and building projects.\n\n## The most important advice\n\n**Build things.** Reading tutorials is not enough. After every concept, build a small project that uses it. Your portfolio of projects is what gets you hired, not your ability to recite definitions."
+}

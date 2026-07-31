@@ -1,0 +1,46 @@
+---
+id: rest-apis
+title: REST APIs
+description: Design and build predictable, resource-oriented HTTP APIs.
+resources:
+  - label: REST API Tutorial
+    url: https://restfulapi.net
+  - label: HTTP Status Codes reference
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+---
+
+## What is it?
+
+**REST** (Representational State Transfer) is an architectural style for building APIs over HTTP. A REST API exposes resources (users, posts, orders) at URLs and uses HTTP methods to define operations.
+
+## Why it matters
+
+REST APIs are how frontend apps talk to backends, how services talk to each other, and how you expose your app's data to third parties. Understanding REST makes you able to both consume and build APIs.
+
+## Key concepts
+
+| HTTP Method | Action | Example |
+|-------------|--------|---------|
+| GET | Read | `GET /api/posts` — list all posts |
+| POST | Create | `POST /api/posts` — create a post |
+| PUT/PATCH | Update | `PUT /api/posts/1` — update post 1 |
+| DELETE | Delete | `DELETE /api/posts/1` — delete post 1 |
+
+### HTTP Status Codes
+- `200 OK` — success
+- `201 Created` — resource created
+- `400 Bad Request` — invalid input
+- `401 Unauthorized` — not authenticated
+- `403 Forbidden` — not authorized
+- `404 Not Found` — resource doesn't exist
+- `500 Internal Server Error` — server bug
+
+### JSON Request/Response
+```json
+// POST /api/posts
+// Request body:
+{ "title": "Hello World", "content": "My first post" }
+
+// Response (201):
+{ "id": 42, "title": "Hello World", "content": "My first post", "createdAt": "2026-01-01" }
+```

@@ -1,0 +1,12 @@
+{
+  "id": "css-layouts",
+  "title": "Flexbox & Grid",
+  "description": "Master the two modern CSS layout systems that power virtually every web interface.",
+  "resources": [
+    { "label": "CSS-Tricks — A Complete Guide to Flexbox", "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/" },
+    { "label": "CSS-Tricks — A Complete Guide to Grid", "url": "https://css-tricks.com/snippets/css/complete-guide-grid/" },
+    { "label": "Flexbox Froggy (game)", "url": "https://flexboxfroggy.com" },
+    { "label": "Grid Garden (game)", "url": "https://cssgridgarden.com" }
+  ],
+  "body": "## What is it?\n\n**Flexbox** and **CSS Grid** are two layout modes that replaced the old float-based hacks.\n\n- **Flexbox**: One-dimensional layout — arrange items in a row or column\n- **CSS Grid**: Two-dimensional layout — arrange items in rows *and* columns simultaneously\n\n## Why it matters\n\nBefore these existed, centering a div vertically was famously painful. Now it's two lines of CSS. Together, Flexbox and Grid handle 99% of layout challenges you'll encounter.\n\n## Flexbox essentials\n\n- `display: flex` on the container\n- `flex-direction`, `justify-content`, `align-items`\n- `flex-wrap`, `gap`\n- `flex-grow`, `flex-shrink`, `flex-basis` on children\n\n## CSS Grid essentials\n\n- `display: grid` on the container\n- `grid-template-columns`, `grid-template-rows`\n- `fr` unit, `repeat()`, `minmax()`\n- `grid-column`, `grid-row` for item placement\n- `grid-template-areas` for named layout zones"
+}

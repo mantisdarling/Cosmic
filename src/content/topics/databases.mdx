@@ -1,0 +1,47 @@
+---
+id: databases
+title: Databases
+description: Store, retrieve, and manage persistent data — the backbone of every application.
+resources:
+  - label: SQLBolt — Learn SQL interactively
+    url: https://sqlbolt.com
+  - label: MongoDB University (free)
+    url: https://learn.mongodb.com
+---
+
+## What is it?
+
+A **database** is an organized collection of data that persists beyond a single program run. There are two main families:
+
+- **Relational (SQL)**: Data in tables with rows and columns, relationships enforced by foreign keys. Examples: PostgreSQL, MySQL, SQLite
+- **Non-relational (NoSQL)**: Data in documents, key-value pairs, or graphs. Examples: MongoDB, Redis, Firestore
+
+## Why it matters
+
+Without a database, your app forgets everything when it restarts. Every real application — social networks, e-commerce, banking — is ultimately a UI around a database.
+
+## When to use which
+
+| SQL (PostgreSQL) | NoSQL (MongoDB) |
+|-----------------|-----------------|
+| Complex relationships | Flexible/changing schemas |
+| Financial data (ACID) | Real-time, high write volume |
+| Reporting & analytics | Content management |
+| Most web apps | Mobile & IoT data |
+
+## Key SQL concepts
+
+```sql
+-- Create table
+CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT, email TEXT UNIQUE);
+
+-- Insert
+INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com');
+
+-- Query
+SELECT * FROM users WHERE name LIKE 'A%' ORDER BY name;
+
+-- Join
+SELECT posts.title, users.name
+FROM posts JOIN users ON posts.user_id = users.id;
+```

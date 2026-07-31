@@ -1,0 +1,10 @@
+{
+  "id": "databases",
+  "title": "Databases",
+  "description": "Store, retrieve, and manage persistent data — the backbone of every application.",
+  "resources": [
+    { "label": "SQLBolt — Learn SQL interactively", "url": "https://sqlbolt.com" },
+    { "label": "MongoDB University (free)", "url": "https://learn.mongodb.com" }
+  ],
+  "body": "## What is it?\n\nA **database** is an organized collection of data that persists beyond a single program run. Two main families:\n\n- **Relational (SQL)**: Data in tables with rows and columns. Examples: PostgreSQL, MySQL, SQLite\n- **Non-relational (NoSQL)**: Data in documents, key-value pairs, or graphs. Examples: MongoDB, Redis, Firestore\n\n## When to use which\n\n| SQL (PostgreSQL) | NoSQL (MongoDB) |\n|-----------------|-------------------|\n| Complex relationships | Flexible schemas |\n| Financial data (ACID) | High write volume |\n| Reporting & analytics | Mobile & IoT data |\n| Most web apps | Real-time data |\n\n## Key SQL concepts\n\n```sql\n-- Create table\nCREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT, email TEXT UNIQUE);\n\n-- Insert\nINSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com');\n\n-- Query\nSELECT * FROM users WHERE name LIKE 'A%' ORDER BY name;\n\n-- Join\nSELECT posts.title, users.name\nFROM posts JOIN users ON posts.user_id = users.id;\n```"
+}
