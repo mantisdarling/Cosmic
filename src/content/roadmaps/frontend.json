@@ -1,0 +1,25 @@
+{
+  "id": "frontend",
+  "title": "Frontend Developer",
+  "description": "Step by step guide to becoming a modern frontend developer in 2026.",
+  "icon": "🎨",
+  "color": "#EAB308",
+  "nodes": [
+    { "id": "fe-root", "label": "Frontend Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "internet", "label": "How the Internet Works", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "html", "label": "HTML", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "css", "label": "CSS", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "js-fe", "label": "JavaScript", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "responsive", "label": "Responsive Design", "parentId": "css", "status": "todo", "type": "topic" },
+    { "id": "css-frameworks", "label": "CSS Frameworks (Tailwind)", "parentId": "css", "status": "todo", "type": "topic" },
+    { "id": "package-managers", "label": "Package Managers (npm, pnpm)", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "build-tools", "label": "Build Tools (Vite, Webpack)", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "react-fe", "label": "React", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs", "label": "Next.js", "parentId": "react-fe", "status": "todo", "type": "topic" },
+    { "id": "state-mgmt", "label": "State Management (Zustand, Redux)", "parentId": "react-fe", "status": "todo", "type": "topic" },
+    { "id": "testing-fe", "label": "Testing (Jest, Playwright)", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "web-perf", "label": "Web Performance", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "accessibility", "label": "Accessibility (a11y)", "parentId": "fe-root", "status": "todo", "type": "topic" },
+    { "id": "typescript-fe", "label": "TypeScript", "parentId": "js-fe", "status": "todo", "type": "topic" }
+  ]
+}

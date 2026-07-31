@@ -1,0 +1,21 @@
+{
+  "id": "sql",
+  "title": "SQL",
+  "description": "Master SQL — from basic queries to advanced joins, window functions, query optimization, and database design.",
+  "icon": "🗄️",
+  "color": "#10B981",
+  "nodes": [
+    { "id": "sql-root", "label": "SQL", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "rdbms", "label": "Relational Database Concepts", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "basic-queries", "label": "Basic Queries (SELECT, WHERE)", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "crud", "label": "CRUD (INSERT, UPDATE, DELETE)", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "joins", "label": "JOINs (INNER, LEFT, RIGHT, FULL)", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "aggregations", "label": "Aggregations (GROUP BY, HAVING)", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "subqueries", "label": "Subqueries & CTEs", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "window-functions", "label": "Window Functions (ROW_NUMBER, RANK)", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "indexes", "label": "Indexes & Query Optimization", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "transactions", "label": "Transactions & ACID", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "db-design-sql", "label": "Database Design & Normalization", "parentId": "sql-root", "status": "todo", "type": "topic" },
+    { "id": "stored-procs", "label": "Stored Procedures & Views", "parentId": "sql-root", "status": "todo", "type": "topic" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "docker",
+  "title": "Docker",
+  "description": "Learn Docker from zero — images, containers, Compose, networking, volumes, and production best practices.",
+  "icon": "🐳",
+  "color": "#2563EB",
+  "nodes": [
+    { "id": "docker-root", "label": "Docker", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "containers-101", "label": "What are Containers?", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "install-docker", "label": "Installation & Setup", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "images", "label": "Docker Images", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "dockerfile", "label": "Writing Dockerfiles", "parentId": "images", "status": "todo", "type": "topic" },
+    { "id": "docker-containers", "label": "Running Containers", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "volumes", "label": "Volumes & Bind Mounts", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "networking-docker", "label": "Docker Networking", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "compose", "label": "Docker Compose", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "registry", "label": "Docker Hub & Registries", "parentId": "docker-root", "status": "todo", "type": "topic" },
+    { "id": "multi-stage", "label": "Multi-Stage Builds", "parentId": "dockerfile", "status": "todo", "type": "topic" },
+    { "id": "security-docker", "label": "Docker Security", "parentId": "docker-root", "status": "todo", "type": "topic" }
+  ]
+}

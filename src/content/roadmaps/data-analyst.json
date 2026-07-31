@@ -1,0 +1,21 @@
+{
+  "id": "data-analyst",
+  "title": "Data Analyst",
+  "description": "Learn to collect, analyze, and visualize data to drive business decisions using Python, SQL, and BI tools.",
+  "icon": "📊",
+  "color": "#06B6D4",
+  "nodes": [
+    { "id": "da-root", "label": "Data Analyst", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "excel", "label": "Excel / Google Sheets", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "sql-da", "label": "SQL", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "python-da", "label": "Python for Data Analysis", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "pandas", "label": "Pandas & NumPy", "parentId": "python-da", "status": "todo", "type": "topic" },
+    { "id": "matplotlib", "label": "Matplotlib & Seaborn", "parentId": "python-da", "status": "todo", "type": "topic" },
+    { "id": "statistics", "label": "Statistics & Probability", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "viz", "label": "Data Visualization", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "tableau", "label": "Tableau / Power BI", "parentId": "viz", "status": "todo", "type": "topic" },
+    { "id": "data-cleaning", "label": "Data Cleaning & Wrangling", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "ml-da", "label": "Intro to Machine Learning", "parentId": "da-root", "status": "todo", "type": "topic" },
+    { "id": "storytelling", "label": "Data Storytelling", "parentId": "da-root", "status": "todo", "type": "topic" }
+  ]
+}

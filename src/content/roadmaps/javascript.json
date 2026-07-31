@@ -1,0 +1,21 @@
+{
+  "id": "javascript",
+  "title": "JavaScript",
+  "description": "Master JavaScript — the language of the web. Covers fundamentals, async patterns, ES2025, and the Node.js runtime.",
+  "icon": "🟨",
+  "color": "#EAB308",
+  "nodes": [
+    { "id": "js-root", "label": "JavaScript", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "js-basics-sk", "label": "Basics (Variables, Types, Operators)", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "functions-js", "label": "Functions & Scope", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "objects-arrays", "label": "Objects & Arrays", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "prototypes", "label": "Prototypes & Classes", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "async-sk", "label": "Async (Promises, Async/Await)", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "dom-sk", "label": "DOM Manipulation", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "es6plus", "label": "ES6+ Features", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "modules-js", "label": "Modules (ESM & CJS)", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "closures-js", "label": "Closures & Lexical Scope", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "event-loop", "label": "Event Loop & Call Stack", "parentId": "js-root", "status": "todo", "type": "topic" },
+    { "id": "apis-js", "label": "Browser & Web APIs", "parentId": "js-root", "status": "todo", "type": "topic" }
+  ]
+}

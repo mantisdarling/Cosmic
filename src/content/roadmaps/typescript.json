@@ -1,0 +1,21 @@
+{
+  "id": "typescript",
+  "title": "TypeScript",
+  "description": "Learn TypeScript from scratch — types, generics, decorators, and advanced patterns for scalable applications.",
+  "icon": "🔷",
+  "color": "#3B82F6",
+  "nodes": [
+    { "id": "ts-root", "label": "TypeScript", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "ts-basics", "label": "TypeScript Basics", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "types", "label": "Types & Interfaces", "parentId": "ts-basics", "status": "todo", "type": "topic" },
+    { "id": "type-inference", "label": "Type Inference", "parentId": "ts-basics", "status": "todo", "type": "topic" },
+    { "id": "generics", "label": "Generics", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "utility-types", "label": "Utility Types", "parentId": "generics", "status": "todo", "type": "topic" },
+    { "id": "decorators", "label": "Decorators", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "modules-ts", "label": "Modules & Namespaces", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "config-ts", "label": "tsconfig.json", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "advanced-types", "label": "Advanced Types (Mapped, Conditional)", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "ts-with-react", "label": "TypeScript with React", "parentId": "ts-root", "status": "todo", "type": "topic" },
+    { "id": "ts-with-node", "label": "TypeScript with Node.js", "parentId": "ts-root", "status": "todo", "type": "topic" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "system-design",
+  "title": "System Design",
+  "description": "Learn to design scalable, reliable, and high-performance systems — from load balancers to distributed databases.",
+  "icon": "🏗️",
+  "color": "#8B5CF6",
+  "nodes": [
+    { "id": "sd-root", "label": "System Design", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "scalability", "label": "Scalability Concepts", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "load-balancing", "label": "Load Balancing", "parentId": "scalability", "status": "todo", "type": "topic" },
+    { "id": "caching-sd", "label": "Caching Strategies", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "cdn", "label": "CDN & Edge Computing", "parentId": "caching-sd", "status": "todo", "type": "topic" },
+    { "id": "db-design", "label": "Database Design", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "sql-vs-nosql", "label": "SQL vs NoSQL Trade-offs", "parentId": "db-design", "status": "todo", "type": "topic" },
+    { "id": "sharding", "label": "Sharding & Replication", "parentId": "db-design", "status": "todo", "type": "topic" },
+    { "id": "microservices", "label": "Microservices Architecture", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "message-queues", "label": "Message Queues & Event Streaming", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "cap-theorem", "label": "CAP Theorem", "parentId": "sd-root", "status": "todo", "type": "topic" },
+    { "id": "case-studies", "label": "Case Studies (Twitter, YouTube, Uber)", "parentId": "sd-root", "status": "todo", "type": "topic" }
+  ]
+}

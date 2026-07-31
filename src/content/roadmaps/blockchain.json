@@ -1,0 +1,21 @@
+{
+  "id": "blockchain",
+  "title": "Blockchain Developer",
+  "description": "Learn smart contracts, DeFi, NFTs, and how to build decentralized applications on Ethereum and beyond.",
+  "icon": "⛓️",
+  "color": "#6366F1",
+  "nodes": [
+    { "id": "bc-root", "label": "Blockchain Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "blockchain-basics", "label": "Blockchain Fundamentals", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "crypto-basics", "label": "Cryptography Basics", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "ethereum", "label": "Ethereum & EVM", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "solidity", "label": "Solidity", "parentId": "ethereum", "status": "todo", "type": "topic" },
+    { "id": "smart-contracts", "label": "Smart Contracts", "parentId": "solidity", "status": "todo", "type": "topic" },
+    { "id": "hardhat", "label": "Hardhat / Foundry", "parentId": "ethereum", "status": "todo", "type": "topic" },
+    { "id": "web3js", "label": "Web3.js / Ethers.js", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "defi", "label": "DeFi Protocols", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "nfts", "label": "NFTs & ERC Standards", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "ipfs", "label": "IPFS & Decentralized Storage", "parentId": "bc-root", "status": "todo", "type": "topic" },
+    { "id": "auditing", "label": "Smart Contract Auditing", "parentId": "solidity", "status": "todo", "type": "topic" }
+  ]
+}

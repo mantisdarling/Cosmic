@@ -1,0 +1,21 @@
+{
+  "id": "linux",
+  "title": "Linux",
+  "description": "Master Linux — command line, file system, processes, shell scripting, networking, and system administration.",
+  "icon": "🐧",
+  "color": "#F97316",
+  "nodes": [
+    { "id": "linux-root", "label": "Linux", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "linux-intro", "label": "Linux Introduction & Distros", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "cli", "label": "Command Line Basics", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "filesystem", "label": "Filesystem & Permissions", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "processes", "label": "Processes & Signals", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "shell-scripting", "label": "Shell Scripting (Bash)", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "package-mgmt", "label": "Package Management (apt, yum)", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "networking-linux", "label": "Networking (SSH, curl, netstat)", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "users-groups", "label": "Users & Groups", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "cron", "label": "Cron & Scheduling", "parentId": "linux-root", "status": "todo", "type": "topic" },
+    { "id": "vim", "label": "Vim / Nano", "parentId": "cli", "status": "todo", "type": "topic" },
+    { "id": "systemd", "label": "Systemd & Services", "parentId": "linux-root", "status": "todo", "type": "topic" }
+  ]
+}

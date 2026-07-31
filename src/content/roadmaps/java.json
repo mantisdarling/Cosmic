@@ -1,0 +1,22 @@
+{
+  "id": "java",
+  "title": "Java",
+  "description": "Learn Java from the ground up — OOP, collections, concurrency, Spring Boot, and enterprise patterns.",
+  "icon": "☕",
+  "color": "#EF4444",
+  "nodes": [
+    { "id": "java-root", "label": "Java", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "java-basics", "label": "Java Basics & Syntax", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "oop-java", "label": "OOP (Classes, Inheritance, Polymorphism)", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "collections", "label": "Collections Framework", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "streams", "label": "Streams & Lambda Expressions", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "concurrency", "label": "Concurrency & Multithreading", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "io-java", "label": "File I/O & NIO", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "jdbc", "label": "JDBC & Database Access", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "maven-gradle", "label": "Build Tools (Maven / Gradle)", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "spring", "label": "Spring Framework", "parentId": "java-root", "status": "todo", "type": "topic" },
+    { "id": "spring-boot", "label": "Spring Boot", "parentId": "spring", "status": "todo", "type": "topic" },
+    { "id": "spring-security", "label": "Spring Security", "parentId": "spring", "status": "todo", "type": "topic" },
+    { "id": "testing-java", "label": "Testing (JUnit, Mockito)", "parentId": "java-root", "status": "todo", "type": "topic" }
+  ]
+}

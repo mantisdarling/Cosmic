@@ -1,0 +1,20 @@
+{
+  "id": "git",
+  "title": "Git & GitHub",
+  "description": "Master version control with Git — branching strategies, merging, rebasing, GitHub workflows, and collaboration.",
+  "icon": "🔀",
+  "color": "#F97316",
+  "nodes": [
+    { "id": "git-root", "label": "Git & GitHub", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "git-basics-sk", "label": "Git Basics (init, add, commit)", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "branching", "label": "Branching & Merging", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "remote", "label": "Remotes (push, pull, fetch)", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "merge-conflicts", "label": "Merge Conflicts", "parentId": "branching", "status": "todo", "type": "topic" },
+    { "id": "rebase", "label": "Rebase & Cherry-pick", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "stash", "label": "Stash & Refs", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "hooks", "label": "Git Hooks", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "github-flow", "label": "GitHub Flow", "parentId": "git-root", "status": "todo", "type": "topic" },
+    { "id": "pull-requests", "label": "Pull Requests & Code Review", "parentId": "github-flow", "status": "todo", "type": "topic" },
+    { "id": "github-actions-git", "label": "GitHub Actions CI", "parentId": "git-root", "status": "todo", "type": "topic" }
+  ]
+}

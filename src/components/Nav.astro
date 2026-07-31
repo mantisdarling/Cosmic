@@ -1,181 +1,230 @@
 ---
 /**
  * Nav.astro — Top navigation bar
- * Security: theme toggle uses strict whitelist; no user input reaches DOM attributes.
+ * Uses scoped <style> so rendering doesn't depend on Tailwind scanning.
  */
 ---
 
-<nav
-  id="mainNav"
-  class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur-md border-b border-[var(--border-default)] bg-[rgba(8,8,16,0.8)] transition-all duration-300"
-  role="navigation"
-  aria-label="Main navigation"
->
-  <!-- Logo -->
-  <a
-    href="/"
-    class="font-display text-2xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors duration-200 select-none"
-    aria-label="Cosmic Roadmap home"
-  >
-    COSMIC
-  </a>
+<style>
+  nav.cosmic-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 64px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(8, 8, 16, 0.82);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: box-shadow 0.3s ease;
+  }
+  nav.cosmic-nav.scrolled {
+    box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.2em;
+    color: #f0f0ff;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-logo:hover { color: #a78bfa; }
 
-  <!-- Center links -->
-  <ul class="hidden md:flex items-center gap-8 list-none" role="list">
-    <li>
-      <a
-        href="/"
-        class="font-mono text-xs tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase"
-      >
-        Roadmaps
-      </a>
-    </li>
-    <li>
-      <a
-        href="/#about"
-        class="font-mono text-xs tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase"
-      >
-        About
-      </a>
-    </li>
+  .nav-links {
+    display: none;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+    margin: 0; padding: 0;
+  }
+  @media (min-width: 768px) {
+    .nav-links { display: flex; }
+  }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6060a0;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #f0f0ff; }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #6060a0;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .theme-btn:hover {
+    border-color: #7c3aed;
+    color: #a78bfa;
+    background: rgba(124,58,237,0.08);
+  }
+
+  /* Mobile hamburger */
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  @media (min-width: 768px) { .hamburger { display: none; } }
+  .hamburger-line {
+    display: block;
+    height: 1.5px;
+    background: #6060a0;
+    border-radius: 2px;
+    transition: all 0.25s;
+  }
+  .hamburger-line:nth-child(1) { width: 20px; }
+  .hamburger-line:nth-child(2) { width: 20px; }
+  .hamburger-line:nth-child(3) { width: 12px; }
+  .hamburger:hover .hamburger-line { background: #a78bfa; }
+
+  /* Mobile menu */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+  }
+  .mobile-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+  }
+  .mobile-drawer {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 280px;
+    background: #12121e;
+    border-left: 1px solid #1e1e35;
+    display: flex;
+    flex-direction: column;
+    padding: 80px 32px 32px;
+    gap: 32px;
+  }
+  .mobile-drawer a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.08em;
+    color: #f0f0ff;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .mobile-drawer a:hover { color: #a78bfa; }
+</style>
+
+<nav id="mainNav" class="cosmic-nav" role="navigation" aria-label="Main navigation">
+  <!-- Logo -->
+  <a href="/" class="nav-logo" aria-label="Cosmic Roadmap home">COSMIC</a>
+
+  <!-- Desktop links -->
+  <ul class="nav-links" role="list">
+    <li><a href="/">Roadmaps</a></li>
+    <li><a href="/#about">About</a></li>
   </ul>
 
-  <!-- Right side: theme toggle + search trigger -->
-  <div class="flex items-center gap-4">
-    <!-- Theme Toggle -->
-    <button
-      id="themeToggle"
-      aria-label="Toggle light/dark theme"
-      title="Toggle theme"
-      class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--accent-purple)] hover:text-[var(--accent-purple-light)] transition-all duration-200 font-mono text-xs"
-    >
+  <!-- Right -->
+  <div class="nav-right">
+    <button id="themeToggle" class="theme-btn" aria-label="Toggle light/dark theme">
       <span id="themeIcon" aria-hidden="true">◐</span>
-      <span id="themeLabel" class="hidden sm:inline">Light</span>
+      <span id="themeLabel">Light</span>
     </button>
-
-    <!-- Mobile menu button -->
     <button
       id="mobileMenuBtn"
+      class="hamburger"
       aria-label="Open navigation menu"
       aria-expanded="false"
       aria-controls="mobileMenu"
-      class="md:hidden flex flex-col gap-1.5 p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
     >
-      <span class="block w-5 h-0.5 bg-current rounded transition-all" id="hamburger1"></span>
-      <span class="block w-5 h-0.5 bg-current rounded transition-all" id="hamburger2"></span>
-      <span class="block w-3.5 h-0.5 bg-current rounded transition-all" id="hamburger3"></span>
+      <span class="hamburger-line" aria-hidden="true"></span>
+      <span class="hamburger-line" aria-hidden="true"></span>
+      <span class="hamburger-line" aria-hidden="true"></span>
     </button>
   </div>
 </nav>
 
-<!-- Mobile Menu -->
-<div
-  id="mobileMenu"
-  role="dialog"
-  aria-label="Mobile navigation menu"
-  aria-modal="true"
-  hidden
-  class="fixed inset-0 z-40 md:hidden"
->
-  <!-- Backdrop -->
-  <div
-    id="mobileMenuBackdrop"
-    class="absolute inset-0 bg-black/70 backdrop-blur-sm"
-    aria-hidden="true"
-  ></div>
-  <!-- Drawer -->
-  <div class="absolute top-0 right-0 bottom-0 w-72 bg-[var(--bg-secondary)] border-l border-[var(--border-default)] flex flex-col p-8 pt-20">
-    <ul class="list-none flex flex-col gap-6" role="list">
-      <li>
-        <a href="/" class="font-display text-3xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors">
-          ROADMAPS
-        </a>
-      </li>
-      <li>
-        <a href="/#about" class="font-display text-3xl tracking-widest text-[var(--text-primary)] hover:text-[var(--accent-purple-light)] transition-colors">
-          ABOUT
-        </a>
-      </li>
-    </ul>
-  </div>
+<!-- Mobile menu -->
+<div id="mobileMenu" role="dialog" aria-label="Mobile navigation" aria-modal="true" hidden class="mobile-menu">
+  <div id="mobileBackdrop" class="mobile-backdrop" aria-hidden="true"></div>
+  <nav class="mobile-drawer">
+    <a href="/">Roadmaps</a>
+    <a href="/#about">About</a>
+  </nav>
 </div>
 
 <script>
-  // ─── Theme Toggle ────────────────────────────────────────────────────
-  // SECURITY: only "dark" or "light" are valid — enforced by strict whitelist.
-  // No user-supplied string ever reaches setAttribute directly.
-  const VALID_THEMES = ['dark', 'light'] as const;
-  type Theme = typeof VALID_THEMES[number];
+  const THEMES = ['dark', 'light'] as const;
+  type Theme = typeof THEMES[number];
 
   function getTheme(): Theme {
-    const stored = localStorage.getItem('cosmic-theme');
-    return (VALID_THEMES as readonly string[]).includes(stored ?? '') ? stored as Theme : 'dark';
+    const s = localStorage.getItem('cosmic-theme');
+    return (THEMES as readonly string[]).includes(s ?? '') ? s as Theme : 'dark';
+  }
+  function applyTheme(t: Theme) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.classList.toggle('dark', t === 'dark');
+    const lbl = document.getElementById('themeLabel');
+    const ico = document.getElementById('themeIcon');
+    if (lbl) lbl.textContent = t === 'dark' ? 'Light' : 'Dark';
+    if (ico) ico.textContent = t === 'dark' ? '◐' : '◑';
+    localStorage.setItem('cosmic-theme', t);
   }
 
-  function applyTheme(theme: Theme) {
-    // Whitelist-only: never setAttribute with arbitrary input
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-
-    const label = document.getElementById('themeLabel');
-    const icon = document.getElementById('themeIcon');
-    if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
-    if (icon) icon.textContent = theme === 'dark' ? '◐' : '◑';
-
-    // Safe localStorage write
-    localStorage.setItem('cosmic-theme', theme);
-  }
-
-  const themeBtn = document.getElementById('themeToggle');
-  themeBtn?.addEventListener('click', () => {
-    const next: Theme = getTheme() === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
   });
-
-  // Initialize label on load
   applyTheme(getTheme());
 
-  // ─── Mobile Menu ────────────────────────────────────────────────────
-  const menuBtn = document.getElementById('mobileMenuBtn');
-  const mobileMenu = document.getElementById('mobileMenu');
-  const backdrop = document.getElementById('mobileMenuBackdrop');
+  // Mobile menu
+  const btn = document.getElementById('mobileMenuBtn');
+  const menu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('mobileBackdrop');
 
   function openMenu() {
-    mobileMenu?.removeAttribute('hidden');
-    menuBtn?.setAttribute('aria-expanded', 'true');
+    menu?.removeAttribute('hidden');
+    btn?.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   }
-
   function closeMenu() {
-    mobileMenu?.setAttribute('hidden', '');
-    menuBtn?.setAttribute('aria-expanded', 'false');
+    menu?.setAttribute('hidden', '');
+    btn?.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   }
 
-  menuBtn?.addEventListener('click', () => {
-    const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
-    isOpen ? closeMenu() : openMenu();
+  btn?.addEventListener('click', () => {
+    btn.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu();
   });
-
   backdrop?.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
 
-  // Close on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-  });
-
-  // Close mobile menu when navigating to a link
-  mobileMenu?.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', closeMenu);
-  });
-
-  // ─── Nav shadow on scroll ───────────────────────────────────────────
+  // Scroll shadow
   const nav = document.getElementById('mainNav');
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 20) {
-      nav?.classList.add('shadow-lg', 'shadow-black/30');
-    } else {
-      nav?.classList.remove('shadow-lg', 'shadow-black/30');
-    }
+    nav?.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
 </script>

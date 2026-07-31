@@ -1,0 +1,24 @@
+{
+  "id": "ai-engineer",
+  "title": "AI Engineer",
+  "description": "Roadmap to becoming an AI/ML Engineer — from Python basics to deploying production models.",
+  "icon": "🤖",
+  "color": "#A855F7",
+  "nodes": [
+    { "id": "ai-root", "label": "AI Engineer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "python-ai", "label": "Python for AI", "parentId": "ai-root", "status": "todo", "type": "topic" },
+    { "id": "math-ai", "label": "Math & Statistics", "parentId": "ai-root", "status": "todo", "type": "topic" },
+    { "id": "linear-algebra", "label": "Linear Algebra", "parentId": "math-ai", "status": "todo", "type": "topic" },
+    { "id": "calculus", "label": "Calculus & Probability", "parentId": "math-ai", "status": "todo", "type": "topic" },
+    { "id": "ml-fundamentals", "label": "ML Fundamentals", "parentId": "ai-root", "status": "todo", "type": "topic" },
+    { "id": "supervised", "label": "Supervised Learning", "parentId": "ml-fundamentals", "status": "todo", "type": "topic" },
+    { "id": "unsupervised", "label": "Unsupervised Learning", "parentId": "ml-fundamentals", "status": "todo", "type": "topic" },
+    { "id": "deep-learning", "label": "Deep Learning & Neural Nets", "parentId": "ai-root", "status": "todo", "type": "topic" },
+    { "id": "transformers", "label": "Transformers & Attention", "parentId": "deep-learning", "status": "todo", "type": "topic" },
+    { "id": "llms", "label": "Large Language Models (LLMs)", "parentId": "transformers", "status": "todo", "type": "topic" },
+    { "id": "prompt-eng", "label": "Prompt Engineering", "parentId": "llms", "status": "todo", "type": "topic" },
+    { "id": "rag", "label": "RAG & Vector Databases", "parentId": "llms", "status": "todo", "type": "topic" },
+    { "id": "mlops-ai", "label": "MLOps & Model Deployment", "parentId": "ai-root", "status": "todo", "type": "topic" },
+    { "id": "langchain", "label": "LangChain / LlamaIndex", "parentId": "ai-root", "status": "todo", "type": "topic" }
+  ]
+}

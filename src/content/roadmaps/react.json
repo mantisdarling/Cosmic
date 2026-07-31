@@ -1,0 +1,22 @@
+{
+  "id": "react",
+  "title": "React",
+  "description": "Complete guide to React — hooks, state management, performance optimization, and the full React ecosystem.",
+  "icon": "⚛️",
+  "color": "#06B6D4",
+  "nodes": [
+    { "id": "react-root", "label": "React", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "jsx", "label": "JSX & Rendering", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "components", "label": "Components & Props", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "state", "label": "State (useState)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "effects", "label": "Side Effects (useEffect)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "context", "label": "Context API", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "react-hooks-all", "label": "All Hooks (useRef, useCallback, useMemo)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "react-router", "label": "React Router v7", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "data-fetching", "label": "Data Fetching (TanStack Query)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "zustand", "label": "State Management (Zustand)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "testing-react", "label": "Testing (RTL, Vitest)", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "perf-react", "label": "Performance Optimization", "parentId": "react-root", "status": "todo", "type": "topic" },
+    { "id": "nextjs-react", "label": "Next.js & Server Components", "parentId": "react-root", "status": "todo", "type": "topic" }
+  ]
+}

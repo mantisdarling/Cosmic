@@ -1,0 +1,21 @@
+{
+  "id": "android",
+  "title": "Android Developer",
+  "description": "Learn Android development from scratch — Kotlin, Jetpack Compose, architecture patterns, and publishing to Play Store.",
+  "icon": "📱",
+  "color": "#22C55E",
+  "nodes": [
+    { "id": "android-root", "label": "Android Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "kotlin", "label": "Kotlin Fundamentals", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "android-studio", "label": "Android Studio", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "compose", "label": "Jetpack Compose", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "layouts-android", "label": "Layouts & Navigation", "parentId": "compose", "status": "todo", "type": "topic" },
+    { "id": "viewmodel", "label": "ViewModel & State", "parentId": "compose", "status": "todo", "type": "topic" },
+    { "id": "room", "label": "Room Database", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "retrofit", "label": "Networking (Retrofit)", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "coroutines", "label": "Coroutines & Flow", "parentId": "kotlin", "status": "todo", "type": "topic" },
+    { "id": "hilt", "label": "Dependency Injection (Hilt)", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "testing-android", "label": "Testing (JUnit, Espresso)", "parentId": "android-root", "status": "todo", "type": "topic" },
+    { "id": "play-store", "label": "Publishing to Play Store", "parentId": "android-root", "status": "todo", "type": "topic" }
+  ]
+}

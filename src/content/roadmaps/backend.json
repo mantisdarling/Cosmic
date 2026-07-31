@@ -1,0 +1,24 @@
+{
+  "id": "backend",
+  "title": "Backend Developer",
+  "description": "Step by step guide to becoming a backend developer — APIs, databases, servers, and cloud.",
+  "icon": "⚙️",
+  "color": "#F97316",
+  "nodes": [
+    { "id": "be-root", "label": "Backend Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "internet-be", "label": "Internet & HTTP", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "os-general", "label": "OS & General Knowledge", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "lang-be", "label": "Pick a Language (Node/Python/Go)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "relational-db", "label": "Relational Databases", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "nosql-db", "label": "NoSQL Databases", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "apis-be", "label": "APIs (REST, GraphQL, gRPC)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "auth-be", "label": "Authentication & Authorization", "parentId": "apis-be", "status": "todo", "type": "topic" },
+    { "id": "caching", "label": "Caching (Redis, Memcached)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "message-brokers", "label": "Message Brokers (Kafka, RabbitMQ)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "containerization", "label": "Containerization (Docker)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "web-servers", "label": "Web Servers (Nginx)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "testing-be", "label": "Testing (Unit, Integration)", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "design-patterns", "label": "Design Patterns", "parentId": "be-root", "status": "todo", "type": "topic" },
+    { "id": "arch-patterns", "label": "Architecture Patterns", "parentId": "be-root", "status": "todo", "type": "topic" }
+  ]
+}

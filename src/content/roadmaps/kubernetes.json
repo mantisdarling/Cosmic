@@ -1,0 +1,21 @@
+{
+  "id": "kubernetes",
+  "title": "Kubernetes",
+  "description": "Master container orchestration with Kubernetes — pods, deployments, services, Helm, and production clusters.",
+  "icon": "☸️",
+  "color": "#3B82F6",
+  "nodes": [
+    { "id": "k8s-root", "label": "Kubernetes", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "k8s-arch", "label": "Kubernetes Architecture", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "pods", "label": "Pods & Containers", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "deployments", "label": "Deployments & ReplicaSets", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "services-k8s", "label": "Services & Networking", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "ingress", "label": "Ingress & Load Balancing", "parentId": "services-k8s", "status": "todo", "type": "topic" },
+    { "id": "configmaps", "label": "ConfigMaps & Secrets", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "storage-k8s", "label": "Storage & PersistentVolumes", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "helm-k8s", "label": "Helm Package Manager", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "hpa", "label": "Auto-scaling (HPA, VPA)", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "rbac", "label": "RBAC & Security", "parentId": "k8s-root", "status": "todo", "type": "topic" },
+    { "id": "monitoring-k8s", "label": "Monitoring (Prometheus + Grafana)", "parentId": "k8s-root", "status": "todo", "type": "topic" }
+  ]
+}

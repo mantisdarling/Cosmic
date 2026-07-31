@@ -1,0 +1,21 @@
+{
+  "id": "python",
+  "title": "Python",
+  "description": "A comprehensive guide to Python — from beginner syntax to advanced concepts, scripting, and applications.",
+  "icon": "🐍",
+  "color": "#FBBF24",
+  "nodes": [
+    { "id": "py-root", "label": "Python", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "py-basics", "label": "Python Basics", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "data-structures-py", "label": "Data Structures", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "oop-py", "label": "OOP in Python", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "file-io", "label": "File I/O & Context Managers", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "modules-py", "label": "Modules & Packages (pip)", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "async-py", "label": "Async / Await", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "testing-py", "label": "Testing (pytest)", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "web-py", "label": "Web (Django / FastAPI)", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "data-py", "label": "Data Science (NumPy, Pandas)", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "scripting", "label": "Scripting & Automation", "parentId": "py-root", "status": "todo", "type": "topic" },
+    { "id": "decorators-py", "label": "Decorators & Metaclasses", "parentId": "py-root", "status": "todo", "type": "topic" }
+  ]
+}

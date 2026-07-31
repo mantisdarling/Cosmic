@@ -1,0 +1,21 @@
+{
+  "id": "go",
+  "title": "Go (Golang)",
+  "description": "Learn Go — a fast, statically typed language built for concurrency, microservices, and cloud-native tools.",
+  "icon": "🐹",
+  "color": "#06B6D4",
+  "nodes": [
+    { "id": "go-root", "label": "Go (Golang)", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "go-basics", "label": "Go Syntax & Types", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "structs", "label": "Structs & Methods", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "interfaces-go", "label": "Interfaces", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "goroutines", "label": "Goroutines & Concurrency", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "channels", "label": "Channels & Select", "parentId": "goroutines", "status": "todo", "type": "topic" },
+    { "id": "error-go", "label": "Error Handling", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "packages-go", "label": "Packages & Modules", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "io-go", "label": "File I/O & Networking", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "http-go", "label": "HTTP Servers (net/http)", "parentId": "go-root", "status": "todo", "type": "topic" },
+    { "id": "gin", "label": "Gin / Fiber Framework", "parentId": "http-go", "status": "todo", "type": "topic" },
+    { "id": "testing-go", "label": "Testing", "parentId": "go-root", "status": "todo", "type": "topic" }
+  ]
+}

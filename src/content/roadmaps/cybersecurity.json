@@ -1,0 +1,21 @@
+{
+  "id": "cybersecurity",
+  "title": "Cyber Security",
+  "description": "Learn ethical hacking, network security, penetration testing, and how to secure applications.",
+  "icon": "🔐",
+  "color": "#EF4444",
+  "nodes": [
+    { "id": "cyber-root", "label": "Cyber Security", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "networking-cyber", "label": "Networking Fundamentals", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "linux-cyber", "label": "Linux & Command Line", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "owasp", "label": "OWASP Top 10", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "pentest", "label": "Penetration Testing", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "recon", "label": "Reconnaissance", "parentId": "pentest", "status": "todo", "type": "topic" },
+    { "id": "exploitation", "label": "Exploitation Techniques", "parentId": "pentest", "status": "todo", "type": "topic" },
+    { "id": "web-security", "label": "Web App Security (XSS, SQLi)", "parentId": "owasp", "status": "todo", "type": "topic" },
+    { "id": "cryptography", "label": "Cryptography", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "soc", "label": "SOC & Incident Response", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "cloud-security", "label": "Cloud Security", "parentId": "cyber-root", "status": "todo", "type": "topic" },
+    { "id": "ctf", "label": "CTF Challenges", "parentId": "cyber-root", "status": "todo", "type": "topic" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "nodejs",
+  "title": "Node.js",
+  "description": "Deep dive into Node.js — event loop, streams, HTTP servers, REST APIs, databases, authentication, and deployment.",
+  "icon": "💚",
+  "color": "#22C55E",
+  "nodes": [
+    { "id": "node-root", "label": "Node.js", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "node-basics", "label": "Node.js Architecture & Event Loop", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "modules-node", "label": "CommonJS & ES Modules", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "npm-node", "label": "npm & Package Management", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "fs-node", "label": "File System & Streams", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "http-node", "label": "HTTP Module & Web Servers", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "express-node", "label": "Express.js", "parentId": "http-node", "status": "todo", "type": "topic" },
+    { "id": "middleware", "label": "Middleware & Error Handling", "parentId": "express-node", "status": "todo", "type": "topic" },
+    { "id": "db-node", "label": "Databases (Prisma, Drizzle)", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "auth-node", "label": "Auth (JWT, OAuth)", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "testing-node", "label": "Testing (Jest, Supertest)", "parentId": "node-root", "status": "todo", "type": "topic" },
+    { "id": "deploy-node", "label": "Deployment & Process Management", "parentId": "node-root", "status": "todo", "type": "topic" }
+  ]
+}

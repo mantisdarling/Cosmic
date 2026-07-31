@@ -1,0 +1,22 @@
+{
+  "id": "aws",
+  "title": "AWS",
+  "description": "Master Amazon Web Services — compute, storage, networking, serverless, databases, and cloud architecture.",
+  "icon": "☁️",
+  "color": "#F59E0B",
+  "nodes": [
+    { "id": "aws-root", "label": "AWS", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "cloud-concepts", "label": "Cloud Computing Concepts", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "iam", "label": "IAM (Identity & Access)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "ec2", "label": "EC2 (Compute)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "s3", "label": "S3 (Object Storage)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "vpc", "label": "VPC & Networking", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "rds", "label": "RDS & DynamoDB", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "lambda", "label": "Lambda (Serverless)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "api-gw", "label": "API Gateway", "parentId": "lambda", "status": "todo", "type": "topic" },
+    { "id": "cloudfront", "label": "CloudFront (CDN)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "ecs-eks", "label": "ECS & EKS (Containers)", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "cloudwatch", "label": "CloudWatch & Monitoring", "parentId": "aws-root", "status": "todo", "type": "topic" },
+    { "id": "terraform-aws", "label": "Terraform with AWS", "parentId": "aws-root", "status": "todo", "type": "topic" }
+  ]
+}

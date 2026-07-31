@@ -1,0 +1,23 @@
+{
+  "id": "devops",
+  "title": "DevOps Engineer",
+  "description": "Learn everything about DevOps, CI/CD, containers, orchestration, and cloud infrastructure.",
+  "icon": "🚀",
+  "color": "#EF4444",
+  "nodes": [
+    { "id": "devops-root", "label": "DevOps Engineer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "linux-devops", "label": "Linux & Shell Scripting", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "networking", "label": "Networking & Security", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "git-devops", "label": "Git & Version Control", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "docker-devops", "label": "Docker & Containers", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "k8s-devops", "label": "Kubernetes", "parentId": "docker-devops", "status": "todo", "type": "topic" },
+    { "id": "helm", "label": "Helm Charts", "parentId": "k8s-devops", "status": "todo", "type": "topic" },
+    { "id": "cicd", "label": "CI/CD Pipelines", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "github-actions", "label": "GitHub Actions", "parentId": "cicd", "status": "todo", "type": "topic" },
+    { "id": "cloud-devops", "label": "Cloud (AWS / GCP / Azure)", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "iac", "label": "Infrastructure as Code (Terraform)", "parentId": "cloud-devops", "status": "todo", "type": "topic" },
+    { "id": "monitoring", "label": "Monitoring & Observability", "parentId": "devops-root", "status": "todo", "type": "topic" },
+    { "id": "logging", "label": "Logging (ELK Stack)", "parentId": "monitoring", "status": "todo", "type": "topic" },
+    { "id": "security-devops", "label": "DevSecOps", "parentId": "devops-root", "status": "todo", "type": "topic" }
+  ]
+}
