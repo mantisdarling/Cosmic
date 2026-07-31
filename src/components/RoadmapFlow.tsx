@@ -1,8 +1,8 @@
 /**
  * RoadmapFlow.tsx
- * - No Controls, no MiniMap (clean canvas like roadmap.sh)
- * - Large nodes, tight layout, LR direction
- * - No auth dependency
+ * - Static canvas (no pan, no zoom, no controls)
+ * - TB dagre layout, large nodes
+ * - Click node → opens TopicPanel
  */
 
 import { useMemo, useEffect, useState, memo } from 'react';
@@ -17,64 +17,50 @@ import {
   type NodeTypes,
 } from '@xyflow/react';
 import dagre from 'dagre';
-import type { Roadmap, NodeStatus } from '../lib/security';
+import type { Roadmap } from '../lib/security';
 import '@xyflow/react/dist/style.css';
 
-// ── Layout ───────────────────────────────────────────────────
-const NW = 210;   // node width
-const NH = 46;    // node height
-const RH = 56;    // root height
-const RS = 70;    // rank sep
-const NS = 12;    // node sep
+// ── Layout constants ────────────────────────────────────────────
+const NW = 220;   // node width
+const NH = 48;    // node height
+const RH = 58;    // root height
+const RS = 72;    // rank separation
+const NS = 14;    // node separation
 
-// ── Styles per status ─────────────────────────────────────────
-const S: Record<string, { bg: string; border: string; color: string }> = {
-  todo:         { bg: '#161616', border: '#2a2a2a', color: '#A3A3A3' },
-  'in-progress':{ bg: '#1a1200', border: '#F5A623', color: '#FCD068' },
-  done:         { bg: '#0a1a0a', border: '#22C55E', color: '#4ADE80' },
-  bookmarked:   { bg: '#0a0f1a', border: '#3B82F6', color: '#60A5FA' },
-};
-
-// ── Node component ────────────────────────────────────────────
+// ── Custom Node ─────────────────────────────────────────────────
 const FlowNode = memo(({ data }: {
-  data: {
-    label: string;
-    isRoot: boolean;
-    status: string;
-    accent: string;
-    onClick: () => void;
-  };
+  data: { label: string; isRoot: boolean; accent: string; onClick: () => void };
 }) => {
-  const st = S[data.status] ?? S.todo;
   const [hov, setHov] = useState(false);
+  const { isRoot, accent, label, onClick } = data;
 
-  if (data.isRoot) {
+  if (isRoot) {
     return (
       <button
-        onClick={data.onClick}
+        onClick={onClick}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
+        aria-label={`Explore: ${label}`}
         style={{
           width: NW, height: RH,
-          background: hov ? data.accent : data.accent,
-          border: `2px solid ${data.accent}`,
+          background: accent,
+          border: `2px solid ${accent}`,
           borderRadius: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: `0 0 32px ${data.accent}50`,
-          filter: hov ? 'brightness(1.1)' : 'brightness(1)',
+          cursor: 'pointer', outline: 'none',
+          boxShadow: `0 0 28px ${accent}55`,
+          filter: hov ? 'brightness(1.12)' : 'brightness(1)',
           transition: 'filter .15s, box-shadow .15s',
-          outline: 'none',
+          fontFamily: 'Inter, system-ui, sans-serif',
         }}
-        aria-label={`Open topic: ${data.label}`}
       >
         <span style={{
           fontSize: 14, fontWeight: 800, color: '#0D0D0D',
-          fontFamily: 'Inter, system-ui, sans-serif',
           letterSpacing: '-0.03em', lineHeight: 1.2,
-          textAlign: 'center', padding: '0 12px',
+          textAlign: 'center', padding: '0 14px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
-          {data.label}
+          {label}
         </span>
       </button>
     );
@@ -82,51 +68,46 @@ const FlowNode = memo(({ data }: {
 
   return (
     <button
-      onClick={data.onClick}
+      onClick={onClick}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      aria-label={`Explore: ${label}`}
       style={{
+        position: 'relative',
         width: NW, height: NH,
-        background: hov ? '#1f1f1f' : st.bg,
-        border: `1.5px solid ${hov ? data.accent : st.border}`,
+        background: hov ? '#1e1e1e' : '#161616',
+        border: `1.5px solid ${hov ? accent : '#2a2a2a'}`,
         borderRadius: 8,
         display: 'flex', alignItems: 'center',
-        padding: '0 12px', gap: 10,
-        cursor: 'pointer', textAlign: 'left',
+        padding: '0 12px 0 16px', gap: 8,
+        cursor: 'pointer', textAlign: 'left', outline: 'none',
+        boxShadow: hov ? `0 0 0 1px ${accent}35, 0 6px 20px rgba(0,0,0,0.5)` : 'none',
         transition: 'border-color .15s, background .15s, box-shadow .15s',
-        boxShadow: hov ? `0 0 0 1px ${data.accent}40, 0 4px 16px rgba(0,0,0,0.5)` : 'none',
-        outline: 'none',
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
-      aria-label={`Open topic: ${data.label}`}
     >
-      {/* Status bar on left edge */}
+      {/* Left accent bar on hover */}
       <span style={{
-        position: 'absolute', left: 0, top: 4, bottom: 4, width: 3,
+        position: 'absolute', left: 0, top: 6, bottom: 6, width: 3,
         borderRadius: '0 3px 3px 0',
-        background: data.status === 'todo' ? 'transparent' : st.border,
+        background: hov ? accent : 'transparent',
         transition: 'background .15s',
       }} aria-hidden="true" />
 
       <span style={{
-        fontSize: 13, fontWeight: 500, color: hov ? '#F5F5F5' : st.color,
+        fontSize: 13, fontWeight: 500,
+        color: hov ? '#F5F5F5' : '#A3A3A3',
         letterSpacing: '-0.01em', lineHeight: 1.25,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         flex: 1, transition: 'color .15s',
       }}>
-        {data.label}
+        {label}
       </span>
 
-      {/* Status badge */}
-      {data.status === 'done' && (
-        <span style={{ fontSize: 12, color: '#22C55E', flexShrink: 0, fontWeight: 700 }}>✓</span>
-      )}
-      {data.status === 'bookmarked' && (
-        <span style={{ fontSize: 11, color: '#3B82F6', flexShrink: 0 }}>◈</span>
-      )}
-      {data.status === 'in-progress' && (
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5A623', flexShrink: 0, display: 'inline-block' }} aria-hidden="true" />
-      )}
+      <span style={{
+        fontSize: 10, color: hov ? accent : '#333',
+        flexShrink: 0, transition: 'color .15s',
+      }} aria-hidden="true">→</span>
     </button>
   );
 });
@@ -134,15 +115,14 @@ FlowNode.displayName = 'FlowNode';
 
 const nodeTypes: NodeTypes = { flowNode: FlowNode as any };
 
-// ── Dagre layout ──────────────────────────────────────────────
-function layoutNodes(nodes: Node[], edges: Edge[]) {
+// ── Dagre layout ────────────────────────────────────────────────
+function applyLayout(nodes: Node[], edges: Edge[]) {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: RS, nodesep: NS, marginx: 24, marginy: 24 });
+  g.setGraph({ rankdir: 'TB', ranksep: RS, nodesep: NS, marginx: 32, marginy: 32 });
 
   nodes.forEach(n => {
-    const h = (n.data as any).isRoot ? RH : NH;
-    g.setNode(n.id, { width: NW, height: h });
+    g.setNode(n.id, { width: NW, height: (n.data as any).isRoot ? RH : NH });
   });
   edges.forEach(e => g.setEdge(e.source, e.target));
   dagre.layout(g);
@@ -154,14 +134,14 @@ function layoutNodes(nodes: Node[], edges: Edge[]) {
   });
 }
 
-// ── Component ─────────────────────────────────────────────────
+// ── Main component ───────────────────────────────────────────────
 interface Props {
   roadmap: Roadmap;
-  progress: Record<string, string>;  // nodeId → status
+  progress: Record<string, string>;
   onNodeClick: (id: string) => void;
 }
 
-export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
+export default function RoadmapFlow({ roadmap, onNodeClick }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [ready, setReady] = useState(false);
@@ -176,7 +156,6 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
       data: {
         label: n.label,
         isRoot: n.type === 'root',
-        status: progress[n.id] ?? 'todo',
         accent,
         onClick: () => onNodeClick(n.id),
       },
@@ -195,18 +174,17 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
       }));
 
     return { rfNodes, rfEdges };
-  }, [roadmap, progress, onNodeClick]);
+  }, [roadmap, onNodeClick]);
 
   useEffect(() => {
-    const laid = layoutNodes(rfNodes, rfEdges);
+    const laid = applyLayout(rfNodes, rfEdges);
     setNodes(laid);
     setEdges(rfEdges);
-    // Small delay so ReactFlow is mounted before fitView
-    setTimeout(() => setReady(true), 50);
+    setTimeout(() => setReady(true), 60);
   }, [rfNodes, rfEdges]);
 
   return (
-    <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .5s' }}>
+    <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .45s' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -214,9 +192,10 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.1, maxZoom: 1.4, minZoom: 0.3 }}
+        fitViewOptions={{ padding: 0.12, maxZoom: 1.35 }}
         minZoom={0.3}
-        maxZoom={1.4}
+        maxZoom={1.35}
+        // All interaction disabled — static diagram
         zoomOnScroll={false}
         zoomOnPinch={false}
         zoomOnDoubleClick={false}
@@ -231,11 +210,10 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={32}
-          size={1.2}
-          color="#1e1e1e"
+          gap={30}
+          size={1}
+          color="#1c1c1c"
         />
-        {/* No Controls, No MiniMap — clean like roadmap.sh */}
       </ReactFlow>
     </div>
   );
