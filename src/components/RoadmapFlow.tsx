@@ -187,6 +187,9 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Props) 
   return (
     <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .4s' }}>
       <style>{`
+        .react-flow { background: transparent !important; }
+        .react-flow__background { background: transparent !important; }
+        .react-flow__container { background: transparent !important; }
         .react-flow__node { cursor: pointer !important; }
         .react-flow__node.selected > div { outline: none !important; box-shadow: none !important; }
         .react-flow__node-flowNode.selected { outline: none !important; }

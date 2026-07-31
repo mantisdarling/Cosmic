@@ -78,7 +78,12 @@ const topicContents = roadmap.nodes.map((node) => {
     .topbar-right { display: flex; align-items: center; gap: 10px; }
 
     /* ── Canvas ── */
-    .canvas-wrap { flex: 1; overflow: hidden; position: relative; }
+    .canvas-wrap {
+      flex: 1; overflow: hidden; position: relative;
+      background-image: radial-gradient(circle at center, rgba(11, 12, 16, 0.75) 0%, rgba(11, 12, 16, 0.92) 75%, #0B0C10 100%), url('/roadmap-bg.jpg');
+      background-size: cover;
+      background-position: center;
+    }
   </style>
 
   <div class="page">
