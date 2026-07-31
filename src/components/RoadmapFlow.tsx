@@ -1,15 +1,14 @@
 /**
- * RoadmapFlow.tsx — React Flow canvas with yellow theme
- * Nodes rendered as clean roadmap.sh-style boxes.
- * Security: labels are React text nodes, never innerHTML.
+ * RoadmapFlow.tsx
+ * - No Controls, no MiniMap (clean canvas like roadmap.sh)
+ * - Large nodes, tight layout, LR direction
+ * - No auth dependency
  */
 
-import { useCallback, useMemo, useEffect, useState, memo } from 'react';
+import { useMemo, useEffect, useState, memo } from 'react';
 import {
   ReactFlow,
   Background,
-  Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
   BackgroundVariant,
@@ -18,159 +17,167 @@ import {
   type NodeTypes,
 } from '@xyflow/react';
 import dagre from 'dagre';
-import type { ProgressMap } from '../lib/firestore';
 import type { Roadmap, NodeStatus } from '../lib/security';
 import '@xyflow/react/dist/style.css';
 
-// ── Layout constants ─────────────────────────────────────────────────────
-const NODE_W = 230;
-const NODE_H = 48;
-const ROOT_H = 56;
-const RANK_SEP = 90;
-const NODE_SEP = 24;
+// ── Layout ───────────────────────────────────────────────────
+const NW = 210;   // node width
+const NH = 46;    // node height
+const RH = 56;    // root height
+const RS = 70;    // rank sep
+const NS = 12;    // node sep
 
-// ── Status styles ────────────────────────────────────────────────────────
-const STATUS: Record<string, { bg: string; border: string; dot: string; text: string }> = {
-  todo:        { bg: '#141414', border: '#262626', dot: '#333',    text: '#A3A3A3' },
-  'in-progress':{ bg: 'rgba(245,166,35,0.08)', border: '#F5A623', dot: '#F5A623', text: '#F5F5F5' },
-  done:        { bg: 'rgba(34,197,94,0.08)',   border: '#22C55E', dot: '#22C55E', text: '#F5F5F5' },
-  bookmarked:  { bg: 'rgba(59,130,246,0.08)', border: '#3B82F6', dot: '#3B82F6', text: '#F5F5F5' },
+// ── Styles per status ─────────────────────────────────────────
+const S: Record<string, { bg: string; border: string; color: string }> = {
+  todo:         { bg: '#161616', border: '#2a2a2a', color: '#A3A3A3' },
+  'in-progress':{ bg: '#1a1200', border: '#F5A623', color: '#FCD068' },
+  done:         { bg: '#0a1a0a', border: '#22C55E', color: '#4ADE80' },
+  bookmarked:   { bg: '#0a0f1a', border: '#3B82F6', color: '#60A5FA' },
 };
 
-// ── Custom Node ──────────────────────────────────────────────────────────
-const RoadmapNode = memo(({ data }: {
-  data: { label: string; nodeType: string; status: string; accentColor: string; onClick: () => void }
+// ── Node component ────────────────────────────────────────────
+const FlowNode = memo(({ data }: {
+  data: {
+    label: string;
+    isRoot: boolean;
+    status: string;
+    accent: string;
+    onClick: () => void;
+  };
 }) => {
-  const isRoot = data.nodeType === 'root';
-  const s = STATUS[data.status] ?? STATUS.todo;
+  const st = S[data.status] ?? S.todo;
+  const [hov, setHov] = useState(false);
+
+  if (data.isRoot) {
+    return (
+      <button
+        onClick={data.onClick}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          width: NW, height: RH,
+          background: hov ? data.accent : data.accent,
+          border: `2px solid ${data.accent}`,
+          borderRadius: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer',
+          boxShadow: `0 0 32px ${data.accent}50`,
+          filter: hov ? 'brightness(1.1)' : 'brightness(1)',
+          transition: 'filter .15s, box-shadow .15s',
+          outline: 'none',
+        }}
+        aria-label={`Open topic: ${data.label}`}
+      >
+        <span style={{
+          fontSize: 14, fontWeight: 800, color: '#0D0D0D',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          letterSpacing: '-0.03em', lineHeight: 1.2,
+          textAlign: 'center', padding: '0 12px',
+        }}>
+          {data.label}
+        </span>
+      </button>
+    );
+  }
 
   return (
     <button
       onClick={data.onClick}
-      aria-label={`Open topic: ${data.label}`}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        width: NODE_W,
-        height: isRoot ? ROOT_H : NODE_H,
-        background: isRoot ? `rgba(${hexToRgb(data.accentColor)},0.12)` : s.bg,
-        border: `1.5px solid ${isRoot ? data.accentColor : s.border}`,
+        width: NW, height: NH,
+        background: hov ? '#1f1f1f' : st.bg,
+        border: `1.5px solid ${hov ? data.accent : st.border}`,
         borderRadius: 8,
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 14px',
-        gap: 10,
-        cursor: 'pointer',
-        textAlign: 'left',
-        transition: 'border-color .15s, box-shadow .15s, background .15s',
-        boxShadow: isRoot ? `0 0 24px ${data.accentColor}30` : 'none',
+        display: 'flex', alignItems: 'center',
+        padding: '0 12px', gap: 10,
+        cursor: 'pointer', textAlign: 'left',
+        transition: 'border-color .15s, background .15s, box-shadow .15s',
+        boxShadow: hov ? `0 0 0 1px ${data.accent}40, 0 4px 16px rgba(0,0,0,0.5)` : 'none',
         outline: 'none',
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
-      onMouseEnter={e => {
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.borderColor = isRoot ? data.accentColor : '#404040';
-        el.style.boxShadow = `0 0 0 1px ${isRoot ? data.accentColor : '#303030'}40, 0 4px 12px rgba(0,0,0,0.4)`;
-        el.style.background = isRoot ? `rgba(${hexToRgb(data.accentColor)},0.18)` : '#1a1a1a';
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget as HTMLButtonElement;
-        el.style.borderColor = isRoot ? data.accentColor : s.border;
-        el.style.boxShadow = isRoot ? `0 0 24px ${data.accentColor}30` : 'none';
-        el.style.background = isRoot ? `rgba(${hexToRgb(data.accentColor)},0.12)` : s.bg;
-      }}
+      aria-label={`Open topic: ${data.label}`}
     >
-      {/* Status indicator */}
+      {/* Status bar on left edge */}
       <span style={{
-        width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-        background: isRoot ? data.accentColor : s.dot,
-        boxShadow: isRoot ? `0 0 6px ${data.accentColor}` : 'none',
+        position: 'absolute', left: 0, top: 4, bottom: 4, width: 3,
+        borderRadius: '0 3px 3px 0',
+        background: data.status === 'todo' ? 'transparent' : st.border,
+        transition: 'background .15s',
       }} aria-hidden="true" />
 
-      {/* Label */}
       <span style={{
-        fontSize: isRoot ? 14 : 13,
-        fontWeight: isRoot ? 700 : 500,
-        color: isRoot ? '#F5F5F5' : s.text,
-        letterSpacing: '-0.01em',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        lineHeight: 1.3,
-        flex: 1,
+        fontSize: 13, fontWeight: 500, color: hov ? '#F5F5F5' : st.color,
+        letterSpacing: '-0.01em', lineHeight: 1.25,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        flex: 1, transition: 'color .15s',
       }}>
         {data.label}
       </span>
 
-      {/* Done checkmark */}
+      {/* Status badge */}
       {data.status === 'done' && (
-        <span style={{ fontSize: 11, color: '#22C55E', flexShrink: 0 }} aria-hidden="true">✓</span>
+        <span style={{ fontSize: 12, color: '#22C55E', flexShrink: 0, fontWeight: 700 }}>✓</span>
       )}
       {data.status === 'bookmarked' && (
-        <span style={{ fontSize: 11, color: '#3B82F6', flexShrink: 0 }} aria-hidden="true">◈</span>
+        <span style={{ fontSize: 11, color: '#3B82F6', flexShrink: 0 }}>◈</span>
       )}
       {data.status === 'in-progress' && (
-        <span style={{ fontSize: 9, color: '#F5A623', flexShrink: 0 }} aria-hidden="true">●</span>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5A623', flexShrink: 0, display: 'inline-block' }} aria-hidden="true" />
       )}
-
-      {/* Arrow */}
-      <span style={{ fontSize: 10, color: '#333', flexShrink: 0, transition: 'color .15s' }} aria-hidden="true">
-        →
-      </span>
     </button>
   );
 });
-RoadmapNode.displayName = 'RoadmapNode';
+FlowNode.displayName = 'FlowNode';
 
-const nodeTypes: NodeTypes = { roadmapNode: RoadmapNode as any };
+const nodeTypes: NodeTypes = { flowNode: FlowNode as any };
 
-// ── Dagre layout ────────────────────────────────────────────────────────
-function layout(nodes: Node[], edges: Edge[]) {
+// ── Dagre layout ──────────────────────────────────────────────
+function layoutNodes(nodes: Node[], edges: Edge[]) {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', ranksep: RANK_SEP, nodesep: NODE_SEP });
-  nodes.forEach(n => g.setNode(n.id, { width: NODE_W, height: (n.data as any).nodeType === 'root' ? ROOT_H : NODE_H }));
+  g.setGraph({ rankdir: 'TB', ranksep: RS, nodesep: NS, marginx: 24, marginy: 24 });
+
+  nodes.forEach(n => {
+    const h = (n.data as any).isRoot ? RH : NH;
+    g.setNode(n.id, { width: NW, height: h });
+  });
   edges.forEach(e => g.setEdge(e.source, e.target));
   dagre.layout(g);
-  return {
-    nodes: nodes.map(n => {
-      const { x, y } = g.node(n.id);
-      const h = (n.data as any).nodeType === 'root' ? ROOT_H : NODE_H;
-      return { ...n, position: { x: x - NODE_W / 2, y: y - h / 2 } };
-    }),
-    edges,
-  };
+
+  return nodes.map(n => {
+    const { x, y } = g.node(n.id);
+    const h = (n.data as any).isRoot ? RH : NH;
+    return { ...n, position: { x: x - NW / 2, y: y - h / 2 } };
+  });
 }
 
-// Helper
-function hexToRgb(hex: string) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `${r},${g},${b}`;
-}
-
-// ── Component ────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────
 interface Props {
   roadmap: Roadmap;
-  progress: ProgressMap;
+  progress: Record<string, string>;  // nodeId → status
   onNodeClick: (id: string) => void;
-  accentColor?: string;
 }
 
-export default function RoadmapFlow({ roadmap, progress, onNodeClick, accentColor = '#F5A623' }: Props) {
+export default function RoadmapFlow({ roadmap, progress, onNodeClick }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [ready, setReady] = useState(false);
 
   const { rfNodes, rfEdges } = useMemo(() => {
+    const accent = roadmap.color || '#F5A623';
+
     const rfNodes: Node[] = roadmap.nodes.map(n => ({
       id: n.id,
-      type: 'roadmapNode',
+      type: 'flowNode',
       position: { x: 0, y: 0 },
       data: {
         label: n.label,
-        nodeType: n.type,
-        status: (progress[n.id]?.status as string) ?? 'todo',
-        accentColor,
+        isRoot: n.type === 'root',
+        status: progress[n.id] ?? 'todo',
+        accent,
         onClick: () => onNodeClick(n.id),
       },
       selectable: false,
@@ -188,17 +195,18 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick, accentColo
       }));
 
     return { rfNodes, rfEdges };
-  }, [roadmap, progress, onNodeClick, accentColor]);
+  }, [roadmap, progress, onNodeClick]);
 
   useEffect(() => {
-    const { nodes: laid, edges: laidEdges } = layout(rfNodes, rfEdges);
+    const laid = layoutNodes(rfNodes, rfEdges);
     setNodes(laid);
-    setEdges(laidEdges);
-    setReady(true);
+    setEdges(rfEdges);
+    // Small delay so ReactFlow is mounted before fitView
+    setTimeout(() => setReady(true), 50);
   }, [rfNodes, rfEdges]);
 
   return (
-    <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .4s' }}>
+    <div style={{ width: '100%', height: '100%', opacity: ready ? 1 : 0, transition: 'opacity .5s' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -206,40 +214,26 @@ export default function RoadmapFlow({ roadmap, progress, onNodeClick, accentColo
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.18, maxZoom: 1.1 }}
-        minZoom={0.2}
-        maxZoom={2.5}
-        proOptions={{ hideAttribution: false }}
+        fitViewOptions={{ padding: 0.1, maxZoom: 1.4, minZoom: 0.3 }}
+        minZoom={0.15}
+        maxZoom={3}
+        zoomOnScroll={false}
+        zoomOnPinch={false}
+        zoomOnDoubleClick={false}
+        panOnScroll={true}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        proOptions={{ hideAttribution: true }}
         aria-label={`${roadmap.title} roadmap diagram`}
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={28}
-          size={1}
-          color="#1f1f1f"
+          gap={32}
+          size={1.2}
+          color="#1e1e1e"
         />
-        <Controls
-          showInteractive={false}
-          aria-label="Zoom controls"
-          style={{
-            background: '#141414',
-            border: '1px solid #222',
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}
-        />
-        <MiniMap
-          nodeColor={n => {
-            const s = (n.data as any)?.status ?? 'todo';
-            return STATUS[s]?.dot ?? '#333';
-          }}
-          maskColor="rgba(13,13,13,0.82)"
-          style={{ background: '#141414', border: '1px solid #222', borderRadius: 8 }}
-          aria-label="Roadmap minimap"
-        />
+        {/* No Controls, No MiniMap — clean like roadmap.sh */}
       </ReactFlow>
     </div>
   );
