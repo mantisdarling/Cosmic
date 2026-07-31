@@ -143,7 +143,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: Props) {
 
   // ── Desktop canvas view ───────────────────────────────────────
   return (
-    <div style={{ width: '100%', height: '100%', background: '#0D0D0D', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', background: '#0B0C10', position: 'relative' }}>
       {/* Progress bar at top */}
       {doneCount > 0 && (
         <div style={{

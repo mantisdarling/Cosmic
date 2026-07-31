@@ -9,23 +9,24 @@
 
 /* ── CSS Variables ─────────────────────────────────────────── */
 :root {
-  /* Backgrounds — deep space navy (Athena-inspired) */
-  --bg:          #0D0F1A;
-  --bg-surface:  #0f1120;
-  --bg-card:     #131628;
-  --bg-hover:    #1a1d38;
-  --bg-input:    #0b0d1c;
+  /* Backgrounds — Cyberpunk Thunder (Deep Obsidian) */
+  --bg:          #0B0C10;
+  --bg-surface:  #10121A;
+  --bg-card:     #141722;
+  --bg-hover:    #1B1F30;
+  --bg-input:    #0E1017;
 
-  /* Brand Yellow */
+  /* Brand Yellow & Cyan */
   --yellow:      #F5A623;
   --yellow-light:#FCD068;
   --yellow-dim:  #D4891B;
-  --yellow-glow: rgba(245,166,35,0.14);
-  --yellow-border: rgba(245,166,35,0.3);
+  --yellow-glow: rgba(245,166,35,0.16);
+  --cyan:        #00E5FF;
+  --cyan-glow:   rgba(0,229,255,0.15);
 
-  /* Borders — navy tinted */
-  --border:      #1e2035;
-  --border-light:#2a2d50;
+  /* Borders — Obsidian & Electric Slate */
+  --border:      #1E2333;
+  --border-light:#2A3147;
 
   /* Text */
   --text:        #F5F5F5;
@@ -59,9 +60,11 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Subtle starfield texture */
-  background-image: radial-gradient(circle at 20% 50%, rgba(30,32,53,0.4) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(30,32,53,0.3) 0%, transparent 40%);
+  /* Cyberpunk Thunder ambient glow */
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(0, 229, 255, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 75% 45%, rgba(245, 166, 35, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 85%, rgba(0, 229, 255, 0.03) 0%, transparent 55%);
 }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; font-family: inherit; }

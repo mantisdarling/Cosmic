@@ -37,9 +37,9 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     height: 56px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 32px;
-    background: rgba(10,11,24,0.94);
+    background: rgba(11,12,16,0.94);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid #1e2035;
+    border-bottom: 1px solid #1E2333;
   }
   .nav-left { display: flex; align-items: center; gap: 28px; }
   .nav-logo {
@@ -77,11 +77,11 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .hero-container {
     position: relative;
     background-image:
-      radial-gradient(circle at 50% 30%, rgba(13,15,26,0.65) 0%, rgba(13,15,26,0.92) 70%, #0D0F1A 100%),
+      radial-gradient(circle at 50% 30%, rgba(11,12,16,0.55) 0%, rgba(11,12,16,0.92) 70%, #0B0C10 100%),
       url('/zenitsu-hero.jpg');
     background-size: cover;
     background-position: center 25%;
-    border-bottom: 1px solid #1e2035;
+    border-bottom: 1px solid #1E2333;
   }
   body.light .hero-container {
     background-image:
@@ -139,7 +139,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   #search-input {
     width: 100%; padding: 13px 16px 13px 42px;
-    background: #141414; border: 1px solid #2a2a2a;
+    background: #141722; border: 1px solid #1E2333;
     border-radius: 10px; color: #F5F5F5;
     font-size: 0.92rem; font-family: inherit;
     transition: border-color .2s, box-shadow .2s;
@@ -159,8 +159,8 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   /* ── STATS ────────────────────────────────────────────── */
   .stats-bar {
-    border-top: 1px solid #1e2035; border-bottom: 1px solid #1e2035;
-    background: #0b0d1c; padding: 20px 32px;
+    border-top: 1px solid #1E2333; border-bottom: 1px solid #1E2333;
+    background: #0E1017; padding: 20px 32px;
     display: flex; align-items: center; justify-content: center;
     gap: 40px; flex-wrap: wrap;
   }
@@ -193,18 +193,18 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .card {
     display: flex; flex-direction: column;
     padding: 18px 20px 18px 22px;
-    background: #0f1120;
-    border: 1px solid #1e2035;
+    background: #141722;
+    border: 1px solid #1E2333;
     border-radius: 10px;
     text-decoration: none;
     transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
     position: relative; overflow: hidden;
   }
   .card:hover {
-    border-color: #2a2d50;
-    background: #131628;
+    border-color: #2A3147;
+    background: #1B1F30;
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 40px rgba(0,229,255,0.08), 0 8px 24px rgba(0,0,0,0.6);
   }
   /* Left accent bar always visible, glows on hover */
   .card-accent {
@@ -231,12 +231,12 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .card:hover .card-arrow { transform: translate(2px, -2px); }
 
   /* ── DIVIDER ──────────────────────────────────────────── */
-  .divider { height: 1px; background: #1e2035; margin: 0 24px; }
+  .divider { height: 1px; background: #1E2333; margin: 0 24px; }
 
   /* ── FOOTER ───────────────────────────────────────────── */
   .footer {
-    border-top: 1px solid #1e2035; padding: 28px 32px;
-    background: #0b0d1c;
+    border-top: 1px solid #1E2333; padding: 28px 32px;
+    background: #0E1017;
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 12px;
   }
