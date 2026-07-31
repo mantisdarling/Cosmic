@@ -1,0 +1,33 @@
+{
+  "id": "php",
+  "title": "PHP Developer",
+  "description": "Build dynamic web applications with PHP and the Laravel framework.",
+  "icon": "🐘",
+  "color": "#8892BE",
+  "nodes": [
+    { "id": "php-root", "label": "PHP Developer", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "php-syntax", "label": "PHP Syntax", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-syntax-vars", "label": "Variables, Types & Operators", "parentId": "php-syntax", "status": "todo", "type": "subtopic" },
+    { "id": "php-syntax-control", "label": "Control Structures & Functions", "parentId": "php-syntax", "status": "todo", "type": "subtopic" },
+    { "id": "php-oop", "label": "OOP in PHP", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-oop-classes", "label": "Classes, Traits & Interfaces", "parentId": "php-oop", "status": "todo", "type": "subtopic" },
+    { "id": "php-oop-namespaces", "label": "Namespaces & Autoloading", "parentId": "php-oop", "status": "todo", "type": "subtopic" },
+    { "id": "php-composer", "label": "Composer", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-laravel", "label": "Laravel Framework", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-laravel-artisan", "label": "Artisan CLI", "parentId": "php-laravel", "status": "todo", "type": "subtopic" },
+    { "id": "php-laravel-config", "label": "Config & Service Providers", "parentId": "php-laravel", "status": "todo", "type": "subtopic" },
+    { "id": "php-mvc", "label": "MVC Pattern", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-eloquent", "label": "Eloquent ORM", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-eloquent-relationships", "label": "Relationships & Scopes", "parentId": "php-eloquent", "status": "todo", "type": "subtopic" },
+    { "id": "php-blade", "label": "Blade Templates", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-auth", "label": "Authentication", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-auth-sanctum", "label": "Sanctum & Breeze", "parentId": "php-auth", "status": "todo", "type": "subtopic" },
+    { "id": "php-rest", "label": "REST APIs", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-rest-resources", "label": "API Resources & Transformers", "parentId": "php-rest", "status": "todo", "type": "subtopic" },
+    { "id": "php-testing", "label": "Testing (PHPUnit)", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-queues", "label": "Queues", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-caching", "label": "Caching", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-deployment", "label": "Deployment", "parentId": "php-root", "status": "todo", "type": "topic" },
+    { "id": "php-deploy-forge", "label": "Laravel Forge & Vapor", "parentId": "php-deployment", "status": "todo", "type": "subtopic" }
+  ]
+}

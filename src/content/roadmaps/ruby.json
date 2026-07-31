@@ -1,0 +1,32 @@
+{
+  "id": "ruby",
+  "title": "Ruby on Rails",
+  "description": "Build full-stack web applications rapidly with Ruby on Rails convention-over-configuration.",
+  "icon": "💎",
+  "color": "#CC342D",
+  "nodes": [
+    { "id": "ruby-root", "label": "Ruby on Rails", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "ruby-basics", "label": "Ruby Basics", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-basics-syntax", "label": "Syntax & Data Types", "parentId": "ruby-basics", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-basics-blocks", "label": "Blocks, Procs & Lambdas", "parentId": "ruby-basics", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-basics-oop", "label": "Classes & Modules", "parentId": "ruby-basics", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-rails-setup", "label": "Rails Setup", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-rails-new", "label": "rails new & Generators", "parentId": "ruby-rails-setup", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-mvc", "label": "MVC Architecture", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-activerecord", "label": "ActiveRecord", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-ar-associations", "label": "Associations & Validations", "parentId": "ruby-activerecord", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-ar-queries", "label": "Query Interface & Scopes", "parentId": "ruby-activerecord", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-migrations", "label": "Migrations", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-routes", "label": "Routes", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-routes-resources", "label": "RESTful Resources", "parentId": "ruby-routes", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-views", "label": "Views (ERB / Haml)", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-auth", "label": "Authentication (Devise)", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-jobs", "label": "Background Jobs (Sidekiq)", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-testing", "label": "Testing (RSpec)", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-testing-factory", "label": "FactoryBot & Faker", "parentId": "ruby-testing", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-api", "label": "API Mode", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-api-json", "label": "JSON Serialization", "parentId": "ruby-api", "status": "todo", "type": "subtopic" },
+    { "id": "ruby-deployment", "label": "Deployment (Heroku/Render)", "parentId": "ruby-root", "status": "todo", "type": "topic" },
+    { "id": "ruby-deploy-assets", "label": "Asset Pipeline & Precompile", "parentId": "ruby-deployment", "status": "todo", "type": "subtopic" }
+  ]
+}

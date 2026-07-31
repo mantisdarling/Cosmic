@@ -18,6 +18,8 @@ interface Props {
   roadmapTitle: string;
   markdownBody: string;
   resources: Resource[];
+  onMarkDone?: () => void;
+  isDone?: boolean;
 }
 
 marked.setOptions({ gfm: true, breaks: false });
@@ -60,7 +62,7 @@ async function fetchNextTopic(topic: string, roadmap: string): Promise<string> {
 
 // ── Component ─────────────────────────────────────────────────────
 const TopicPanel = memo(function TopicPanel({
-  isOpen, onClose, nodeLabel, roadmapTitle, markdownBody, resources,
+  isOpen, onClose, nodeLabel, roadmapTitle, markdownBody, resources, onMarkDone, isDone,
 }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [contentHtml, setContentHtml] = useState('');
@@ -187,18 +189,39 @@ const TopicPanel = memo(function TopicPanel({
                 {nodeLabel || '—'}
               </h2>
             </div>
-            <button
-              ref={closeRef} onClick={onClose} aria-label="Close panel"
-              style={{
-                flexShrink: 0, width: 32, height: 32,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 8, border: '1px solid #222', background: '#1a1a1a',
-                color: '#525252', fontSize: '1.1rem', lineHeight: 1,
-                cursor: 'pointer', transition: 'color .15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.color = '#F5F5F5'}
-              onMouseLeave={e => e.currentTarget.style.color = '#525252'}
-            >×</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {onMarkDone && (
+                <button
+                  onClick={onMarkDone}
+                  title={isDone ? 'Mark as undone' : 'Mark as done'}
+                  style={{
+                    height: 32, padding: '0 12px',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    borderRadius: 8, border: `1px solid ${isDone ? '#22C55E' : '#222'}`,
+                    background: isDone ? 'rgba(34,197,94,0.1)' : '#1a1a1a',
+                    color: isDone ? '#22C55E' : '#525252',
+                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+                    transition: 'all .15s', fontFamily: 'inherit',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#22C55E'; e.currentTarget.style.color = '#22C55E'; }}
+                  onMouseLeave={e => { if (!isDone) { e.currentTarget.style.borderColor = '#222'; e.currentTarget.style.color = '#525252'; } }}
+                >
+                  {isDone ? '✓ Done' : '◯ Mark Done'}
+                </button>
+              )}
+              <button
+                ref={closeRef} onClick={onClose} aria-label="Close panel"
+                style={{
+                  flexShrink: 0, width: 32, height: 32,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 8, border: '1px solid #222', background: '#1a1a1a',
+                  color: '#525252', fontSize: '1.1rem', lineHeight: 1,
+                  cursor: 'pointer', transition: 'color .15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#F5F5F5'}
+                onMouseLeave={e => e.currentTarget.style.color = '#525252'}
+              >×</button>
+            </div>
           </div>
 
           {/* Tabs */}

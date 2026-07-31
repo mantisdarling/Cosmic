@@ -1,0 +1,33 @@
+{
+  "id": "computer-science",
+  "title": "Computer Science",
+  "description": "Build a solid foundation in CS fundamentals, algorithms, and system design concepts.",
+  "icon": "🧠",
+  "color": "#6366F1",
+  "nodes": [
+    { "id": "computer-science-root", "label": "Computer Science", "parentId": null, "status": "todo", "type": "root" },
+    { "id": "computer-science-ds", "label": "Data Structures", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-ds-arrays", "label": "Arrays & Strings", "parentId": "computer-science-ds", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-ds-linked", "label": "Linked Lists", "parentId": "computer-science-ds", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-ds-trees", "label": "Trees (BST, AVL, Trie)", "parentId": "computer-science-ds", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-ds-graphs", "label": "Graphs", "parentId": "computer-science-ds", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-ds-heaps", "label": "Heaps & Priority Queues", "parentId": "computer-science-ds", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-algo", "label": "Algorithms", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-algo-sorting", "label": "Sorting Algorithms", "parentId": "computer-science-algo", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-algo-searching", "label": "Searching & Binary Search", "parentId": "computer-science-algo", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-algo-dp", "label": "Dynamic Programming", "parentId": "computer-science-algo", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-bigo", "label": "Big O Notation", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-bigo-time", "label": "Time & Space Complexity", "parentId": "computer-science-bigo", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-os", "label": "Operating Systems", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-os-processes", "label": "Processes, Threads & Scheduling", "parentId": "computer-science-os", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-networking", "label": "Networking Basics", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-net-tcpip", "label": "TCP/IP, DNS & HTTP", "parentId": "computer-science-networking", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-databases", "label": "Databases", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-compilers", "label": "Compilers", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-design-patterns", "label": "Design Patterns", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-distributed", "label": "Distributed Systems", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-dist-cap", "label": "CAP Theorem & Consensus", "parentId": "computer-science-distributed", "status": "todo", "type": "subtopic" },
+    { "id": "computer-science-security", "label": "Security Fundamentals", "parentId": "computer-science-root", "status": "todo", "type": "topic" },
+    { "id": "computer-science-sec-crypto", "label": "Cryptography & Auth", "parentId": "computer-science-security", "status": "todo", "type": "subtopic" }
+  ]
+}
