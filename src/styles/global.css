@@ -102,19 +102,35 @@ ul { list-style: none; }
 }
 
 /* ── Topic panel prose ───────────────────────────────────── */
-.prose h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
+.prose h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--text);
-  margin: 1.5rem 0 0.6rem;
+  margin: 0 0 1rem;
+  letter-spacing: -0.03em;
+}
+.prose h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--yellow);
+  margin: 1.6rem 0 0.6rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--border);
+  letter-spacing: -0.02em;
 }
 .prose h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--text);
   margin: 1.2rem 0 0.4rem;
+}
+.prose h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin: 1rem 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .prose p {
   color: var(--text-2);

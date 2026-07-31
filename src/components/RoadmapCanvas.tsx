@@ -1,8 +1,6 @@
 /**
- * RoadmapCanvas.tsx
- * - No auth, no progress tracking, no sign-in
- * - Click a node → TopicPanel slides in with content + resources
- * - Fully free and open source
+ * RoadmapCanvas.tsx — Orchestrates the roadmap flow canvas + topic panel
+ * No auth, no progress tracking, just clean diagram + AI-powered topic panel
  */
 
 import { useState, useCallback, useMemo } from 'react';
@@ -26,7 +24,6 @@ export default function RoadmapCanvas({ roadmap, topicContents }: Props) {
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  // Build lookup map
   const topicMap = useMemo(() => {
     const m = new Map<string, TopicContent>();
     topicContents.forEach(t => {
@@ -48,19 +45,17 @@ export default function RoadmapCanvas({ roadmap, topicContents }: Props) {
 
   return (
     <div style={{ width: '100%', height: '100%', background: '#0D0D0D', position: 'relative' }}>
-
-      {/* ── React Flow canvas — static, no pan/zoom ── */}
       <RoadmapFlow
         roadmap={roadmap}
         progress={{}}
         onNodeClick={handleNodeClick}
       />
 
-      {/* ── Topic side panel ── */}
       <TopicPanel
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}
         nodeLabel={activeNode?.label ?? ''}
+        roadmapTitle={roadmap.title}
         markdownBody={activeTopic?.markdownBody ?? ''}
         resources={activeTopic?.resources ?? []}
       />
