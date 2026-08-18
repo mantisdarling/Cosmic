@@ -360,7 +360,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
             animation: 'fadeUp 0.4s ease both',
           }}
         >
-          <span style={{ fontSize: '1.5rem' }}>🎉</span>
+          <span style={{ fontSize: '1.5rem', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>🎉</span>
           <div>
             <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: '#F5F5F5' }}>
               Roadmap Complete!
@@ -380,6 +380,9 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
               fontSize: '0.8rem',
               fontWeight: 700,
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
             }}
           >
             Get Badge ✦
@@ -416,7 +419,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
               boxShadow: `0 0 80px ${roadmap.color || '#F5A623'}44`,
             }}
           >
-            <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>{roadmap.icon}</div>
+            <div style={{ fontSize: '3.5rem', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>{roadmap.icon}</div>
             <div
               style={{
                 fontSize: '0.7rem',

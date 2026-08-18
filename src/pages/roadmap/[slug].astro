@@ -66,7 +66,7 @@ const topicContents = roadmap.nodes.map((node) => {
     .back-link:hover { color: #A3A3A3; background: #1a1a1a; }
     .topbar-sep { color: #2a2a2a; font-size: 0.9rem; }
     .topbar-title { display: flex; align-items: center; gap: 10px; }
-    .topbar-icon { font-size: 1.2rem; }
+    .topbar-icon { font-size: 1.25rem; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
     .topbar-name {
       font-size: 0.92rem; font-weight: 700; color: #E5E5E5;
       letter-spacing: -0.02em; white-space: nowrap;
@@ -74,17 +74,17 @@ const topicContents = roadmap.nodes.map((node) => {
     .topbar-count {
       font-size: 0.72rem; font-weight: 500; color: #525252;
       background: #1a1a1a; border: 1px solid #222; border-radius: 999px;
-      padding: 2px 8px; white-space: nowrap;
+      padding: 3px 8px; white-space: nowrap; line-height: 1;
     }
-    .topbar-right { display: flex; align-items: center; gap: 10px; }
-
-    /* ── Canvas ── */
-    .canvas-wrap {
-      flex: 1; overflow: hidden; position: relative;
-      background-image: radial-gradient(circle at center, rgba(11, 12, 16, 0.75) 0%, rgba(11, 12, 16, 0.92) 75%, #0B0C10 100%), url('/roadmap-bg.jpg');
-      background-size: cover;
-      background-position: center;
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .topbar-btn {
+      height: 28px; padding: 0 10px; border-radius: 6px;
+      border: 1px solid #1f1f1f; background: none; color: #737373;
+      font-size: 0.72rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none; transition: all .15s ease;
     }
+    .topbar-btn:hover { color: #A3A3A3; border-color: #2a2a2a; background: #141722; }
   </style>
 
   <div class="page">
@@ -103,16 +103,10 @@ const topicContents = roadmap.nodes.map((node) => {
       </div>
       <div class="topbar-right">
         <BookmarkToggle client:only="react" roadmapId={roadmap.id} />
-        <button id="share-btn" aria-label="Share this roadmap"
-          style="font-size:0.72rem;color:#525252;background:none;border:1px solid #1f1f1f;border-radius:6px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;font-family:inherit;"
-          onmouseover="this.style.color='#A3A3A3';this.style.borderColor='#2a2a2a';"
-          onmouseout="this.style.color='#525252';this.style.borderColor='#1f1f1f';"
-        >
-          <span id="share-icon">↗</span> Share
+        <button id="share-btn" class="topbar-btn" aria-label="Share this roadmap">
+          <span id="share-icon" style="font-size: 0.8rem; line-height: 1;">↗</span> Share
         </button>
-        <a href="https://github.com/mantisdarling/cosmic" target="_blank" rel="noopener noreferrer"
-          style="font-size:0.72rem;color:#525252;text-decoration:none;display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;border:1px solid #1f1f1f;transition:color .15s;"
-          onmouseover="this.style.color='#A3A3A3'" onmouseout="this.style.color='#525252'">
+        <a href="https://github.com/mantisdarling/cosmic" target="_blank" rel="noopener noreferrer" class="topbar-btn" aria-label="GitHub Repository">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
           GitHub
         </a>

@@ -64,28 +64,48 @@ export default function BookmarkToggle({ roadmapId }: BookmarkToggleProps) {
     saveBookmarks(bookmarks);
   }, [roadmapId]);
 
-  if (!isMounted) return <div className="w-8 h-8" />; // Placeholder for layout stability
+  if (!isMounted) return <div style={{ width: 85, height: 28 }} />; // Placeholder for layout stability
 
   return (
     <button
       onClick={toggleBookmark}
       title={isBookmarked ? 'Remove from favorites' : 'Add to favorites'}
-      className="relative z-10 w-8 h-8 rounded-full flex items-center justify-center bg-[#10121A] border border-[#2A3147] hover:bg-[#1B1F30] transition-all hover:scale-105 shadow-sm"
       aria-label="Bookmark Roadmap"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        height: '28px',
+        padding: '0 10px',
+        borderRadius: '6px',
+        fontSize: '0.72rem',
+        fontWeight: 600,
+        fontFamily: 'inherit',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        background: isBookmarked ? 'rgba(245, 166, 35, 0.12)' : 'transparent',
+        border: `1px solid ${isBookmarked ? 'rgba(245, 166, 35, 0.4)' : '#1f1f1f'}`,
+        color: isBookmarked ? '#F5A623' : '#737373',
+      }}
+      onMouseEnter={(e) => {
+        if (!isBookmarked) {
+          e.currentTarget.style.color = '#A3A3A3';
+          e.currentTarget.style.borderColor = '#2a2a2a';
+          e.currentTarget.style.background = '#141722';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isBookmarked) {
+          e.currentTarget.style.color = '#737373';
+          e.currentTarget.style.borderColor = '#1f1f1f';
+          e.currentTarget.style.background = 'transparent';
+        }
+      }}
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill={isBookmarked ? '#F5A623' : 'none'}
-        stroke={isBookmarked ? '#F5A623' : '#737373'}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="transition-colors duration-200"
-      >
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-      </svg>
+      <span style={{ fontSize: '0.85rem', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>
+        {isBookmarked ? '★' : '☆'}
+      </span>
+      <span>{isBookmarked ? 'Saved' : 'Favorite'}</span>
     </button>
   );
 }

@@ -360,10 +360,15 @@ const TopicPanel = memo(function TopicPanel({
                 color: activeTab === 'content' ? '#F5F5F5' : '#737373',
                 fontSize: '0.82rem',
                 fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
                 transition: 'color 0.15s ease',
+                fontFamily: 'inherit',
               }}
             >
-              📄 Content
+              <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>📄</span>
+              <span>Content</span>
             </button>
 
             <button
@@ -378,13 +383,15 @@ const TopicPanel = memo(function TopicPanel({
                 color: activeTab === 'ai' ? '#F5A623' : '#737373',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
                 transition: 'color 0.15s ease',
+                fontFamily: 'inherit',
               }}
             >
-              <span>✦</span> AI Tutor
+              <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>✦</span>
+              <span>AI Tutor</span>
             </button>
 
             <button
@@ -399,13 +406,15 @@ const TopicPanel = memo(function TopicPanel({
                 color: activeTab === 'quiz' ? '#00E5FF' : '#737373',
                 fontSize: '0.82rem',
                 fontWeight: 600,
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
                 transition: 'color 0.15s ease',
+                fontFamily: 'inherit',
               }}
             >
-              <span>🎯</span> Quiz
+              <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>🎯</span>
+              <span>Quiz</span>
             </button>
           </div>
         </div>
