@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!apiKey) {
     return new Response(
       JSON.stringify({ error: 'AI Tutor service is not configured. GROQ_API_KEY environment variable is missing.' }),
-      { status: 503, headers: { 'Content-Type': 'application/json' } }
+      { status: 503, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
     );
   }
 
@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return new Response(
       JSON.stringify({ error: 'Invalid JSON request payload.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
     );
   }
 
@@ -239,10 +239,9 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
     }
 
     if (!response.ok) {
-      const errorMessage = responseData?.error?.message ?? 'Upstream Groq API error.';
       return new Response(
-        JSON.stringify({ error: errorMessage }),
-        { status: 502, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'The AI provider is temporarily unavailable. Please try again shortly.' }),
+        { status: 502, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
       );
     }
 
@@ -278,7 +277,7 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
   } catch {
     return new Response(
       JSON.stringify({ error: 'Failed to communicate with AI provider backend.' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
+      { status: 502, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
     );
   }
 };
