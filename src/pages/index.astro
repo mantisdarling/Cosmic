@@ -273,7 +273,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     outline: 2px solid #FCD068; outline-offset: 3px;
   }
   @media (prefers-reduced-motion: reduce) {
-    .hero-container *, .card, .clear-filters { animation: none !important; transition: none !important; }
+    .hero-container *, .card, .clear-filters, .character-card, .color-swatch { animation: none !important; transition: none !important; }
     .hero-badges { display: none; }
   }
 
@@ -290,6 +290,59 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .stat { text-align: center; }
   .stat-num { font-size: 1.75rem; font-weight: 900; color: #F5A623; letter-spacing: -0.05em; display: block; text-shadow: 0 0 18px rgba(245,166,35,0.2); }
   .stat-lbl { font-size: 0.68rem; color: #8992A8; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ── ANIME SHOWCASE ───────────────────────────────────── */
+  .showcase { max-width: 1200px; margin: 0 auto; padding: 62px 24px 34px; }
+  .showcase-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr); gap: 14px; align-items: stretch; }
+  .character-card {
+    position: relative; min-height: 420px; overflow: hidden; border-radius: 18px;
+    border: 1px solid rgba(0,229,255,0.28);
+    background-image: linear-gradient(90deg, rgba(7,10,20,0.98) 0%, rgba(7,10,20,0.86) 34%, rgba(7,10,20,0.2) 77%, rgba(7,10,20,0.35) 100%), url('/cosmic-lightning-swordsman.png');
+    background-size: cover; background-position: center 38%;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.35), inset 0 0 50px rgba(0,229,255,0.06);
+    isolation: isolate;
+  }
+  .character-card::before { content: ''; position: absolute; inset: 0; z-index: -1; background: repeating-linear-gradient(0deg, transparent 0 4px, rgba(255,255,255,.018) 5px 6px); mix-blend-mode: screen; pointer-events: none; }
+  .character-card::after { content: ''; position: absolute; width: 260px; height: 260px; right: 13%; top: 11%; border: 1px solid rgba(0,229,255,.15); border-radius: 50%; box-shadow: 0 0 0 18px rgba(0,229,255,.035), 0 0 0 42px rgba(245,166,35,.025); pointer-events: none; z-index: -1; }
+  .character-copy { position: relative; z-index: 2; width: min(56%, 390px); padding: 34px 0 30px 32px; }
+  .character-kicker { margin-bottom: 14px; color: #00E5FF; font: 700 .68rem/1.2 'Space Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .character-title { margin: 0 0 12px; color: #F8FAFF; font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: .98; letter-spacing: -.06em; }
+  .character-title span { display: block; color: #F5A623; }
+  .character-desc { color: #A8B0C2; font-size: .86rem; line-height: 1.65; margin: 0 0 20px; }
+  .character-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .character-tag { padding: 6px 9px; border-radius: 999px; border: 1px solid rgba(91,106,148,.45); background: rgba(11,17,31,.64); color: #CFD8EC; font: 600 .65rem/1 'Space Mono', monospace; }
+  .character-footer { position: absolute; left: 32px; right: 32px; bottom: 22px; display: flex; justify-content: space-between; gap: 12px; color: #7D89A4; font: 600 .65rem/1 'Space Mono', monospace; letter-spacing: .04em; text-transform: uppercase; }
+  .character-status { color: #62F4BE; }
+  .particle-controls {
+    position: relative; padding: 26px; border-radius: 18px; border: 1px solid rgba(55,67,98,.7);
+    background: linear-gradient(145deg, rgba(18,23,36,.98), rgba(11,15,26,.98)); box-shadow: 0 18px 50px rgba(0,0,0,.2);
+  }
+  .particle-controls::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, #00E5FF, #A78BFA, #F5A623); opacity: .85; }
+  .control-kicker { color: #F5A623; font: 700 .66rem/1 'Space Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+  .control-title { margin: 10px 0 8px; color: #F5F5F5; font-size: 1.3rem; letter-spacing: -.03em; }
+  .control-desc { margin: 0 0 22px; color: #8992A8; font-size: .8rem; line-height: 1.6; }
+  .control-group { padding: 15px 0; border-top: 1px solid rgba(55,67,98,.45); }
+  .control-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; color: #CFD8EC; font-size: .78rem; font-weight: 700; }
+  .control-value { color: #00E5FF; font: 700 .68rem/1 'Space Mono', monospace; text-transform: uppercase; }
+  .color-swatches { display: flex; flex-wrap: wrap; gap: 9px; }
+  .color-swatch { width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: var(--swatch); box-shadow: 0 0 16px color-mix(in srgb, var(--swatch) 42%, transparent); cursor: pointer; transition: transform .2s, border-color .2s, box-shadow .2s; }
+  .color-swatch:hover { transform: translateY(-2px); }
+  .color-swatch.active { border-color: #F5F5F5; box-shadow: 0 0 0 3px rgba(255,255,255,.12), 0 0 22px color-mix(in srgb, var(--swatch) 62%, transparent); }
+  .density-range { width: 100%; accent-color: #00E5FF; cursor: pointer; }
+  .density-scale { display: flex; justify-content: space-between; margin-top: 5px; color: #5E6A82; font: 600 .62rem/1 'Space Mono', monospace; text-transform: uppercase; }
+  .control-hint { margin: 16px 0 0; padding: 10px 12px; border-left: 2px solid #00E5FF; background: rgba(0,229,255,.05); color: #8D9AB4; font-size: .72rem; line-height: 1.5; }
+  @media (max-width: 820px) {
+    .showcase-grid { grid-template-columns: 1fr; }
+    .character-card { min-height: 440px; background-position: 68% 38%; }
+    .character-copy { width: min(62%, 390px); }
+  }
+  @media (max-width: 540px) {
+    .showcase { padding-top: 48px; }
+    .character-card { min-height: 510px; background-position: 67% center; }
+    .character-copy { width: auto; padding: 28px 22px; }
+    .character-footer { left: 22px; right: 22px; bottom: 18px; }
+    .particle-controls { padding: 22px; }
+  }
 
   /* ── SECTION ──────────────────────────────────────────── */
   .section { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
@@ -514,6 +567,55 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     </div>
   </div>
 
+  <!-- ── ANIME CHARACTER SHOWCASE ─────────────────────── -->
+  <section class="showcase" aria-labelledby="showcase-heading" data-reveal>
+    <div class="section-head">
+      <div>
+        <div class="control-kicker">Character archive // 001</div>
+        <h2 class="section-title" id="showcase-heading">Choose your next arc</h2>
+      </div>
+      <span class="section-count">Anime-inspired skill profiles</span>
+    </div>
+    <div class="showcase-grid">
+      <article class="character-card" aria-labelledby="character-name">
+        <div class="character-copy">
+          <div class="character-kicker">Lightning path // active</div>
+          <h3 class="character-title" id="character-name">The <span>Stormblade</span></h3>
+          <p class="character-desc">A focused path for builders who move fast, stay curious, and turn sharp fundamentals into electric momentum.</p>
+          <div class="character-tags" aria-label="Stormblade skills">
+            <span class="character-tag">JavaScript</span>
+            <span class="character-tag">React</span>
+            <span class="character-tag">Node.js</span>
+          </div>
+        </div>
+        <div class="character-footer">
+          <span class="character-status">● Sync online</span>
+          <span>Rank // 04</span>
+        </div>
+      </article>
+      <aside class="particle-controls" aria-labelledby="particle-controls-heading">
+        <div class="control-kicker">Cosmic engine // live</div>
+        <h3 class="control-title" id="particle-controls-heading">Tune the energy field</h3>
+        <p class="control-desc">Shape the atmosphere around the Stormblade. Changes apply instantly and stay local to this session.</p>
+        <div class="control-group">
+          <div class="control-label"><span>Particle color</span><span id="particle-color-value" class="control-value">Cyan</span></div>
+          <div class="color-swatches" role="group" aria-label="Particle color">
+            <button class="color-swatch active" type="button" style="--swatch:#00E5FF" data-particle-color="cyan" aria-label="Use cyan particles" aria-pressed="true"></button>
+            <button class="color-swatch" type="button" style="--swatch:#F5A623" data-particle-color="amber" aria-label="Use amber particles" aria-pressed="false"></button>
+            <button class="color-swatch" type="button" style="--swatch:#A78BFA" data-particle-color="violet" aria-label="Use violet particles" aria-pressed="false"></button>
+            <button class="color-swatch" type="button" style="--swatch:#62F4BE" data-particle-color="mint" aria-label="Use mint particles" aria-pressed="false"></button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-label"><label for="particle-density">Particle density</label><span id="particle-density-value" class="control-value">Balanced</span></div>
+          <input class="density-range" id="particle-density" type="range" min="20" max="90" step="10" value="58" aria-describedby="particle-density-help" />
+          <div class="density-scale" aria-hidden="true"><span>Calm</span><span>Balanced</span><span>Storm</span></div>
+        </div>
+        <p class="control-hint" id="particle-density-help">Lower density is gentler on mobile devices. The field pauses automatically when the hero leaves the viewport.</p>
+      </aside>
+    </div>
+  </section>
+
   <div id="roadmaps">
     <div id="no-results" role="status">
       <span id="no-results-copy">No roadmaps found for "<span id="no-results-query"></span>" — try a different keyword.</span>
@@ -698,44 +800,61 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     runScrambleAnimation(DEVELOPER_ROLES[currentRoleIndex]);
   }, 3500);
 
-  // Interactive anime energy field: particles drift upward, connect into constellations,
-  // and subtly follow the pointer while the floating skill badges parallax around them.
-  type HeroParticle = { x: number; y: number; radius: number; speed: number; phase: number; hue: 'cyan' | 'amber' };
+  // Interactive anime energy field: throttled to ~30fps, paused when hidden, and
+  // rendered with a spatial grid so connection checks stay cheap at higher densities.
+  type ParticleColor = 'cyan' | 'amber' | 'violet' | 'mint';
+  type HeroParticle = { x: number; y: number; radius: number; speed: number; phase: number };
+  const PARTICLE_RGB: Record<ParticleColor, string> = {
+    cyan: '0,229,255', amber: '245,166,35', violet: '167,139,250', mint: '98,244,190',
+  };
   const heroContainer = document.querySelector<HTMLElement>('.hero-container');
   const particleCanvas = document.getElementById('hero-particles') as HTMLCanvasElement | null;
   const particleContext = particleCanvas?.getContext('2d');
   const floatingBadges = Array.from(document.querySelectorAll<HTMLElement>('.hero-badge'));
+  const particleDensityInput = document.getElementById('particle-density') as HTMLInputElement | null;
+  const particleDensityValue = document.getElementById('particle-density-value');
+  const particleColorValue = document.getElementById('particle-color-value');
+  const colorSwatches = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-particle-color]'));
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let setParticleDensity = (_density: number) => {};
+  let setParticleColor = (_color: ParticleColor) => {};
 
   if (heroContainer && particleCanvas && particleContext && !prefersReducedMotion) {
     const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
     const particles: HeroParticle[] = [];
+    const particleConfig = { density: Number(particleDensityInput?.value || 58), color: 'cyan' as ParticleColor };
     let canvasWidth = 0;
     let canvasHeight = 0;
     let deviceScale = 1;
     let animationFrame = 0;
+    let lastFrameTime = 0;
+    let isVisible = true;
+    const drawPositions: Array<{ x: number; y: number }> = [];
+    const spatialGrid = new Map<string, number[]>();
+
+    const syncParticlePool = () => {
+      const targetCount = Math.round(26 + particleConfig.density * 0.55);
+      while (particles.length < targetCount) {
+        particles.push({
+          x: Math.random() * canvasWidth,
+          y: Math.random() * canvasHeight,
+          radius: 0.7 + Math.random() * 1.8,
+          speed: 0.08 + Math.random() * 0.22,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+      if (particles.length > targetCount) particles.length = targetCount;
+    };
 
     const resizeParticles = () => {
       const bounds = heroContainer.getBoundingClientRect();
       canvasWidth = bounds.width;
       canvasHeight = bounds.height;
-      deviceScale = Math.min(window.devicePixelRatio || 1, 2);
+      deviceScale = Math.min(window.devicePixelRatio || 1, 1.5);
       particleCanvas.width = Math.floor(canvasWidth * deviceScale);
       particleCanvas.height = Math.floor(canvasHeight * deviceScale);
       particleContext.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
-
-      if (particles.length === 0) {
-        for (let index = 0; index < 58; index += 1) {
-          particles.push({
-            x: Math.random() * canvasWidth,
-            y: Math.random() * canvasHeight,
-            radius: 0.7 + Math.random() * 1.8,
-            speed: 0.08 + Math.random() * 0.22,
-            phase: Math.random() * Math.PI * 2,
-            hue: Math.random() > 0.76 ? 'amber' : 'cyan',
-          });
-        }
-      }
+      syncParticlePool();
     };
 
     const resetPointer = () => {
@@ -762,13 +881,28 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       });
     };
 
+    const setVisibility = (visible: boolean) => {
+      isVisible = visible;
+      if (visible && !animationFrame) animationFrame = window.requestAnimationFrame(renderParticles);
+    };
+
     const renderParticles = (time: number) => {
+      animationFrame = 0;
+      if (!isVisible) return;
+      if (time - lastFrameTime < 32) {
+        animationFrame = window.requestAnimationFrame(renderParticles);
+        return;
+      }
+      lastFrameTime = time;
       pointer.x += (pointer.targetX - pointer.x) * 0.04;
       pointer.y += (pointer.targetY - pointer.y) * 0.04;
       particleContext.clearRect(0, 0, canvasWidth, canvasHeight);
       particleContext.globalCompositeOperation = 'lighter';
+      const color = PARTICLE_RGB[particleConfig.color];
+      drawPositions.length = 0;
+      spatialGrid.clear();
 
-      particles.forEach((particle) => {
+      particles.forEach((particle, index) => {
         particle.y -= particle.speed;
         particle.x += Math.sin(time * 0.0007 + particle.phase) * 0.08;
         if (particle.y < -12) {
@@ -777,53 +911,83 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
         }
         const drawX = particle.x + pointer.x * particle.radius * 2.4;
         const drawY = particle.y + pointer.y * particle.radius * 1.8;
-        const color = particle.hue === 'amber' ? '245,166,35' : '0,229,255';
-        const glow = particleContext.createRadialGradient(drawX, drawY, 0, drawX, drawY, particle.radius * 7);
-        glow.addColorStop(0, `rgba(${color},0.48)`);
-        glow.addColorStop(1, `rgba(${color},0)`);
-        particleContext.fillStyle = glow;
+        drawPositions[index] = { x: drawX, y: drawY };
+        const cellX = Math.floor(drawX / 92);
+        const cellY = Math.floor(drawY / 92);
+        const cellKey = `${cellX}:${cellY}`;
+        const cell = spatialGrid.get(cellKey) || [];
+        cell.push(index);
+        spatialGrid.set(cellKey, cell);
+        particleContext.fillStyle = `rgba(${color},0.11)`;
         particleContext.beginPath();
-        particleContext.arc(drawX, drawY, particle.radius * 7, 0, Math.PI * 2);
+        particleContext.arc(drawX, drawY, particle.radius * 6, 0, Math.PI * 2);
         particleContext.fill();
-        particleContext.fillStyle = `rgba(${color},0.9)`;
+        particleContext.fillStyle = `rgba(${color},0.88)`;
         particleContext.beginPath();
         particleContext.arc(drawX, drawY, particle.radius, 0, Math.PI * 2);
         particleContext.fill();
       });
 
-      for (let first = 0; first < particles.length; first += 1) {
-        for (let second = first + 1; second < particles.length; second += 1) {
-          const a = particles[first];
-          const b = particles[second];
-          const ax = a.x + pointer.x * a.radius * 2.4;
-          const ay = a.y + pointer.y * a.radius * 1.8;
-          const bx = b.x + pointer.x * b.radius * 2.4;
-          const by = b.y + pointer.y * b.radius * 1.8;
-          const distance = Math.hypot(ax - bx, ay - by);
-          if (distance < 92) {
-            particleContext.strokeStyle = `rgba(84,188,255,${(1 - distance / 92) * 0.12})`;
-            particleContext.lineWidth = 0.65;
-            particleContext.beginPath();
-            particleContext.moveTo(ax, ay);
-            particleContext.lineTo(bx, by);
-            particleContext.stroke();
+      spatialGrid.forEach((cell, key) => {
+        const [cellX, cellY] = key.split(':').map(Number);
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+            const neighbor = spatialGrid.get(`${cellX + offsetX}:${cellY + offsetY}`) || [];
+            cell.forEach((firstIndex) => neighbor.forEach((secondIndex) => {
+              if (secondIndex <= firstIndex) return;
+              const first = drawPositions[firstIndex];
+              const second = drawPositions[secondIndex];
+              const distance = Math.hypot(first.x - second.x, first.y - second.y);
+              if (distance < 92) {
+                particleContext.strokeStyle = `rgba(${color},${(1 - distance / 92) * 0.14})`;
+                particleContext.lineWidth = 0.65;
+                particleContext.beginPath();
+                particleContext.moveTo(first.x, first.y);
+                particleContext.lineTo(second.x, second.y);
+                particleContext.stroke();
+              }
+            }));
           }
         }
-      }
+      });
 
       particleContext.globalCompositeOperation = 'source-over';
       animationFrame = window.requestAnimationFrame(renderParticles);
     };
 
+    setParticleDensity = (density: number) => {
+      particleConfig.density = Math.max(20, Math.min(90, density));
+      syncParticlePool();
+    };
+    setParticleColor = (color: ParticleColor) => { particleConfig.color = color; };
     resizeParticles();
-    window.addEventListener('resize', resizeParticles);
+    window.addEventListener('resize', resizeParticles, { passive: true });
     heroContainer.addEventListener('pointermove', movePointer, { passive: true });
     heroContainer.addEventListener('pointerleave', resetPointer, { passive: true });
+    new IntersectionObserver((entries) => entries.forEach((entry) => setVisibility(entry.isIntersecting)), { threshold: 0.01 }).observe(heroContainer);
     animationFrame = window.requestAnimationFrame(renderParticles);
     window.addEventListener('beforeunload', () => window.cancelAnimationFrame(animationFrame), { once: true });
   } else if (particleCanvas) {
     particleCanvas.style.display = 'none';
   }
+
+  const densityLabels: Record<string, string> = { '20': 'Calm', '30': 'Calm', '40': 'Light', '50': 'Light', '60': 'Balanced', '70': 'Dense', '80': 'Dense', '90': 'Storm' };
+  const colorLabels: Record<ParticleColor, string> = { cyan: 'Cyan', amber: 'Amber', violet: 'Violet', mint: 'Mint' };
+  particleDensityInput?.addEventListener('input', () => {
+    const value = particleDensityInput.value;
+    setParticleDensity(Number(value));
+    if (particleDensityValue) particleDensityValue.textContent = densityLabels[value] || 'Balanced';
+  });
+  colorSwatches.forEach((swatch) => swatch.addEventListener('click', () => {
+    const selected = swatch.dataset.particleColor as ParticleColor;
+    setParticleColor(selected);
+    colorSwatches.forEach((item) => {
+      const active = item === swatch;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-pressed', String(active));
+    });
+    if (particleColorValue) particleColorValue.textContent = colorLabels[selected];
+  }));
 
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const favoritesBtn = document.getElementById('favorites-filter-btn') as HTMLButtonElement;
