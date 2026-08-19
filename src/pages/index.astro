@@ -142,6 +142,32 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .hero-art-layer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6,9,18,.28), transparent 46%, rgba(6,9,18,.24)), linear-gradient(180deg, rgba(6,9,18,.08), transparent 45%, rgba(6,9,18,.54)); }
   .hero-particle-field { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
   #hero-particles { width: 100%; height: 100%; display: block; opacity: .9; }
+  .hero-energy-layers { position:absolute; inset:-10%; z-index:1; pointer-events:none; overflow:hidden; transform:translate3d(calc(var(--pointer-x) * 8px), calc(var(--pointer-y) * 6px), 0); transition:transform .7s cubic-bezier(.22,1,.36,1); }
+  .energy-orbit { position:absolute; display:block; border:1px solid rgba(0,229,255,.26); border-radius:50%; transform-origin:center; mix-blend-mode:screen; }
+  .energy-orbit::after { content:''; position:absolute; width:7px; height:7px; top:8%; left:20%; border-radius:50%; background:#00E5FF; box-shadow:0 0 18px 4px rgba(0,229,255,.7); }
+  .energy-orbit-one { width:580px; height:250px; right:4%; top:17%; transform:rotate(-28deg); animation:energy-orbit-one 18s linear infinite; box-shadow:0 0 0 18px rgba(0,229,255,.018), 0 0 0 42px rgba(0,229,255,.012); }
+  .energy-orbit-two { width:410px; height:410px; right:15%; top:7%; border-color:rgba(245,166,35,.18); transform:rotate(22deg); animation:energy-orbit-two 24s linear infinite reverse; }
+  .energy-orbit-two::after { top:75%; left:88%; width:5px; height:5px; background:#F5A623; box-shadow:0 0 16px 4px rgba(245,166,35,.6); }
+  .energy-ribbon { position:absolute; display:block; width:74%; height:90px; border-radius:50%; filter:blur(2px); opacity:.55; mix-blend-mode:screen; transform-origin:center; }
+  .energy-ribbon-cyan { right:-12%; top:51%; background:linear-gradient(90deg,transparent,rgba(0,229,255,.04) 12%,rgba(0,229,255,.55) 53%,transparent 86%); transform:rotate(-18deg); animation:energy-ribbon-cyan 9s ease-in-out infinite; }
+  .energy-ribbon-amber { right:-8%; top:63%; height:44px; background:linear-gradient(90deg,transparent,rgba(245,166,35,.04) 18%,rgba(245,166,35,.44) 56%,transparent 85%); transform:rotate(-21deg); animation:energy-ribbon-amber 12s ease-in-out 1.4s infinite reverse; }
+  .energy-pulse { position:absolute; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,rgba(0,229,255,.17),rgba(0,229,255,.045) 30%,transparent 70%); filter:blur(1px); mix-blend-mode:screen; animation:energy-pulse 6s ease-in-out infinite; }
+  .energy-pulse-one { top:19%; right:34%; animation-delay:-1.2s; }
+  .energy-pulse-two { top:58%; right:18%; width:220px; height:220px; background:radial-gradient(circle,rgba(245,166,35,.14),rgba(245,166,35,.035) 32%,transparent 70%); animation-delay:-3.6s; }
+  .energy-pulse-three { top:38%; left:42%; width:90px; height:90px; background:radial-gradient(circle,rgba(167,139,250,.18),rgba(167,139,250,.03) 35%,transparent 72%); animation-delay:-4.8s; }
+  .anime-spark { position:absolute; color:#C4F8FF; font:700 1rem/1 'Space Mono',monospace; text-shadow:0 0 14px currentColor; animation:anime-spark 5s ease-in-out infinite; }
+  .anime-spark-one { top:26%; right:28%; color:#00E5FF; animation-delay:-.8s; }
+  .anime-spark-two { top:67%; right:39%; color:#F5A623; font-size:.72rem; animation-delay:-2.4s; }
+  .anime-spark-three { top:42%; right:10%; color:#A78BFA; font-size:.7rem; animation-delay:-3.8s; }
+  @keyframes energy-orbit-one { from { transform:rotate(-28deg) rotate(0deg); } to { transform:rotate(-28deg) rotate(360deg); } }
+  @keyframes energy-orbit-two { from { transform:rotate(22deg) rotate(0deg) scale(1); } 50% { transform:rotate(22deg) rotate(180deg) scale(1.035); } to { transform:rotate(22deg) rotate(360deg) scale(1); } }
+  @keyframes energy-ribbon-cyan { 0%,100% { opacity:.15; transform:rotate(-18deg) translate3d(8%,10px,0) scaleX(.88); } 50% { opacity:.7; transform:rotate(-18deg) translate3d(-8%,-14px,0) scaleX(1.05); } }
+  @keyframes energy-ribbon-amber { 0%,100% { opacity:.12; transform:rotate(-21deg) translate3d(10%,12px,0) scaleX(.85); } 50% { opacity:.62; transform:rotate(-21deg) translate3d(-9%,-6px,0) scaleX(1.08); } }
+  @keyframes energy-pulse { 0%,100% { opacity:.18; transform:scale(.72); } 50% { opacity:.78; transform:scale(1.12); } }
+  @keyframes anime-spark { 0%,100% { opacity:.15; transform:translate3d(0,8px,0) scale(.7) rotate(0deg); } 45% { opacity:1; transform:translate3d(-9px,-14px,0) scale(1.2) rotate(20deg); } 70% { opacity:.35; transform:translate3d(8px,-4px,0) scale(.8) rotate(40deg); } }
+  @media (prefers-reduced-motion: reduce) { .hero-energy-layers { display:none; } }
+  @media (pointer: coarse), (max-width: 820px) { .hero-energy-layers { opacity:.62; transform:none; } .energy-orbit-one { width:440px; height:190px; right:-20%; } .energy-orbit-two { right:-12%; } .energy-ribbon { opacity:.32; } }
+
   .hero-badges { position: absolute; inset: 0; max-width: 1260px; margin: 0 auto; z-index: 3; pointer-events: none; }
   .hero-badge {
     --badge-shift-x: 0px; --badge-shift-y: 0px;
@@ -668,6 +694,18 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   <!-- ── HERO ─────────────────────────────────────────── -->
   <div class="hero-container">
     <div class="hero-art-layer" aria-hidden="true"><img src="/cosmic-anime-hero.webp" width="1440" height="810" alt="" fetchpriority="high" decoding="async" /></div>
+    <div class="hero-energy-layers" aria-hidden="true">
+      <span class="energy-orbit energy-orbit-one"></span>
+      <span class="energy-orbit energy-orbit-two"></span>
+      <span class="energy-ribbon energy-ribbon-cyan"></span>
+      <span class="energy-ribbon energy-ribbon-amber"></span>
+      <span class="energy-pulse energy-pulse-one"></span>
+      <span class="energy-pulse energy-pulse-two"></span>
+      <span class="energy-pulse energy-pulse-three"></span>
+      <span class="anime-spark anime-spark-one">✦</span>
+      <span class="anime-spark anime-spark-two">✦</span>
+      <span class="anime-spark anime-spark-three">✦</span>
+    </div>
     <div class="hero-particle-field" aria-hidden="true"><canvas id="hero-particles"></canvas></div>
     <div class="hero-badges" aria-hidden="true">
       <span class="hero-badge hero-badge-frontend" data-depth="1.2"><span>FRONTEND // 01</span></span>
