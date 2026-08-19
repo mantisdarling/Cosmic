@@ -18,6 +18,21 @@ test.describe('Cosmic Three.js motion layer', () => {
     expect(runtime.height).toBeGreaterThan(0);
   });
 
+  test('pushes shards with a mouse click and exposes a burst state', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(1800);
+
+    const scene = page.locator('[data-anime-three-scene]');
+    const hero = page.locator('.hero-container');
+    const bounds = await hero.boundingBox();
+    expect(bounds).not.toBeNull();
+    if (!bounds) return;
+
+    await page.mouse.click(bounds.x + bounds.width * .82, bounds.y + bounds.height * .28);
+    await expect(scene).toHaveAttribute('data-impact-count', '1');
+    await expect(scene).toHaveAttribute('data-impact-active', 'true');
+  });
+
   test('keeps content available and hides 3D decoration on reduced mobile motion', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });

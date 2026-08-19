@@ -92,16 +92,17 @@
         new THREE.MeshBasicMaterial({ color: violet, transparent: true, opacity: .52 }),
       ];
 
-      const shards: Array<{ mesh: InstanceType<ThreeModule['Mesh']>; angle: number; radius: number; height: number; speed: number; phase: number }> = [];
+      const shards: Array<{ mesh: InstanceType<ThreeModule['Mesh']>; angle: number; radius: number; height: number; speed: number; phase: number; baseScale: number; offsetX: number; offsetY: number; offsetZ: number; velocityX: number; velocityY: number; velocityZ: number }> = [];
       for (let index = 0; index < 18; index += 1) {
         const angle = (index / 18) * Math.PI * 2;
         const radius = 1.18 + (index % 4) * .18;
         const mesh = new THREE.Mesh(shardGeometry, shardMaterials[index % shardMaterials.length]);
         mesh.position.set(Math.cos(angle) * radius, Math.sin(angle) * (.68 + (index % 3) * .1), -1.1 + (index % 5) * .32);
         mesh.rotation.set(angle * .7, angle, angle * .35);
-        mesh.scale.setScalar(.7 + (index % 3) * .14);
+        const baseScale = .7 + (index % 3) * .14;
+        mesh.scale.setScalar(baseScale);
         orbitalField.add(mesh);
-        shards.push({ mesh, angle, radius, height: .68 + (index % 3) * .1, speed: .12 + (index % 5) * .018, phase: index * .47 });
+        shards.push({ mesh, angle, radius, height: .68 + (index % 3) * .1, speed: .12 + (index % 5) * .018, phase: index * .47, baseScale, offsetX: 0, offsetY: 0, offsetZ: 0, velocityX: 0, velocityY: 0, velocityZ: 0 });
       }
 
       const ringGeometry = new THREE.TorusGeometry(1.36, .012, 6, 64);
@@ -116,6 +117,12 @@
       stage.add(core);
       const coreHalo = new THREE.Mesh(new THREE.SphereGeometry(.56, 16, 16), new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: .055 }));
       stage.add(coreHalo);
+      const impactRingGeometry = new THREE.TorusGeometry(.24, .016, 6, 48);
+      const impactRingMaterial = new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: 0, depthWrite: false });
+      const impactRing = new THREE.Mesh(impactRingGeometry, impactRingMaterial);
+      impactRing.rotation.x = .86;
+      impactRing.visible = false;
+      stage.add(impactRing);
 
       const resize = () => {
         const bounds = root.getBoundingClientRect();
@@ -136,6 +143,13 @@
       let frame = 0;
       let visible = true;
       let lastTime = performance.now();
+      let impactEnergy = 0;
+      let impactCooldown = 0;
+      let impactCount = 0;
+      const impactPoint = new THREE.Vector3();
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const impactPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
       const handlePointerMove = (event: PointerEvent) => {
         const bounds = hero.getBoundingClientRect();
@@ -143,6 +157,40 @@
         targetY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
       };
       const resetPointer = () => { targetX = 0; targetY = 0; };
+      const handlePointerDown = (event: PointerEvent) => {
+        if (event.button !== 0 || impactCooldown > 0) return;
+        if (event.target instanceof Element && event.target.closest('a,button,input,select,textarea')) return;
+        const bounds = hero.getBoundingClientRect();
+        pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -(((event.clientY - bounds.top) / bounds.height) * 2 - 1));
+        raycaster.setFromCamera(pointer, camera);
+        if (!raycaster.ray.intersectPlane(impactPlane, impactPoint)) return;
+        stage.worldToLocal(impactPoint);
+        impactEnergy = Math.min(1.2, impactEnergy + .82);
+        impactCooldown = .08;
+        impactCount += 1;
+        root.dataset.impactCount = String(impactCount);
+        root.dataset.impactActive = 'true';
+        impactRing.position.copy(impactPoint);
+        impactRing.scale.setScalar(.22);
+        impactRingMaterial.opacity = .88;
+        impactRing.visible = true;
+        shards.forEach((shard) => {
+          const orbitAngle = shard.angle + performance.now() * .001 * shard.speed;
+          const baseX = Math.cos(orbitAngle) * shard.radius;
+          const baseY = Math.sin(orbitAngle * 1.07 + shard.phase) * shard.height;
+          const dx = baseX - impactPoint.x;
+          const dy = baseY - impactPoint.y;
+          const distance = Math.hypot(dx, dy);
+          const influence = Math.max(0, 1 - distance / 2.55);
+          if (!influence) return;
+          const inverseDistance = distance > .08 ? 1 / distance : 0;
+          const push = (.16 + influence * .16) * impactEnergy;
+          shard.velocityX += (dx * inverseDistance || Math.cos(shard.angle)) * push;
+          shard.velocityY += (dy * inverseDistance || Math.sin(shard.angle)) * push;
+          shard.velocityZ += (.08 + influence * .08) * impactEnergy;
+        });
+        if (!frame && visible) frame = window.requestAnimationFrame(render);
+      };
       const render = (now: number) => {
         frame = 0;
         if (!visible) return;
@@ -150,6 +198,14 @@
         lastTime = now;
         const time = now * .001;
         const delta = elapsed / 16.67;
+        impactCooldown = Math.max(0, impactCooldown - elapsed * .001);
+        impactEnergy = Math.max(0, impactEnergy * Math.pow(.87, delta));
+        impactRing.scale.multiplyScalar(Math.pow(.94, delta));
+        impactRingMaterial.opacity *= Math.pow(.82, delta);
+        if (impactRingMaterial.opacity < .015) {
+          impactRing.visible = false;
+          root.dataset.impactActive = 'false';
+        }
         velocityX += (targetX - springX) * .028 * delta;
         velocityY += (targetY - springY) * .028 * delta;
         velocityX *= Math.pow(.78, delta);
@@ -166,16 +222,29 @@
         amberRing.rotation.z -= .0007 * delta;
         core.rotation.x += .003 * delta;
         core.rotation.y -= .004 * delta;
-        core.scale.setScalar(1 + Math.sin(time * 1.35) * .08);
-        coreHalo.scale.setScalar(1 + Math.sin(time * .9 + 1.4) * .12);
+        core.scale.setScalar(1 + Math.sin(time * 1.35) * .08 + impactEnergy * .18);
+        coreHalo.scale.setScalar(1 + Math.sin(time * .9 + 1.4) * .12 + impactEnergy * .3);
 
-        shards.forEach(({ mesh, angle, radius, height, speed, phase }) => {
+        shards.forEach((shard) => {
+          const { mesh, angle, radius, height, speed, phase, baseScale } = shard;
           const orbitAngle = angle + time * speed;
-          mesh.position.x = Math.cos(orbitAngle) * radius;
-          mesh.position.y = Math.sin(orbitAngle * 1.07 + phase) * height;
-          mesh.position.z = -1.1 + Math.sin(time * .7 + phase) * .28 + (angle % .9);
-          mesh.rotation.x += .006 * delta;
-          mesh.rotation.y += .009 * delta;
+          const baseX = Math.cos(orbitAngle) * radius;
+          const baseY = Math.sin(orbitAngle * 1.07 + phase) * height;
+          const baseZ = -1.1 + Math.sin(time * .7 + phase) * .28 + (angle % .9);
+          shard.velocityX += -shard.offsetX * .024 * delta;
+          shard.velocityY += -shard.offsetY * .024 * delta;
+          shard.velocityZ += -shard.offsetZ * .024 * delta;
+          shard.velocityX *= Math.pow(.84, delta);
+          shard.velocityY *= Math.pow(.84, delta);
+          shard.velocityZ *= Math.pow(.84, delta);
+          shard.offsetX += shard.velocityX * delta;
+          shard.offsetY += shard.velocityY * delta;
+          shard.offsetZ += shard.velocityZ * delta;
+          mesh.position.set(baseX + shard.offsetX, baseY + shard.offsetY, baseZ + shard.offsetZ);
+          const impactScale = 1 + Math.min(.42, Math.hypot(shard.offsetX, shard.offsetY, shard.offsetZ) * .22);
+          mesh.scale.setScalar(baseScale * impactScale);
+          mesh.rotation.x += (.006 + Math.abs(shard.velocityY) * .012) * delta;
+          mesh.rotation.y += (.009 + Math.abs(shard.velocityX) * .012) * delta;
         });
 
         renderer.render(scene, camera);
@@ -192,7 +261,6 @@
 
       const observer = new IntersectionObserver(([entry]) => setVisible(Boolean(entry?.isIntersecting)), { threshold: .01 });
       observer.observe(hero);
-      const visibilityHandler = () => setVisible(!document.hidden && visible);
       const handleDocumentVisibility = () => {
         if (document.hidden) {
           if (frame) window.cancelAnimationFrame(frame);
@@ -207,12 +275,14 @@
       resize();
       hero.addEventListener('pointermove', handlePointerMove, { passive: true });
       hero.addEventListener('pointerleave', resetPointer, { passive: true });
+      hero.addEventListener('pointerdown', handlePointerDown, { passive: true });
       window.addEventListener('resize', resize, { passive: true });
       document.addEventListener('visibilitychange', handleDocumentVisibility, { passive: true });
       window.addEventListener('beforeunload', () => {
         observer.disconnect();
         hero.removeEventListener('pointermove', handlePointerMove);
         hero.removeEventListener('pointerleave', resetPointer);
+        hero.removeEventListener('pointerdown', handlePointerDown);
         window.removeEventListener('resize', resize);
         document.removeEventListener('visibilitychange', handleDocumentVisibility);
         if (frame) window.cancelAnimationFrame(frame);
@@ -220,9 +290,16 @@
         shardGeometry.dispose();
         shardMaterials.forEach((material) => material.dispose());
         ringGeometry.dispose();
+        impactRingGeometry.dispose();
+        impactRingMaterial.dispose();
+        amberRing.geometry.dispose();
+        (amberRing.material as InstanceType<ThreeModule['MeshBasicMaterial']>).dispose();
+        (core.geometry as InstanceType<ThreeModule['IcosahedronGeometry']>).dispose();
+        (core.material as InstanceType<ThreeModule['MeshBasicMaterial']>).dispose();
+        (coreHalo.geometry as InstanceType<ThreeModule['SphereGeometry']>).dispose();
+        (coreHalo.material as InstanceType<ThreeModule['MeshBasicMaterial']>).dispose();
       }, { once: true });
 
-      void visibilityHandler;
       frame = window.requestAnimationFrame(render);
     });
   }
