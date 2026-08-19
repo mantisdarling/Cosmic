@@ -91,11 +91,18 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     .search-container { margin: 0 auto; }
     .hero-container { background-position: 68% center; }
     .hero-container::after { width: 280px; height: 280px; right: -80px; top: 18%; }
+    .hero-badges { opacity: .68; }
+    .hero-badge-frontend { top: 12%; left: 8%; }
+    .hero-badge-ai { top: 22%; right: 5%; }
+    .hero-badge-cloud { bottom: 14%; left: 7%; }
+    .hero-badge-devops { bottom: 22%; right: 7%; }
   }
   @media (max-width: 640px) { .nav-links { display: none; } }
 
   /* ── HERO CONTAINER ─────────────────────────────────── */
   .hero-container {
+    --pointer-x: 0;
+    --pointer-y: 0;
     position: relative; overflow: hidden;
     background-image:
       linear-gradient(90deg, rgba(6,9,18,0.96) 0%, rgba(6,9,18,0.86) 34%, rgba(6,9,18,0.36) 66%, rgba(6,9,18,0.78) 100%),
@@ -116,7 +123,35 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     border: 1px solid rgba(0,229,255,0.14); border-radius: 50%;
     box-shadow: 0 0 0 22px rgba(0,229,255,0.025), 0 0 0 52px rgba(245,166,35,0.018);
     pointer-events: none; z-index: -1;
+    transform: translate3d(calc(var(--pointer-x) * 18px), calc(var(--pointer-y) * 12px), 0);
+    transition: transform .35s ease-out;
   }
+  .hero-particle-field { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  #hero-particles { width: 100%; height: 100%; display: block; opacity: .9; }
+  .hero-badges { position: absolute; inset: 0; max-width: 1260px; margin: 0 auto; z-index: 2; pointer-events: none; }
+  .hero-badge {
+    --badge-shift-x: 0px; --badge-shift-y: 0px;
+    position: absolute; display: inline-flex; padding: 6px 10px;
+    border: 1px solid rgba(127, 150, 205, 0.42); border-radius: 999px;
+    background: rgba(11, 17, 31, 0.68); color: #B8C5E2;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 10px 30px rgba(0,0,0,0.24), 0 0 18px rgba(0,229,255,0.08);
+    backdrop-filter: blur(10px); font: 700 .68rem/1 'Space Mono', monospace;
+    letter-spacing: .04em; white-space: nowrap;
+    transform: translate3d(var(--badge-shift-x), var(--badge-shift-y), 0);
+    transition: transform .35s ease-out, border-color .2s, color .2s;
+  }
+  .hero-badge::before { content: ''; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #00E5FF; box-shadow: 0 0 10px currentColor; }
+  .hero-badge > span { animation: badge-float 4.5s ease-in-out infinite; display: inline-flex; align-items: center; }
+  .hero-badge:hover { border-color: rgba(0,229,255,0.8); color: #F5F5F5; }
+  .hero-badge-frontend { top: 22%; left: 57%; color: #B5F4FF; }
+  .hero-badge-frontend::before { background: #00E5FF; }
+  .hero-badge-ai { top: 37%; right: 5%; color: #FFE0A2; animation-delay: -.9s; }
+  .hero-badge-ai::before { background: #F5A623; }
+  .hero-badge-cloud { bottom: 21%; left: 63%; color: #D2C4FF; animation-delay: -1.8s; }
+  .hero-badge-cloud::before { background: #A78BFA; }
+  .hero-badge-devops { bottom: 28%; right: 13%; color: #B7FFD8; animation-delay: -2.7s; }
+  .hero-badge-devops::before { background: #22C55E; }
+  @keyframes badge-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
 
   /* ── HERO ─────────────────────────────────────────────── */
   .hero {
@@ -239,6 +274,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   @media (prefers-reduced-motion: reduce) {
     .hero-container *, .card, .clear-filters { animation: none !important; transition: none !important; }
+    .hero-badges { display: none; }
   }
 
   /* ── STATS ────────────────────────────────────────────── */
@@ -379,7 +415,14 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 <main>
   <!-- ── HERO ─────────────────────────────────────────── -->
   <div class="hero-container">
-    <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-particle-field" aria-hidden="true"><canvas id="hero-particles"></canvas></div>
+    <div class="hero-badges" aria-hidden="true">
+      <span class="hero-badge hero-badge-frontend" data-depth="1.2"><span>FRONTEND // 01</span></span>
+      <span class="hero-badge hero-badge-ai" data-depth="1.8"><span>AI SYSTEMS // 02</span></span>
+      <span class="hero-badge hero-badge-cloud" data-depth="1.4"><span>CLOUD ARC // 03</span></span>
+      <span class="hero-badge hero-badge-devops" data-depth="2.1"><span>DEVOPS // 04</span></span>
+    </div>
+    <section class="hero hero-content" aria-labelledby="hero-heading">
       <div class="hero-eyebrow" data-reveal>
         <span class="eyebrow-dot" aria-hidden="true"></span>
         Community Roadmaps · Open Source · Free Forever
@@ -654,6 +697,133 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     currentRoleIndex = (currentRoleIndex + 1) % DEVELOPER_ROLES.length;
     runScrambleAnimation(DEVELOPER_ROLES[currentRoleIndex]);
   }, 3500);
+
+  // Interactive anime energy field: particles drift upward, connect into constellations,
+  // and subtly follow the pointer while the floating skill badges parallax around them.
+  type HeroParticle = { x: number; y: number; radius: number; speed: number; phase: number; hue: 'cyan' | 'amber' };
+  const heroContainer = document.querySelector<HTMLElement>('.hero-container');
+  const particleCanvas = document.getElementById('hero-particles') as HTMLCanvasElement | null;
+  const particleContext = particleCanvas?.getContext('2d');
+  const floatingBadges = Array.from(document.querySelectorAll<HTMLElement>('.hero-badge'));
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (heroContainer && particleCanvas && particleContext && !prefersReducedMotion) {
+    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    const particles: HeroParticle[] = [];
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let deviceScale = 1;
+    let animationFrame = 0;
+
+    const resizeParticles = () => {
+      const bounds = heroContainer.getBoundingClientRect();
+      canvasWidth = bounds.width;
+      canvasHeight = bounds.height;
+      deviceScale = Math.min(window.devicePixelRatio || 1, 2);
+      particleCanvas.width = Math.floor(canvasWidth * deviceScale);
+      particleCanvas.height = Math.floor(canvasHeight * deviceScale);
+      particleContext.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
+
+      if (particles.length === 0) {
+        for (let index = 0; index < 58; index += 1) {
+          particles.push({
+            x: Math.random() * canvasWidth,
+            y: Math.random() * canvasHeight,
+            radius: 0.7 + Math.random() * 1.8,
+            speed: 0.08 + Math.random() * 0.22,
+            phase: Math.random() * Math.PI * 2,
+            hue: Math.random() > 0.76 ? 'amber' : 'cyan',
+          });
+        }
+      }
+    };
+
+    const resetPointer = () => {
+      pointer.targetX = 0;
+      pointer.targetY = 0;
+      heroContainer.style.setProperty('--pointer-x', '0');
+      heroContainer.style.setProperty('--pointer-y', '0');
+      floatingBadges.forEach((badge) => {
+        badge.style.setProperty('--badge-shift-x', '0px');
+        badge.style.setProperty('--badge-shift-y', '0px');
+      });
+    };
+
+    const movePointer = (event: PointerEvent) => {
+      const bounds = heroContainer.getBoundingClientRect();
+      pointer.targetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+      pointer.targetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+      heroContainer.style.setProperty('--pointer-x', pointer.targetX.toFixed(3));
+      heroContainer.style.setProperty('--pointer-y', pointer.targetY.toFixed(3));
+      floatingBadges.forEach((badge) => {
+        const depth = Number(badge.dataset.depth || 1);
+        badge.style.setProperty('--badge-shift-x', `${(pointer.targetX * depth * 11).toFixed(1)}px`);
+        badge.style.setProperty('--badge-shift-y', `${(pointer.targetY * depth * 8).toFixed(1)}px`);
+      });
+    };
+
+    const renderParticles = (time: number) => {
+      pointer.x += (pointer.targetX - pointer.x) * 0.04;
+      pointer.y += (pointer.targetY - pointer.y) * 0.04;
+      particleContext.clearRect(0, 0, canvasWidth, canvasHeight);
+      particleContext.globalCompositeOperation = 'lighter';
+
+      particles.forEach((particle) => {
+        particle.y -= particle.speed;
+        particle.x += Math.sin(time * 0.0007 + particle.phase) * 0.08;
+        if (particle.y < -12) {
+          particle.y = canvasHeight + 12;
+          particle.x = Math.random() * canvasWidth;
+        }
+        const drawX = particle.x + pointer.x * particle.radius * 2.4;
+        const drawY = particle.y + pointer.y * particle.radius * 1.8;
+        const color = particle.hue === 'amber' ? '245,166,35' : '0,229,255';
+        const glow = particleContext.createRadialGradient(drawX, drawY, 0, drawX, drawY, particle.radius * 7);
+        glow.addColorStop(0, `rgba(${color},0.48)`);
+        glow.addColorStop(1, `rgba(${color},0)`);
+        particleContext.fillStyle = glow;
+        particleContext.beginPath();
+        particleContext.arc(drawX, drawY, particle.radius * 7, 0, Math.PI * 2);
+        particleContext.fill();
+        particleContext.fillStyle = `rgba(${color},0.9)`;
+        particleContext.beginPath();
+        particleContext.arc(drawX, drawY, particle.radius, 0, Math.PI * 2);
+        particleContext.fill();
+      });
+
+      for (let first = 0; first < particles.length; first += 1) {
+        for (let second = first + 1; second < particles.length; second += 1) {
+          const a = particles[first];
+          const b = particles[second];
+          const ax = a.x + pointer.x * a.radius * 2.4;
+          const ay = a.y + pointer.y * a.radius * 1.8;
+          const bx = b.x + pointer.x * b.radius * 2.4;
+          const by = b.y + pointer.y * b.radius * 1.8;
+          const distance = Math.hypot(ax - bx, ay - by);
+          if (distance < 92) {
+            particleContext.strokeStyle = `rgba(84,188,255,${(1 - distance / 92) * 0.12})`;
+            particleContext.lineWidth = 0.65;
+            particleContext.beginPath();
+            particleContext.moveTo(ax, ay);
+            particleContext.lineTo(bx, by);
+            particleContext.stroke();
+          }
+        }
+      }
+
+      particleContext.globalCompositeOperation = 'source-over';
+      animationFrame = window.requestAnimationFrame(renderParticles);
+    };
+
+    resizeParticles();
+    window.addEventListener('resize', resizeParticles);
+    heroContainer.addEventListener('pointermove', movePointer, { passive: true });
+    heroContainer.addEventListener('pointerleave', resetPointer, { passive: true });
+    animationFrame = window.requestAnimationFrame(renderParticles);
+    window.addEventListener('beforeunload', () => window.cancelAnimationFrame(animationFrame), { once: true });
+  } else if (particleCanvas) {
+    particleCanvas.style.display = 'none';
+  }
 
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const favoritesBtn = document.getElementById('favorites-filter-btn') as HTMLButtonElement;
