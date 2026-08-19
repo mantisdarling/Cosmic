@@ -131,7 +131,38 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
           messages: [{ role: 'user', content: promptText }],
           max_completion_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
           temperature: 0.7,
-          ...(action === 'challenge' ? { response_format: { type: 'json_object' } } : {}),
+          ...(action === 'challenge' ? {
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'coding_challenge',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    brief: { type: 'string' },
+                    functionName: { type: 'string', enum: ['solve'] },
+                    starterCode: { type: 'string' },
+                    tests: {
+                      type: 'array',
+                      minItems: 3,
+                      maxItems: 3,
+                      items: {
+                        type: 'object',
+                        properties: { input: { type: 'array', items: {} }, expected: {} },
+                        required: ['input', 'expected'],
+                        additionalProperties: false,
+                      },
+                    },
+                    hint: { type: 'string' },
+                  },
+                  required: ['title', 'brief', 'functionName', 'starterCode', 'tests', 'hint'],
+                  additionalProperties: false,
+                },
+              },
+            },
+          } : {}),
           ...(String(import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b').startsWith('openai/gpt-oss/') ? { include_reasoning: false } : {}),
         }),
     });
