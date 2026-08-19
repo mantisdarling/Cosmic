@@ -100,7 +100,7 @@ export default function AuthButton() {
   }, [isFirebaseAvailable]);
 
   const handleEmailFormSubmit = useCallback(
-    async (event: React.FormEvent) => {
+    async (event: { preventDefault: () => void }) => {
       event.preventDefault();
       if (!isFirebaseAvailable) {
         setErrorMessage('Authentication service is currently unavailable.');

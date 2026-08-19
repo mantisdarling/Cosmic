@@ -67,7 +67,7 @@
   .frost-roster-card small { display:block; margin-top:4px; color:#73819A; font-size:.66rem; }
   .frost-roster-arrow { color:#9EEBFF; font-size:1.1rem; }
   .frost-shell { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(240px,.45fr); gap:12px; }
-  .frost-visual { position:relative; min-height:450px; overflow:hidden; border:1px solid rgba(142,235,255,.32); border-radius:18px; background:linear-gradient(90deg,rgba(4,10,24,.97),rgba(8,13,30,.6)),url('/cosmic-frostwarden.png') center right/cover; box-shadow:0 22px 60px rgba(0,0,0,.36),inset 0 0 70px rgba(142,235,255,.1); outline:none; }
+  .frost-visual { position:relative; min-height:450px; overflow:hidden; border:1px solid rgba(142,235,255,.32); border-radius:18px; background:linear-gradient(90deg,rgba(4,10,24,.97),rgba(8,13,30,.6)),url('/cosmic-frostwarden.webp') center right/cover; box-shadow:0 22px 60px rgba(0,0,0,.36),inset 0 0 70px rgba(142,235,255,.1); outline:none; }
   .frost-visual:focus-visible { box-shadow:0 0 0 3px rgba(158,235,255,.3),0 22px 60px rgba(0,0,0,.36); }
   #frostbound-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; }
   .frost-scanlines { position:absolute; inset:0; pointer-events:none; background:linear-gradient(rgba(142,235,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(142,235,255,.03) 1px,transparent 1px); background-size:38px 38px; mask-image:linear-gradient(180deg,transparent,#000 30%,#000 78%,transparent); }
@@ -123,6 +123,8 @@
   const frostBestValue = document.getElementById('frost-best-value');
   const frostAbilityButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.frost-ability'));
   const frostDemo = new URLSearchParams(window.location.search).has('demo');
+  const frostLowPower = window.matchMedia('(pointer: coarse)').matches || (navigator.hardwareConcurrency || 8) <= 4;
+  const frostReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (frostRoot && frostArena && frostCanvas && frostContext && frostLaunch) {
     type Cell = { x: number; y: number };
@@ -134,7 +136,6 @@
     const sigils: Cell[] = [];
     const hazards: Hazard[] = [];
     const sparks: Spark[] = [];
-    const pressed = new Set<string>();
     let width = 0;
     let height = 0;
     let scale = 1;
@@ -149,12 +150,14 @@
     let lastTime = 0;
     let frame = 0;
     let demoTime = 0;
+    let demoFinished = false;
+    let isVisible = true;
 
     if (frostBestValue) frostBestValue.textContent = String(best).padStart(2, '0');
 
     const resize = () => {
       const rect = frostArena.getBoundingClientRect();
-      width = rect.width; height = rect.height; scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = rect.width; height = rect.height; scale = Math.min(window.devicePixelRatio || 1, frostLowPower ? 1 : 1.25);
       frostCanvas.width = Math.floor(width * scale); frostCanvas.height = Math.floor(height * scale); frostContext.setTransform(scale, 0, 0, scale, 0, 0);
       cellSize = Math.min((width - 80) / cols, (height - 150) / rows); offsetX = (width - cellSize * cols) / 2; offsetY = (height - cellSize * rows) / 2;
     };
@@ -176,10 +179,11 @@
       sigils.length = 0; hazards.length = 0; collected = 0; frozenCount = 0;
       const sigilSpots = [[6, 1], [2, 0], [4, 3], [7, 4], [3, 2]];
       sigilSpots.forEach(([x, y]) => sigils.push({ x, y }));
-      [[4, 1], [5, 4], [1, 1], [6, 3]].forEach(([x, y], index) => hazards.push({ x, y, phase: index * 1.4 }));
+      const hazardSpots = frostLowPower ? [[4, 1], [1, 1], [6, 3]] : [[4, 1], [5, 4], [1, 1], [6, 3]];
+      hazardSpots.forEach(([x, y], index) => hazards.push({ x, y, phase: index * 1.4 }));
     };
-    const reset = () => { player.x = 1; player.y = 3; player.stability = 100; player.focus = 100; frozenUntil = 0; demoTime = 0; sparks.length = 0; spawnLayout(); updateHud(); };
-    const finish = (success: boolean) => { running = false; if (success) { best = Math.max(best, collected); localStorage.setItem('cosmic-frostbound-best', String(best)); if (frostBestValue) frostBestValue.textContent = String(best).padStart(2, '0'); status('Circuit complete · aurora stabilized'); } else status('Circuit fractured · reroute and try again'); frostLaunch.textContent = 'Retry circuit'; updateHud(); };
+    const reset = () => { player.x = 1; player.y = 3; player.stability = 100; player.focus = 100; frozenUntil = 0; demoTime = 0; demoFinished = false; sparks.length = 0; spawnLayout(); updateHud(); };
+    const finish = (success: boolean) => { running = false; demoFinished = true; if (success) { best = Math.max(best, collected); localStorage.setItem('cosmic-frostbound-best', String(best)); if (frostBestValue) frostBestValue.textContent = String(best).padStart(2, '0'); status('Circuit complete · aurora stabilized'); } else status('Circuit fractured · reroute and try again'); frostLaunch.textContent = 'Retry circuit'; updateHud(); };
     const collect = () => { for (let index = sigils.length - 1; index >= 0; index -= 1) { if (sigils[index].x === player.x && sigils[index].y === player.y) { sigils.splice(index, 1); collected += 1; player.focus = Math.min(100, player.focus + 12); addSpark(player, '#9EEBFF'); status(`Sigil ${collected} secured · circuit holding`); } } if (collected >= 5) finish(true); };
     const move = (dx: number, dy: number) => { if (!running) return; player.x = Math.max(0, Math.min(cols - 1, player.x + dx)); player.y = Math.max(0, Math.min(rows - 1, player.y + dy)); addSpark(player, '#9EEBFF'); collect(); };
     const cast = (ability: string) => {
@@ -190,7 +194,7 @@
       if (ability === 'bloom') { const nearby = sigils.filter((sigil) => Math.abs(sigil.x - player.x) <= 1 && Math.abs(sigil.y - player.y) <= 1); nearby.forEach((sigil) => { sigils.splice(sigils.indexOf(sigil), 1); collected += 1; addSpark(sigil, '#9EEBFF'); }); status('Aurora Bloom · nearby sigils harvested'); if (collected >= 5) finish(true); }
       updateHud();
     };
-    const start = () => { reset(); running = true; frostLaunch.textContent = 'Restart circuit'; status('Circuit live · collect the sigils'); if (!frame) frame = requestAnimationFrame(loop); };
+    const start = () => { reset(); running = true; frostLaunch.textContent = 'Restart circuit'; status('Circuit live · collect the sigils'); if (!frame && isVisible) frame = requestAnimationFrame(loop); };
     const update = (delta: number, time: number) => {
       if (!running) return;
       player.focus = Math.min(100, player.focus + delta * 5);
@@ -206,13 +210,15 @@
       const haze = frostContext.createRadialGradient(width * .28, height * .38, 8, width * .28, height * .38, width * .72); haze.addColorStop(0, 'rgba(158,235,255,.13)'); haze.addColorStop(1, 'rgba(5,11,26,0)'); frostContext.fillStyle = haze; frostContext.fillRect(0, 0, width, height);
       for (let y = 0; y < rows; y += 1) for (let x = 0; x < cols; x += 1) { const cx = offsetX + x * cellSize + cellSize / 2; const cy = offsetY + y * cellSize + cellSize / 2; frostContext.strokeStyle = 'rgba(158,235,255,.14)'; frostContext.lineWidth = 1; frostContext.strokeRect(offsetX + x * cellSize + 8, offsetY + y * cellSize + 8, cellSize - 16, cellSize - 16); frostContext.fillStyle = `rgba(158,235,255,${.12 + Math.sin(time * .002 + x + y) * .04})`; frostContext.beginPath(); frostContext.arc(cx, cy, 2, 0, Math.PI * 2); frostContext.fill(); }
       const frozen = performance.now() < frozenUntil;
-      hazards.forEach((hazard) => { const cx = offsetX + hazard.x * cellSize + cellSize / 2; const cy = offsetY + hazard.y * cellSize + cellSize / 2; const pulse = frozen ? 0 : Math.sin(hazard.phase) * 4; frostContext.save(); frostContext.globalAlpha = frozen ? .45 : .8; frostContext.strokeStyle = frozen ? '#9EEBFF' : '#A78BFA'; frostContext.shadowColor = frostContext.strokeStyle; frostContext.shadowBlur = 15; frostContext.lineWidth = 2; frostContext.beginPath(); frostContext.arc(cx, cy, 13 + pulse, 0, Math.PI * 2); frostContext.stroke(); frostContext.restore(); });
-      sigils.forEach((sigil) => { const cx = offsetX + sigil.x * cellSize + cellSize / 2; const cy = offsetY + sigil.y * cellSize + cellSize / 2; frostContext.save(); frostContext.translate(cx, cy); frostContext.rotate(time * .001); frostContext.fillStyle = '#9EEBFF'; frostContext.shadowColor = '#9EEBFF'; frostContext.shadowBlur = 18; frostContext.beginPath(); frostContext.moveTo(0, -10); frostContext.lineTo(8, 0); frostContext.lineTo(0, 10); frostContext.lineTo(-8, 0); frostContext.closePath(); frostContext.fill(); frostContext.restore(); });
+      hazards.forEach((hazard) => { const cx = offsetX + hazard.x * cellSize + cellSize / 2; const cy = offsetY + hazard.y * cellSize + cellSize / 2; const pulse = frozen ? 0 : Math.sin(hazard.phase) * 4; frostContext.save(); frostContext.globalAlpha = frozen ? .45 : .8; frostContext.strokeStyle = frozen ? '#9EEBFF' : '#A78BFA'; frostContext.shadowColor = frostContext.strokeStyle; frostContext.shadowBlur = frostLowPower ? 7 : 15; frostContext.lineWidth = 2; frostContext.beginPath(); frostContext.arc(cx, cy, 13 + pulse, 0, Math.PI * 2); frostContext.stroke(); frostContext.restore(); });
+      sigils.forEach((sigil) => { const cx = offsetX + sigil.x * cellSize + cellSize / 2; const cy = offsetY + sigil.y * cellSize + cellSize / 2; frostContext.save(); frostContext.translate(cx, cy); frostContext.rotate(frostLowPower ? 0 : time * .001); frostContext.fillStyle = '#9EEBFF'; frostContext.shadowColor = '#9EEBFF'; frostContext.shadowBlur = frostLowPower ? 8 : 18; frostContext.beginPath(); frostContext.moveTo(0, -10); frostContext.lineTo(8, 0); frostContext.lineTo(0, 10); frostContext.lineTo(-8, 0); frostContext.closePath(); frostContext.fill(); frostContext.restore(); });
       sparks.forEach((spark) => { const cx = offsetX + spark.x * cellSize + cellSize / 2; const cy = offsetY + spark.y * cellSize + cellSize / 2; frostContext.save(); frostContext.globalAlpha = spark.life * 2; frostContext.strokeStyle = spark.color; frostContext.shadowColor = spark.color; frostContext.shadowBlur = 22; frostContext.beginPath(); frostContext.arc(cx, cy, (1 - spark.life) * 28, 0, Math.PI * 2); frostContext.stroke(); frostContext.restore(); });
-      const px = offsetX + player.x * cellSize + cellSize / 2; const py = offsetY + player.y * cellSize + cellSize / 2; frostContext.save(); frostContext.translate(px, py); frostContext.shadowColor = '#9EEBFF'; frostContext.shadowBlur = 26; frostContext.fillStyle = '#13284A'; frostContext.strokeStyle = '#DDF9FF'; frostContext.lineWidth = 2; frostContext.beginPath(); frostContext.moveTo(0, -15); frostContext.lineTo(13, 0); frostContext.lineTo(0, 15); frostContext.lineTo(-13, 0); frostContext.closePath(); frostContext.fill(); frostContext.stroke(); frostContext.fillStyle = '#9EEBFF'; frostContext.beginPath(); frostContext.arc(0, 0, 4, 0, Math.PI * 2); frostContext.fill(); frostContext.restore();
+      const px = offsetX + player.x * cellSize + cellSize / 2; const py = offsetY + player.y * cellSize + cellSize / 2; frostContext.save(); frostContext.translate(px, py); frostContext.shadowColor = '#9EEBFF'; frostContext.shadowBlur = frostLowPower ? 11 : 26; frostContext.fillStyle = '#13284A'; frostContext.strokeStyle = '#DDF9FF'; frostContext.lineWidth = 2; frostContext.beginPath(); frostContext.moveTo(0, -15); frostContext.lineTo(13, 0); frostContext.lineTo(0, 15); frostContext.lineTo(-13, 0); frostContext.closePath(); frostContext.fill(); frostContext.stroke(); frostContext.fillStyle = '#9EEBFF'; frostContext.beginPath(); frostContext.arc(0, 0, 4, 0, Math.PI * 2); frostContext.fill(); frostContext.restore();
     };
-    const loop = (time: number) => { frame = 0; const delta = Math.min(.05, Math.max(.001, (time - lastTime) / 1000 || .016)); lastTime = time; update(delta, time); draw(time); if (running || frostDemo) frame = requestAnimationFrame(loop); };
-    frostArena.addEventListener('keydown', (event) => { const key = event.key.toLowerCase(); if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key)) { event.preventDefault(); pressed.add(key); if (key === 'w' || key === 'arrowup') move(0, -1); if (key === 's' || key === 'arrowdown') move(0, 1); if (key === 'a' || key === 'arrowleft') move(-1, 0); if (key === 'd' || key === 'arrowright') move(1, 0); } if (key === '1') cast('step'); if (key === '2') cast('lock'); if (key === '3') cast('bloom'); });
-    frostLaunch.addEventListener('click', start); frostAbilityButtons.forEach((button) => button.addEventListener('click', () => cast(button.dataset.frostAbility || ''))); window.addEventListener('resize', resize, { passive: true }); resize(); spawnLayout(); draw(0); updateHud(); if (frostDemo) start();
+    const loop = (time: number) => { frame = 0; const delta = Math.min(.05, Math.max(.001, (time - lastTime) / 1000 || .016)); lastTime = time; update(delta, time); draw(time); if (isVisible && (running || (frostDemo && !demoFinished && demoTime < 12000))) frame = requestAnimationFrame(loop); };
+    frostArena.addEventListener('keydown', (event) => { const key = event.key.toLowerCase(); if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key)) { event.preventDefault(); if (key === 'w' || key === 'arrowup') move(0, -1); if (key === 's' || key === 'arrowdown') move(0, 1); if (key === 'a' || key === 'arrowleft') move(-1, 0); if (key === 'd' || key === 'arrowright') move(1, 0); } if (key === '1') cast('step'); if (key === '2') cast('lock'); if (key === '3') cast('bloom'); });
+    const frostObserver = new IntersectionObserver(([entry]) => { isVisible = Boolean(entry?.isIntersecting); if (isVisible && (running || (frostDemo && !demoFinished)) && !frame) frame = requestAnimationFrame(loop); }, { threshold: 0.05 });
+    frostObserver.observe(frostArena);
+    frostLaunch.addEventListener('click', start); frostAbilityButtons.forEach((button) => button.addEventListener('click', () => cast(button.dataset.frostAbility || ''))); window.addEventListener('resize', resize, { passive: true }); window.addEventListener('beforeunload', () => frostObserver.disconnect(), { once: true }); resize(); spawnLayout(); draw(0); updateHud(); if (frostDemo && !frostReducedMotion) start();
   }
 </script>

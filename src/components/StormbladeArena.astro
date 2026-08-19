@@ -49,7 +49,7 @@
   .arena-kicker, .arena-brief-label { color: #00E5FF; font: 700 .66rem/1 'Space Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
   .arena-shortcut { color: #69758E; font: 600 .64rem/1.4 'Space Mono', monospace; text-align: right; text-transform: uppercase; }
   .arena-shell { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(240px, .45fr); gap: 12px; }
-  .arena-visual { position: relative; min-height: 450px; overflow: hidden; border: 1px solid rgba(0,229,255,.28); border-radius: 18px; background: linear-gradient(90deg, rgba(6,10,22,.96), rgba(6,10,22,.72)), url('/cosmic-anime-hero.png') center / cover; box-shadow: 0 22px 60px rgba(0,0,0,.35), inset 0 0 60px rgba(0,229,255,.08); outline: none; }
+  .arena-visual { position: relative; min-height: 450px; overflow: hidden; border: 1px solid rgba(0,229,255,.28); border-radius: 18px; background: linear-gradient(90deg, rgba(6,10,22,.96), rgba(6,10,22,.72)), url('/cosmic-anime-hero.webp') center / cover; box-shadow: 0 22px 60px rgba(0,0,0,.35), inset 0 0 60px rgba(0,229,255,.08); outline: none; }
   .arena-visual:focus-visible { box-shadow: 0 0 0 3px rgba(252,208,104,.32), 0 22px 60px rgba(0,0,0,.35); }
   #stormblade-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
   .arena-grid-glow { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(0,229,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,.035) 1px, transparent 1px); background-size: 42px 42px; mask-image: linear-gradient(180deg, transparent, #000 30%, #000 75%, transparent); }
@@ -106,6 +106,8 @@
   const bestValue = document.getElementById('arena-best-value');
   const abilityButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.arena-ability'));
   const demoMode = new URLSearchParams(window.location.search).has('demo');
+  const lowPowerDevice = window.matchMedia('(pointer: coarse)').matches || (navigator.hardwareConcurrency || 8) <= 4;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (arenaRoot && arena && canvas && context && launchButton) {
     type Vec2 = { x: number; y: number };
@@ -117,7 +119,7 @@
     const enemies: Enemy[] = [];
     const bolts: Bolt[] = [];
     const effects: Effect[] = [];
-    const stars = Array.from({ length: 44 }, (_, index) => ({ x: (index * 83) % 1000, y: (index * 47) % 500, r: 0.5 + (index % 3) * 0.35, phase: index * 1.7 }));
+    const stars = Array.from({ length: lowPowerDevice ? 22 : 44 }, (_, index) => ({ x: (index * 83) % 1000, y: (index * 47) % 500, r: 0.5 + (index % 3) * 0.35, phase: index * 1.7 }));
     let width = 0;
     let height = 0;
     let scale = 1;
@@ -132,6 +134,8 @@
     let lastAbility = 0;
     let pointerTarget: Vec2 | null = null;
     let demoTime = 0;
+    let demoFinished = false;
+    let isVisible = true;
 
     if (bestValue) bestValue.textContent = String(best).padStart(2, '0');
 
@@ -139,7 +143,7 @@
       const rect = arena.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
-      scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      scale = Math.min(window.devicePixelRatio || 1, lowPowerDevice ? 1 : 1.25);
       canvas.width = Math.floor(width * scale);
       canvas.height = Math.floor(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
@@ -173,12 +177,13 @@
     const resetGame = () => {
       enemies.length = 0; bolts.length = 0; effects.length = 0;
       player.x = width / 2; player.y = height / 2; player.health = 100; player.energy = 100; player.dash = 0;
-      score = 0; defeated = 0; wave = 1; spawnTimer = 0; demoTime = 0;
+      score = 0; defeated = 0; wave = 1; spawnTimer = 0; demoTime = 0; demoFinished = false;
       updateHud();
     };
 
     const defeat = () => {
       running = false;
+      demoFinished = true;
       if (score > best) { best = score; localStorage.setItem('cosmic-stormblade-best', String(best)); }
       if (bestValue) bestValue.textContent = String(best).padStart(2, '0');
       launchButton.textContent = 'Retry trial';
@@ -237,7 +242,7 @@
       setStatus('Trial live · break the arc-wraiths');
       for (let index = 0; index < 3; index += 1) spawnEnemy();
       updateHud();
-      if (!frame) frame = requestAnimationFrame(loop);
+      if (!frame && isVisible) frame = requestAnimationFrame(loop);
     };
 
     const update = (delta: number, time: number) => {
@@ -281,7 +286,7 @@
       context.strokeStyle = color;
       context.globalAlpha = alpha;
       context.shadowColor = color;
-      context.shadowBlur = 16;
+      context.shadowBlur = lowPowerDevice ? 8 : 16;
       context.lineWidth = 2;
       context.beginPath();
       context.moveTo(x, y);
@@ -313,7 +318,7 @@
       const delta = Math.min(.05, Math.max(.001, (time - lastTime) / 1000 || .016));
       lastTime = time;
       update(delta, time); draw(time);
-      if (running || demoMode) frame = requestAnimationFrame(loop);
+      if (isVisible && (running || (demoMode && !demoFinished && demoTime < 12000))) frame = requestAnimationFrame(loop);
     };
 
     const pointerMove = (event: PointerEvent) => { const rect = arena.getBoundingClientRect(); pointerTarget = { x: event.clientX - rect.left, y: event.clientY - rect.top }; };
@@ -321,10 +326,16 @@
     arena.addEventListener('pointerleave', () => { pointerTarget = null; }, { passive: true });
     window.addEventListener('keydown', (event) => { const key = event.key.toLowerCase(); if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key)) { event.preventDefault(); keys.add(key); } if (key === '1') cast('dash'); if (key === '2') cast('arc'); if (key === '3') cast('pulse'); });
     window.addEventListener('keyup', (event) => keys.delete(event.key.toLowerCase()));
+    const arenaObserver = new IntersectionObserver(([entry]) => {
+      isVisible = Boolean(entry?.isIntersecting);
+      if (isVisible && (running || (demoMode && !demoFinished)) && !frame) frame = requestAnimationFrame(loop);
+    }, { threshold: 0.05 });
+    arenaObserver.observe(arena);
     window.addEventListener('resize', resize, { passive: true });
     launchButton.addEventListener('click', start);
     abilityButtons.forEach((button) => button.addEventListener('click', () => cast(button.dataset.ability || '')));
+    window.addEventListener('beforeunload', () => arenaObserver.disconnect(), { once: true });
     resize(); draw(0); updateHud();
-    if (demoMode) start();
+    if (demoMode && !reducedMotion) start();
   }
 </script>

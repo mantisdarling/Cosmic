@@ -1,9 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import BookmarkToggle from '../components/BookmarkToggle';
 import StormbladeArena from '../components/StormbladeArena.astro';
 import FrostboundCircuit from '../components/FrostboundCircuit.astro';
-import { RoadmapSchema, cleanAndParseJSON, type Roadmap } from '../lib/security';
+import { RoadmapSchema, type Roadmap } from '../lib/security';
 
 // Load all roadmaps
 const modules = import.meta.glob('../content/roadmaps/*.json', { eager: true });
@@ -109,7 +108,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     background-image:
       linear-gradient(90deg, rgba(6,9,18,0.96) 0%, rgba(6,9,18,0.86) 34%, rgba(6,9,18,0.36) 66%, rgba(6,9,18,0.78) 100%),
       linear-gradient(180deg, rgba(7,9,16,0.18) 0%, rgba(7,9,16,0.12) 45%, #0B0C10 100%),
-      url('/cosmic-anime-hero.png');
+      url('/cosmic-anime-hero.webp');
     background-size: cover;
     background-position: center right;
     border-bottom: 1px solid #1E2333;
@@ -143,7 +142,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     transition: transform .35s ease-out, border-color .2s, color .2s;
   }
   .hero-badge::before { content: ''; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #00E5FF; box-shadow: 0 0 10px currentColor; }
-  .hero-badge > span { animation: badge-float 4.5s ease-in-out infinite; display: inline-flex; align-items: center; }
+  .hero-badge > span { display: inline-flex; align-items: center; }
   .hero-badge:hover { border-color: rgba(0,229,255,0.8); color: #F5F5F5; }
   .hero-badge-frontend { top: 22%; left: 57%; color: #B5F4FF; }
   .hero-badge-frontend::before { background: #00E5FF; }
@@ -153,6 +152,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .hero-badge-cloud::before { background: #A78BFA; }
   .hero-badge-devops { bottom: 28%; right: 13%; color: #B7FFD8; animation-delay: -2.7s; }
   .hero-badge-devops::before { background: #22C55E; }
+  @media (min-width: 821px) and (pointer: fine) { .hero-badge > span { animation: badge-float 4.5s ease-in-out infinite; } }
   @keyframes badge-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
 
   /* ── HERO ─────────────────────────────────────────────── */
@@ -274,6 +274,12 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .clear-filters:focus-visible, .filter-btn:focus-visible, .hero-actions a:focus-visible, .hero-actions button:focus-visible, #search-input:focus-visible {
     outline: 2px solid #FCD068; outline-offset: 3px;
   }
+  @media (pointer: coarse), (max-width: 820px) {
+    .hero-badge { backdrop-filter: none; box-shadow: 0 8px 22px rgba(0,0,0,.2); }
+    .hero-container::before { display: none; }
+    .card:hover { transform: none; box-shadow: none; }
+    .card::after { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .hero-container *, .card, .clear-filters, .character-card, .color-swatch { animation: none !important; transition: none !important; }
     .hero-badges { display: none; }
@@ -299,7 +305,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .character-card {
     position: relative; min-height: 420px; overflow: hidden; border-radius: 18px;
     border: 1px solid rgba(0,229,255,0.28);
-    background-image: linear-gradient(90deg, rgba(7,10,20,0.98) 0%, rgba(7,10,20,0.86) 34%, rgba(7,10,20,0.2) 77%, rgba(7,10,20,0.35) 100%), url('/cosmic-lightning-swordsman.png');
+    background-image: linear-gradient(90deg, rgba(7,10,20,0.98) 0%, rgba(7,10,20,0.86) 34%, rgba(7,10,20,0.2) 77%, rgba(7,10,20,0.35) 100%), url('/cosmic-lightning-swordsman.webp');
     background-size: cover; background-position: center 38%;
     box-shadow: 0 24px 70px rgba(0,0,0,0.35), inset 0 0 50px rgba(0,229,255,0.06);
     isolation: isolate;
@@ -366,6 +372,8 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
+    content-visibility: auto;
+    contain-intrinsic-size: 900px;
   }
 
   /* ── CARD ─────────────────────────────────────────────── */
@@ -440,10 +448,6 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .footer-text a:hover { text-decoration: underline; }
 
   /* ── ANIMATIONS ───────────────────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
   [data-reveal] { opacity: 0; transform: translateY(12px); transition: opacity .5s, transform .5s; }
   [data-reveal].in { opacity: 1; transform: translateY(0); }
 </style>
@@ -634,14 +638,13 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
         <span class="section-count" id="role-count">{role.length} roadmaps</span>
       </div>
       <div class="grid" id="grid-role">
-        {role.map((rm, i) => (
+        {role.map((rm) => (
           <a
             href={`/roadmap/${rm.id}`}
             class="card"
             data-id={rm.id}
             data-title={rm.title.toLowerCase()}
             data-desc={rm.description.toLowerCase()}
-            style={`animation: fadeUp .4s ease both; animation-delay: ${i * 0.04}s;`}
             aria-label={`${rm.title} — ${rm.nodes.length} topics`}
             data-reveal
           >
@@ -670,14 +673,13 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
         <span class="section-count" id="skill-count">{skill.length} roadmaps</span>
       </div>
       <div class="grid" id="grid-skill">
-        {skill.map((rm, i) => (
+        {skill.map((rm) => (
           <a
             href={`/roadmap/${rm.id}`}
             class="card"
             data-id={rm.id}
             data-title={rm.title.toLowerCase()}
             data-desc={rm.description.toLowerCase()}
-            style={`animation: fadeUp .4s ease both; animation-delay: ${i * 0.04}s;`}
             aria-label={`${rm.title} — ${rm.nodes.length} topics`}
             data-reveal
           >
@@ -706,15 +708,14 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
             <span class="section-count" id="other-count">{other.length} roadmaps</span>
           </div>
           <div class="grid" id="grid-other">
-            {other.map((rm, i) => (
+            {other.map((rm) => (
               <a
                 href={`/roadmap/${rm.id}`}
                 class="card"
                 data-id={rm.id}
                 data-title={rm.title.toLowerCase()}
                 data-desc={rm.description.toLowerCase()}
-                style={`animation: fadeUp .4s ease both; animation-delay: ${i * 0.04}s;`}
-                aria-label={`${rm.title} — ${rm.nodes.length} topics`}
+                    aria-label={`${rm.title} — ${rm.nodes.length} topics`}
                 data-reveal
               >
                 <div class="card-accent" style={`background: ${rm.color}`} aria-hidden="true"></div>
@@ -746,22 +747,6 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 <script>
   import { cleanAndParseJSON } from '../lib/security';
 
-  // Scroll reveal animation observer
-  const revealObserver = new IntersectionObserver(
-    (entries) =>
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          revealObserver.unobserve(entry.target);
-        }
-      }),
-    { threshold: 0.05, rootMargin: '0px 0px -10px 0px' }
-  );
-
-  requestAnimationFrame(() =>
-    document.querySelectorAll('[data-reveal]').forEach((element) => revealObserver.observe(element))
-  );
-
   // Hero title text scrambling animation
   const SCRAMBLE_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
   const DEVELOPER_ROLES = [
@@ -775,14 +760,21 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   ];
 
   const scrambleElement = document.getElementById('scramble-text');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lowPowerMode = window.matchMedia('(pointer: coarse)').matches || (navigator.hardwareConcurrency || 8) <= 4;
   let currentRoleIndex = 0;
+  let scrambleTimer: number | undefined;
+  let scrambleInterval: number | undefined;
+  let scrambleVisible = true;
 
   function runScrambleAnimation(targetText: string) {
+    if (!scrambleElement || prefersReducedMotion || !scrambleVisible) return;
+    if (scrambleInterval) window.clearInterval(scrambleInterval);
     let iteration = 0;
     const maxIterations = targetText.length * 3;
+    const intervalMs = lowPowerMode ? 72 : 28;
 
-    const scrambleInterval = setInterval(() => {
-      if (!scrambleElement) return;
+    scrambleInterval = window.setInterval(() => {
       scrambleElement.textContent = targetText
         .split('')
         .map((char, index) => {
@@ -791,19 +783,41 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
           return SCRAMBLE_CHARACTERS[Math.floor(Math.random() * SCRAMBLE_CHARACTERS.length)];
         })
         .join('');
-
-      iteration++;
+      iteration += 1;
       if (iteration > maxIterations) {
-        clearInterval(scrambleInterval);
+        if (scrambleInterval) window.clearInterval(scrambleInterval);
+        scrambleInterval = undefined;
         scrambleElement.textContent = targetText;
       }
-    }, 28);
+    }, intervalMs);
   }
 
-  setInterval(() => {
+  const rotateScrambleRole = () => {
+    if (!scrambleVisible || prefersReducedMotion) return;
     currentRoleIndex = (currentRoleIndex + 1) % DEVELOPER_ROLES.length;
     runScrambleAnimation(DEVELOPER_ROLES[currentRoleIndex]);
-  }, 3500);
+    scrambleTimer = window.setTimeout(rotateScrambleRole, lowPowerMode ? 7200 : 3500);
+  };
+
+  if (scrambleElement && !prefersReducedMotion) {
+    const scrambleObserver = new IntersectionObserver(([entry]) => {
+      scrambleVisible = Boolean(entry?.isIntersecting);
+      if (scrambleVisible && !scrambleTimer) rotateScrambleRole();
+      if (!scrambleVisible) {
+        if (scrambleTimer) window.clearTimeout(scrambleTimer);
+        if (scrambleInterval) window.clearInterval(scrambleInterval);
+        scrambleTimer = undefined;
+        scrambleInterval = undefined;
+      }
+    }, { threshold: 0.1 });
+    scrambleObserver.observe(scrambleElement);
+    scrambleTimer = window.setTimeout(rotateScrambleRole, lowPowerMode ? 7200 : 3500);
+    window.addEventListener('beforeunload', () => {
+      scrambleObserver.disconnect();
+      if (scrambleTimer) window.clearTimeout(scrambleTimer);
+      if (scrambleInterval) window.clearInterval(scrambleInterval);
+    }, { once: true });
+  }
 
   // Interactive anime energy field: throttled to ~30fps, paused when hidden, and
   // rendered with a spatial grid so connection checks stay cheap at higher densities.
@@ -820,14 +834,14 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   const particleDensityValue = document.getElementById('particle-density-value');
   const particleColorValue = document.getElementById('particle-color-value');
   const colorSwatches = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-particle-color]'));
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let setParticleDensity = (_density: number) => {};
   let setParticleColor = (_color: ParticleColor) => {};
 
   if (heroContainer && particleCanvas && particleContext && !prefersReducedMotion) {
     const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
     const particles: HeroParticle[] = [];
-    const particleConfig = { density: Number(particleDensityInput?.value || 58), color: 'cyan' as ParticleColor };
+    const particleConfig = { density: Number(particleDensityInput?.value || (lowPowerMode ? 40 : 58)), color: 'cyan' as ParticleColor };
+    const maxParticleCount = lowPowerMode ? 52 : 96;
     let canvasWidth = 0;
     let canvasHeight = 0;
     let deviceScale = 1;
@@ -838,7 +852,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     const spatialGrid = new Map<string, number[]>();
 
     const syncParticlePool = () => {
-      const targetCount = Math.round(26 + particleConfig.density * 0.55);
+      const targetCount = Math.min(maxParticleCount, Math.round((lowPowerMode ? 18 : 26) + particleConfig.density * (lowPowerMode ? 0.38 : 0.55)));
       while (particles.length < targetCount) {
         particles.push({
           x: Math.random() * canvasWidth,
@@ -855,7 +869,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       const bounds = heroContainer.getBoundingClientRect();
       canvasWidth = bounds.width;
       canvasHeight = bounds.height;
-      deviceScale = Math.min(window.devicePixelRatio || 1, 1.5);
+      deviceScale = Math.min(window.devicePixelRatio || 1, lowPowerMode ? 1 : 1.25);
       particleCanvas.width = Math.floor(canvasWidth * deviceScale);
       particleCanvas.height = Math.floor(canvasHeight * deviceScale);
       particleContext.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
@@ -879,14 +893,14 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       pointer.targetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
       heroContainer.style.setProperty('--pointer-x', pointer.targetX.toFixed(3));
       heroContainer.style.setProperty('--pointer-y', pointer.targetY.toFixed(3));
-      floatingBadges.forEach((badge) => {
+      if (!lowPowerMode) floatingBadges.forEach((badge) => {
         const depth = Number(badge.dataset.depth || 1);
         badge.style.setProperty('--badge-shift-x', `${(pointer.targetX * depth * 11).toFixed(1)}px`);
         badge.style.setProperty('--badge-shift-y', `${(pointer.targetY * depth * 8).toFixed(1)}px`);
       });
     };
 
-    const setVisibility = (visible: boolean) => {
+    const     setVisibility = (visible: boolean) => {
       isVisible = visible;
       if (visible && !animationFrame) animationFrame = window.requestAnimationFrame(renderParticles);
     };
@@ -894,7 +908,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     const renderParticles = (time: number) => {
       animationFrame = 0;
       if (!isVisible) return;
-      if (time - lastFrameTime < 32) {
+      if (time - lastFrameTime < (lowPowerMode ? 50 : 32)) {
         animationFrame = window.requestAnimationFrame(renderParticles);
         return;
       }
@@ -923,10 +937,12 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
         const cell = spatialGrid.get(cellKey) || [];
         cell.push(index);
         spatialGrid.set(cellKey, cell);
-        particleContext.fillStyle = `rgba(${color},0.11)`;
-        particleContext.beginPath();
-        particleContext.arc(drawX, drawY, particle.radius * 6, 0, Math.PI * 2);
-        particleContext.fill();
+        if (!lowPowerMode) {
+          particleContext.fillStyle = `rgba(${color},0.11)`;
+          particleContext.beginPath();
+          particleContext.arc(drawX, drawY, particle.radius * 6, 0, Math.PI * 2);
+          particleContext.fill();
+        }
         particleContext.fillStyle = `rgba(${color},0.88)`;
         particleContext.beginPath();
         particleContext.arc(drawX, drawY, particle.radius, 0, Math.PI * 2);
@@ -965,13 +981,19 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       syncParticlePool();
     };
     setParticleColor = (color: ParticleColor) => { particleConfig.color = color; };
+    const particleObserver = new IntersectionObserver((entries) => entries.forEach((entry) => setVisibility(entry.isIntersecting)), { threshold: 0.01 });
     resizeParticles();
     window.addEventListener('resize', resizeParticles, { passive: true });
-    heroContainer.addEventListener('pointermove', movePointer, { passive: true });
-    heroContainer.addEventListener('pointerleave', resetPointer, { passive: true });
-    new IntersectionObserver((entries) => entries.forEach((entry) => setVisibility(entry.isIntersecting)), { threshold: 0.01 }).observe(heroContainer);
+    if (!lowPowerMode) {
+      heroContainer.addEventListener('pointermove', movePointer, { passive: true });
+      heroContainer.addEventListener('pointerleave', resetPointer, { passive: true });
+    }
+    particleObserver.observe(heroContainer);
     animationFrame = window.requestAnimationFrame(renderParticles);
-    window.addEventListener('beforeunload', () => window.cancelAnimationFrame(animationFrame), { once: true });
+    window.addEventListener('beforeunload', () => {
+      particleObserver.disconnect();
+      window.cancelAnimationFrame(animationFrame);
+    }, { once: true });
   } else if (particleCanvas) {
     particleCanvas.style.display = 'none';
   }

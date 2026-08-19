@@ -1,69 +1,51 @@
-const CACHE_NAME = 'cosmic-cache-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/icon.svg',
-  '/manifest.json'
-];
+const CACHE_NAME = 'cosmic-shell-v2';
+const APP_SHELL = ['/', '/icon.svg', '/manifest.json'];
+const CACHEABLE_STATIC = /\.(?:css|js|svg|ico|json|woff2?)$/i;
+const MAX_CACHEABLE_BYTES = 320_000;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys()
+      .then((cacheNames) => Promise.all(cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests and bypass api requests
-  if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+  const request = event.request;
+  const url = new URL(request.url);
+
+  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .catch(() => caches.match('/'))
+    );
     return;
   }
-  
+
+  if (!CACHEABLE_STATIC.test(url.pathname)) return;
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch fresh in background and update cache
-        fetch(event.request).then((response) => {
-          if (response.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response));
-          }
-        }).catch(() => {/* Ignore network error */});
-        
-        return cachedResponse;
-      }
-      
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
+    caches.match(request).then((cachedResponse) => {
+      const networkResponse = fetch(request).then((response) => {
+        const length = Number(response.headers.get('content-length') || 0);
+        if (response.ok && response.type === 'basic' && (!length || length <= MAX_CACHEABLE_BYTES)) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
         }
-        
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        
         return response;
-      }).catch(() => {
-        // Offline fallback for html requests
-        if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('/');
-        }
       });
+      return cachedResponse || networkResponse;
     })
   );
 });

@@ -14,7 +14,6 @@ export const SlugSchema = z
   .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens only');
 
 export const EmailSchema = z
-  .string()
   .email('Invalid email address')
   .max(254)
   .transform((email) => email.toLowerCase().trim());
@@ -28,7 +27,7 @@ export const SearchQuerySchema = z
 
 export const ResourceSchema = z.object({
   label: z.string().min(1).max(120),
-  url: z.string().url().startsWith('https://', 'Resource URLs must use HTTPS'),
+  url: z.url().startsWith('https://', 'Resource URLs must use HTTPS'),
 });
 
 export const RoadmapNodeSchema = z.object({

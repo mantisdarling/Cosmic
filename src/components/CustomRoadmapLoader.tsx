@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import RoadmapCanvas from './RoadmapCanvas';
 import { RoadmapSchema, type Roadmap } from '../lib/security';
 

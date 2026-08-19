@@ -51,39 +51,52 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link data-deferred-font href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" /></noscript>
 </head>
 <body>
   <KeyboardShortcutsModal client:load />
   
-  <!-- Service Worker registration -->
+  <!-- Deferred font activation and service worker registration -->
+  <script is:inline>
+    window.addEventListener('load', () => {
+      document.querySelectorAll<HTMLLinkElement>('[data-deferred-font]').forEach((link) => { link.media = 'all'; });
+    }, { once: true });
+  </script>
   <script is:inline>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
-          .catch((err) => console.error('Service Worker registration failed:', err));
-      });
+        const register = () => navigator.serviceWorker.register('/sw.js').catch(() => {});
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(register, { timeout: 2500 });
+        } else {
+          window.setTimeout(register, 1800);
+        }
+      }, { once: true });
     }
   </script>
   <slot />
 
-  <!-- Scroll reveal handler -->
+  <!-- Scroll reveal handler: skip observation on low-power or reduced-motion devices -->
   <script>
-    const scrollObserver = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
+    const lowPowerReveal = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || window.matchMedia('(pointer: coarse)').matches
+      || (navigator.hardwareConcurrency || 8) <= 4;
+    const revealTargets = document.querySelectorAll('[data-reveal]');
+    if (lowPowerReveal) {
+      revealTargets.forEach((element) => element.classList.add('in'));
+    } else {
+      const scrollObserver = new IntersectionObserver(
+        (entries) => entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('in');
             scrollObserver.unobserve(entry.target);
           }
         }),
-      { threshold: 0.06, rootMargin: '0px 0px -16px 0px' }
-    );
-
-    requestAnimationFrame(() =>
-      document.querySelectorAll('[data-reveal]').forEach((element) => scrollObserver.observe(element))
-    );
+        { threshold: 0.06, rootMargin: '0px 0px -16px 0px' }
+      );
+      requestAnimationFrame(() => revealTargets.forEach((element) => scrollObserver.observe(element)));
+    }
   </script>
 </body>
 </html>
