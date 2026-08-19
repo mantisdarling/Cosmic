@@ -79,6 +79,32 @@ test.describe('Cosmic Home Page', () => {
     await expect(page.locator('#frost-status')).toContainText('Glacial Lock');
   });
 
+  test('should branch the story mode to Frostwarden and reset the chapter', async ({ page }) => {
+    await page.goto('/');
+
+    await page.getByRole('button', { name: 'Wait for the frost signal.' }).click();
+    await expect(page.locator('#story-speaker')).toHaveText('Frostwarden');
+    await expect(page.locator('#story-status')).toContainText('Frostwarden signal detected');
+    await expect(page.locator('#story-chapter-count')).toHaveText('Scene 02 / 07');
+
+    await page.locator('#story-restart').click();
+    await expect(page.locator('#story-speaker')).toHaveText('Stormblade');
+    await expect(page.locator('#story-chapter-count')).toHaveText('Scene 01 / 07');
+  });
+
+  test('should update roadmap utility actions for route choice and focus session', async ({ page }) => {
+    await page.goto('/');
+
+    await page.locator('#route-select').selectOption({ label: 'Python' });
+    await expect(page.locator('#route-launch')).toHaveAttribute('href', '/roadmap/python');
+
+    await page.locator('#focus-start').click();
+    await expect(page.locator('#focus-start')).toHaveText('Pause session');
+    await page.locator('#focus-reset').click();
+    await expect(page.locator('#focus-clock')).toHaveText('25:00');
+    await expect(page.locator('#focus-status')).toHaveText('Ready when you are.');
+  });
+
   test('should open AI generator panel and successfully redirect to custom roadmap', async ({ page }) => {
     // Intercept /api/ai and mock custom roadmap response
     await page.route('**/api/ai', async route => {

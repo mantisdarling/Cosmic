@@ -1,0 +1,129 @@
+---
+const chapterLabel = 'Chapter 01 // The Convergence';
+---
+
+<section class="story-section" id="story-mode" aria-labelledby="story-heading" data-reveal>
+  <div class="story-section-head">
+    <div>
+      <div class="story-kicker">Interactive narrative // 004</div>
+      <h2 class="section-title" id="story-heading">Choose the signal</h2>
+    </div>
+    <span class="section-count">Two paths · one horizon</span>
+  </div>
+
+  <div class="story-shell">
+    <div class="story-visual" aria-hidden="true">
+      <div class="story-visual-orbit"></div>
+      <div class="story-visual-sigil">✦</div>
+      <div class="story-visual-scan"></div>
+      <span class="story-visual-label story-visual-label-top">COSMIC//NARRATIVE</span>
+      <span class="story-visual-label story-visual-label-bottom">STORM / FROST / FUTURE</span>
+    </div>
+
+    <article class="story-console" aria-live="polite">
+      <div class="story-console-top">
+        <span id="story-chapter">{chapterLabel}</span>
+        <span><span class="story-live-dot" aria-hidden="true"></span><span id="story-status">Signal live</span></span>
+      </div>
+      <div class="story-progress" aria-label="Story progress"><span id="story-progress-bar"></span></div>
+      <div class="story-speaker-row">
+        <div class="story-avatar" id="story-avatar" aria-hidden="true">S</div>
+        <div>
+          <div class="story-speaker" id="story-speaker">Stormblade</div>
+          <div class="story-role" id="story-role">Lightning path // duelist</div>
+        </div>
+      </div>
+      <p class="story-text" id="story-text">The sky above the roadmaps splits into two currents. One crackles. One crystallizes. The next move is yours.</p>
+      <div class="story-choices" id="story-choices"></div>
+      <div class="story-console-footer">
+        <span id="story-chapter-count">Scene 01 / 06</span>
+        <button type="button" id="story-restart" class="story-restart">Restart chapter</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .story-section { max-width: 1200px; margin: 0 auto; padding: 62px 24px 38px; }
+  .story-section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+  .story-kicker { color:#A78BFA; font:700 .66rem/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; }
+  .story-shell { display:grid; grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr); border:1px solid rgba(126,109,196,.42); border-radius:20px; overflow:hidden; background:linear-gradient(135deg,rgba(13,16,32,.98),rgba(9,13,25,.98)); box-shadow:0 24px 70px rgba(0,0,0,.28),0 0 45px rgba(167,139,250,.06); }
+  .story-visual { position:relative; min-height:360px; overflow:hidden; background:radial-gradient(circle at 65% 38%,rgba(167,139,250,.3),transparent 22%),linear-gradient(145deg,#15122f 0%,#0d1730 54%,#08121f 100%); border-right:1px solid rgba(126,109,196,.28); }
+  .story-visual::before { content:''; position:absolute; inset:0; background:linear-gradient(125deg,transparent 0 42%,rgba(0,229,255,.13) 42.2%,transparent 42.7%),linear-gradient(305deg,transparent 0 56%,rgba(245,166,35,.16) 56.2%,transparent 56.7%); opacity:.9; }
+  .story-visual::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 115%,rgba(0,229,255,.2),transparent 48%),repeating-linear-gradient(0deg,transparent 0 4px,rgba(255,255,255,.016) 5px 6px); pointer-events:none; }
+  .story-visual-orbit { position:absolute; width:250px; height:250px; left:50%; top:50%; border:1px solid rgba(158,235,255,.35); border-radius:50%; transform:translate(-50%,-50%) rotate(-28deg) scaleX(.62); box-shadow:0 0 0 24px rgba(167,139,250,.04),0 0 0 52px rgba(0,229,255,.025); }
+  .story-visual-orbit::before,.story-visual-orbit::after { content:''; position:absolute; width:9px; height:9px; border-radius:50%; box-shadow:0 0 18px currentColor; }
+  .story-visual-orbit::before { right:14%; top:6%; color:#F5A623; background:#F5A623; }
+  .story-visual-orbit::after { left:11%; bottom:13%; color:#9EEBFF; background:#9EEBFF; }
+  .story-visual-sigil { position:absolute; left:50%; top:50%; z-index:1; color:#F5A623; font-size:4.8rem; line-height:1; text-shadow:0 0 24px rgba(245,166,35,.42); transform:translate(-50%,-50%); }
+  .story-visual-scan { position:absolute; left:10%; right:10%; top:30%; height:1px; background:linear-gradient(90deg,transparent,#9EEBFF,transparent); box-shadow:0 0 18px #9EEBFF; opacity:.75; }
+  .story-visual-label { position:absolute; z-index:2; color:#B7C9E8; font:700 .6rem/1 'Space Mono',monospace; letter-spacing:.08em; }
+  .story-visual-label-top { top:24px; left:24px; }
+  .story-visual-label-bottom { right:24px; bottom:24px; color:#F5A623; }
+  .story-console { padding:28px 30px 24px; display:flex; flex-direction:column; min-height:360px; }
+  .story-console-top,.story-console-footer { display:flex; justify-content:space-between; align-items:center; gap:12px; color:#6F7B95; font:700 .62rem/1 'Space Mono',monospace; letter-spacing:.06em; text-transform:uppercase; }
+  .story-live-dot { display:inline-block; width:6px; height:6px; margin-right:6px; border-radius:50%; background:#62F4BE; box-shadow:0 0 12px #62F4BE; vertical-align:1px; }
+  .story-progress { height:3px; margin:22px 0 26px; overflow:hidden; border-radius:99px; background:#20243A; }
+  .story-progress span { display:block; width:16.6%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#00E5FF,#A78BFA,#F5A623); transition:width .35s ease; }
+  .story-speaker-row { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .story-avatar { width:40px; height:40px; display:grid; place-items:center; border-radius:12px; color:#0B0C10; background:linear-gradient(135deg,#F5A623,#FCD068); font:900 1.1rem/1 'Space Mono',monospace; box-shadow:0 0 20px rgba(245,166,35,.2); }
+  .story-avatar.frost { background:linear-gradient(135deg,#9EEBFF,#A78BFA); box-shadow:0 0 20px rgba(158,235,255,.22); }
+  .story-speaker { color:#F5F5F5; font-size:1rem; font-weight:800; letter-spacing:-.02em; }
+  .story-role { margin-top:4px; color:#7D89A4; font:600 .64rem/1 'Space Mono',monospace; text-transform:uppercase; }
+  .story-text { max-width:620px; min-height:88px; margin:0 0 24px; color:#D6DDF0; font-size:1.08rem; line-height:1.7; letter-spacing:-.01em; }
+  .story-choices { display:grid; gap:9px; margin-top:auto; }
+  .story-choice { position:relative; width:100%; padding:12px 14px 12px 16px; border:1px solid rgba(91,106,148,.45); border-radius:10px; background:rgba(15,20,35,.72); color:#C8D4EA; font:600 .78rem/1.3 inherit; text-align:left; cursor:pointer; transition:border-color .2s,background .2s,transform .2s; }
+  .story-choice::before { content:'↳'; margin-right:9px; color:#00E5FF; }
+  .story-choice:hover { border-color:#00E5FF; background:rgba(0,229,255,.08); transform:translateX(3px); }
+  .story-choice:focus-visible,.story-restart:focus-visible { outline:2px solid #FCD068; outline-offset:3px; }
+  .story-console-footer { margin-top:22px; padding-top:16px; border-top:1px solid rgba(55,67,98,.45); }
+  .story-restart { padding:0; border:0; background:none; color:#F5A623; font:700 .62rem/1 'Space Mono',monospace; text-transform:uppercase; cursor:pointer; }
+  @media (max-width:760px) { .story-section { padding:48px 18px 28px; } .story-shell { grid-template-columns:1fr; } .story-visual { min-height:220px; border-right:0; border-bottom:1px solid rgba(126,109,196,.28); } .story-console { min-height:0; padding:24px 20px 20px; } .story-text { min-height:0; font-size:.98rem; } }
+  @media (prefers-reduced-motion:reduce) { .story-choice,.story-progress span { transition:none; } }
+</style>
+
+<script>
+  type StoryChoice = { label: string; next: string; status: string };
+  type StoryScene = { speaker: 'Stormblade' | 'Frostwarden'; role: string; text: string; avatar: string; frost?: boolean; choices: StoryChoice[] };
+  const scenes: Record<string, StoryScene> = {
+    start: { speaker:'Stormblade', role:'Lightning path // duelist', avatar:'S', text:'The sky above the roadmaps splits into two currents. One crackles. One crystallizes. The next move is yours.', choices:[{ label:'Follow the lightning into the archive.', next:'storm', status:'Stormblade path selected' },{ label:'Wait for the frost signal.', next:'frost', status:'Frostwarden signal detected' }] },
+    storm: { speaker:'Stormblade', role:'Lightning path // duelist', avatar:'S', text:'Speed is not the goal. Direction is. Pick a path, then make every topic spark.', choices:[{ label:'Charge the frontend arc.', next:'crossroads', status:'Frontend arc unlocked' },{ label:'Strike toward systems design.', next:'stormcraft', status:'Systems arc unlocked' }] },
+    frost: { speaker:'Frostwarden', role:'Ice path // tactician', avatar:'F', frost:true, text:'A quiet route can still carry enormous force. We will map the terrain before we move.', choices:[{ label:'Trace the foundations first.', next:'crossroads', status:'Foundations arc unlocked' },{ label:'Freeze the hard problem and study it.', next:'frostcraft', status:'Deep work arc unlocked' }] },
+    stormcraft: { speaker:'Stormblade', role:'Lightning path // duelist', avatar:'S', text:'A clean system is a blade with no wasted motion. Build the structure, then let the speed arrive.', choices:[{ label:'Open the system design roadmap.', next:'final', status:'System design route primed' }] },
+    frostcraft: { speaker:'Frostwarden', role:'Ice path // tactician', avatar:'F', frost:true, text:'Focus is a spell you practice. Choose one difficult topic and let the noise fall away around it.', choices:[{ label:'Start a focused learning session.', next:'final', status:'Focus session primed' }] },
+    crossroads: { speaker:'Frostwarden', role:'Ice path // tactician', avatar:'F', frost:true, text:'The paths converge at the same truth: progress is easier to keep when the next step is visible.', choices:[{ label:'Let the two arcs converge.', next:'final', status:'Convergence reached' }] },
+    final: { speaker:'Stormblade', role:'Lightning path // duelist', avatar:'S', text:'Signal locked. Your next arc is ready below. Choose a roadmap, start a focus session, or return here when you need a new route.', choices:[{ label:'Replay the chapter.', next:'start', status:'Chapter replayed' }] },
+  };
+  const storySpeaker = document.getElementById('story-speaker');
+  const storyRole = document.getElementById('story-role');
+  const storyText = document.getElementById('story-text');
+  const storyAvatar = document.getElementById('story-avatar');
+  const storyChoices = document.getElementById('story-choices');
+  const storyStatus = document.getElementById('story-status');
+  const storyProgress = document.getElementById('story-progress-bar');
+  const storyChapterCount = document.getElementById('story-chapter-count');
+  const storyRestart = document.getElementById('story-restart');
+  let currentScene = 'start';
+  let sceneNumber = 1;
+  const renderStory = (sceneId: string, status = 'Signal live') => {
+    const scene = scenes[sceneId];
+    if (!scene || !storySpeaker || !storyRole || !storyText || !storyAvatar || !storyChoices) return;
+    currentScene = sceneId;
+    storySpeaker.textContent = scene.speaker;
+    storyRole.textContent = scene.role;
+    storyText.textContent = scene.text;
+    storyAvatar.textContent = scene.avatar;
+    storyAvatar.classList.toggle('frost', Boolean(scene.frost));
+    if (storyStatus) storyStatus.textContent = status;
+    if (storyChapterCount) storyChapterCount.textContent = `Scene ${String(sceneNumber).padStart(2, '0')} / 07`;
+    if (storyProgress) storyProgress.style.width = `${Math.min(100, Math.max(16.6, (sceneNumber / 7) * 100))}%`;
+    storyChoices.replaceChildren(...scene.choices.map((choice) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'story-choice'; button.textContent = choice.label;
+      button.addEventListener('click', () => { sceneNumber = sceneNumber >= 7 || choice.next === 'start' ? 1 : sceneNumber + 1; renderStory(choice.next, choice.status); });
+      return button;
+    }));
+  };
+  renderStory(currentScene);
+  storyRestart?.addEventListener('click', () => { sceneNumber = 1; renderStory('start', 'Signal live'); });
+</script>

@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import StormbladeArena from '../components/StormbladeArena.astro';
 import FrostboundCircuit from '../components/FrostboundCircuit.astro';
+import StoryMode from '../components/StoryMode.astro';
+import RoadmapUtilities from '../components/RoadmapUtilities.astro';
 import { RoadmapSchema, type Roadmap } from '../lib/security';
 
 // Load all roadmaps
@@ -634,8 +636,10 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     </div>
   </section>
 
+  <StoryMode />
   <StormbladeArena />
   <FrostboundCircuit />
+  <RoadmapUtilities roadmaps={all.map(({ id, title }) => ({ id, title }))} />
 
   <div id="roadmaps">
     <div id="no-results" role="status">

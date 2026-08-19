@@ -1,0 +1,123 @@
+---
+interface Props {
+  roadmaps: { id: string; title: string }[];
+}
+const { roadmaps } = Astro.props;
+const featuredIds = ['frontend', 'python', 'react', 'devops', 'ai-engineer', 'fullstack'];
+const featuredRoadmaps = [...featuredIds.map((id) => roadmaps.find((roadmap) => roadmap.id === id)).filter(Boolean), ...roadmaps]
+  .filter((roadmap, index, list) => list.findIndex((candidate) => candidate?.id === roadmap?.id) === index)
+  .slice(0, 18) as { id: string; title: string }[];
+---
+
+<section class="utility-section" aria-labelledby="utility-heading" data-reveal>
+  <div class="utility-head">
+    <div>
+      <div class="utility-kicker">Mission control // 005</div>
+      <h2 class="section-title" id="utility-heading">Make the next step obvious</h2>
+    </div>
+    <span class="section-count">Plan · focus · return</span>
+  </div>
+  <div class="utility-grid">
+    <article class="utility-card utility-route-card">
+      <div class="utility-card-top"><span class="utility-index">01</span><span class="utility-status">Route selector</span></div>
+      <h3>Choose a route</h3>
+      <p>Jump straight into a roadmap and keep your learning path one click away.</p>
+      <label class="utility-label" for="route-select">Destination</label>
+      <div class="utility-route-row">
+        <select id="route-select" aria-label="Choose a roadmap">
+          {featuredRoadmaps.map((roadmap) => <option value={roadmap.id}>{roadmap.title}</option>)}
+        </select>
+        <a id="route-launch" class="utility-action" href={`/roadmap/${featuredRoadmaps[0]?.id ?? 'frontend'}`}>Open</a>
+      </div>
+      <button type="button" id="surprise-route" class="utility-text-action">↗ Surprise me</button>
+    </article>
+
+    <article class="utility-card utility-focus-card">
+      <div class="utility-card-top"><span class="utility-index">02</span><span class="utility-status utility-status-amber">Deep work</span></div>
+      <h3>Start a focus session</h3>
+      <p>Give one topic your full attention. The timer stays local and remembers nothing outside this session.</p>
+      <div class="focus-clock" id="focus-clock" aria-live="polite">25:00</div>
+      <div class="focus-actions"><button type="button" id="focus-start" class="utility-action">Start session</button><button type="button" id="focus-reset" class="utility-quiet-action">Reset</button></div>
+      <span class="focus-status" id="focus-status">Ready when you are.</span>
+    </article>
+
+    <article class="utility-card utility-saved-card">
+      <div class="utility-card-top"><span class="utility-index">03</span><span class="utility-status utility-status-mint">Personal archive</span></div>
+      <h3>Keep your signal</h3>
+      <p>Your favorites become a lightweight personal archive for returning to the roadmaps that matter.</p>
+      <div class="saved-metric"><strong id="saved-count">0</strong><span>saved routes</span></div>
+      <button type="button" id="saved-archive" class="utility-text-action">☆ Open saved archive</button>
+    </article>
+  </div>
+</section>
+
+<style>
+  .utility-section { max-width:1200px; margin:0 auto; padding:56px 24px 38px; }
+  .utility-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+  .utility-kicker { margin-bottom:8px; color:#62F4BE; font:700 .66rem/1 'Space Mono',monospace; letter-spacing:.1em; text-transform:uppercase; }
+  .utility-grid { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:12px; }
+  .utility-card { position:relative; min-height:270px; padding:22px; overflow:hidden; border:1px solid rgba(55,67,98,.72); border-radius:16px; background:linear-gradient(145deg,rgba(19,24,38,.98),rgba(10,15,27,.98)); box-shadow:0 16px 46px rgba(0,0,0,.18); }
+  .utility-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00E5FF,#A78BFA,#F5A623); opacity:.8; }
+  .utility-route-card::after { content:'↗'; position:absolute; right:22px; bottom:8px; color:rgba(0,229,255,.14); font-size:5rem; line-height:1; }
+  .utility-card-top { display:flex; justify-content:space-between; align-items:center; gap:12px; color:#75819A; font:700 .61rem/1 'Space Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .utility-index { color:#00E5FF; }
+  .utility-status-amber { color:#F5A623; }
+  .utility-status-mint { color:#62F4BE; }
+  .utility-card h3 { margin:25px 0 8px; color:#F5F5F5; font-size:1.08rem; letter-spacing:-.03em; }
+  .utility-card p { min-height:46px; margin:0 0 18px; color:#8992A8; font-size:.77rem; line-height:1.6; }
+  .utility-label { display:block; margin-bottom:7px; color:#B7C4DE; font:700 .61rem/1 'Space Mono',monospace; text-transform:uppercase; }
+  .utility-route-row { position:relative; z-index:1; display:flex; gap:8px; }
+  .utility-route-row select { min-width:0; flex:1; height:40px; padding:0 10px; border:1px solid #2A3550; border-radius:8px; background:#0B101B; color:#DCE4F5; font:600 .75rem/1 inherit; }
+  .utility-action,.utility-quiet-action { display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 14px; border-radius:8px; font:700 .72rem/1 inherit; cursor:pointer; text-decoration:none; transition:transform .2s,border-color .2s,background .2s; }
+  .utility-action { border:1px solid #F5A623; background:#F5A623; color:#0B0C10; }
+  .utility-action:hover { transform:translateY(-2px); background:#FCD068; }
+  .utility-quiet-action { border:1px solid #2A3550; background:transparent; color:#AAB7D0; }
+  .utility-quiet-action:hover { border-color:#00E5FF; color:#F5F5F5; }
+  .utility-text-action { position:relative; z-index:1; margin-top:16px; padding:0; border:0; background:none; color:#00E5FF; font:700 .64rem/1 'Space Mono',monospace; text-transform:uppercase; cursor:pointer; }
+  .utility-text-action:hover { color:#F5A623; }
+  .focus-clock { margin:5px 0 14px; color:#F5A623; font:900 clamp(2.3rem,5vw,3.6rem)/1 'Space Mono',monospace; letter-spacing:-.08em; text-shadow:0 0 25px rgba(245,166,35,.16); }
+  .focus-actions { display:flex; gap:8px; }
+  .focus-status { display:block; margin-top:14px; color:#73819A; font:600 .62rem/1 'Space Mono',monospace; }
+  .saved-metric { display:flex; align-items:baseline; gap:8px; margin:30px 0 10px; }
+  .saved-metric strong { color:#62F4BE; font:900 3.4rem/1 'Space Mono',monospace; letter-spacing:-.08em; }
+  .saved-metric span { color:#AAB7D0; font:700 .64rem/1 'Space Mono',monospace; text-transform:uppercase; }
+  .utility-card button:focus-visible,.utility-card select:focus-visible,.utility-card a:focus-visible { outline:2px solid #FCD068; outline-offset:3px; }
+  @media (max-width:900px) { .utility-grid { grid-template-columns:1fr 1fr; } .utility-saved-card { grid-column:span 2; min-height:220px; } }
+  @media (max-width:600px) { .utility-section { padding:44px 18px 28px; } .utility-grid { grid-template-columns:1fr; } .utility-saved-card { grid-column:auto; } .utility-card { min-height:0; } }
+  @media (prefers-reduced-motion:reduce) { .utility-action,.utility-quiet-action { transition:none; } }
+</style>
+
+<script is:inline define:vars={{ routeCatalog: featuredRoadmaps.map(({ id, title }) => ({ id, title })) }}>
+  const routeSelect = document.getElementById('route-select');
+  const routeLaunch = document.getElementById('route-launch');
+  const surpriseRoute = document.getElementById('surprise-route');
+  const savedArchive = document.getElementById('saved-archive');
+  const savedCount = document.getElementById('saved-count');
+  const focusClock = document.getElementById('focus-clock');
+  const focusStart = document.getElementById('focus-start');
+  const focusReset = document.getElementById('focus-reset');
+  const focusStatus = document.getElementById('focus-status');
+  const routes = Array.isArray(routeCatalog) ? routeCatalog : [];
+  let focusSeconds = 25 * 60;
+  let focusTimer;
+  const setRoute = (id) => { if (routeLaunch) routeLaunch.href = `/roadmap/${id}`; };
+  routeSelect?.addEventListener('change', () => setRoute(routeSelect.value));
+  surpriseRoute?.addEventListener('click', () => { if (!routes.length || !routeSelect) return; const route = routes[Math.floor(Math.random() * routes.length)]; routeSelect.value = route.id; setRoute(route.id); routeLaunch?.focus(); });
+  const updateSavedCount = () => { try { savedCount && (savedCount.textContent = String(JSON.parse(localStorage.getItem('cosmic-bookmarks') || '[]').length)); } catch { if (savedCount) savedCount.textContent = '0'; } };
+  updateSavedCount();
+  window.addEventListener('cosmic-bookmarks-updated', updateSavedCount);
+  savedArchive?.addEventListener('click', () => { document.getElementById('favorites-filter-btn')?.click(); document.getElementById('roadmaps')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  const renderFocus = () => { if (!focusClock) return; const minutes = Math.floor(focusSeconds / 60).toString().padStart(2, '0'); const seconds = (focusSeconds % 60).toString().padStart(2, '0'); focusClock.textContent = `${minutes}:${seconds}`; };
+  focusStart?.addEventListener('click', () => {
+    if (focusTimer) {
+      window.clearInterval(focusTimer); focusTimer = undefined;
+      focusStart.textContent = 'Resume session'; focusStatus && (focusStatus.textContent = 'Paused · your route is still here');
+      return;
+    }
+    if (focusSeconds <= 0) focusSeconds = 25 * 60;
+    focusStart.textContent = 'Pause session'; focusStatus && (focusStatus.textContent = 'Focus field active · stay with one topic');
+    focusTimer = window.setInterval(() => { focusSeconds -= 1; renderFocus(); if (focusSeconds <= 0) { window.clearInterval(focusTimer); focusTimer = undefined; focusStart.textContent = 'Start session'; focusStatus && (focusStatus.textContent = 'Session complete · take a short reset'); } }, 1000);
+  });
+  focusReset?.addEventListener('click', () => { if (focusTimer) window.clearInterval(focusTimer); focusTimer = undefined; focusSeconds = 25 * 60; renderFocus(); if (focusStart) focusStart.textContent = 'Start session'; if (focusStatus) focusStatus.textContent = 'Ready when you are.'; });
+  renderFocus();
+</script>
