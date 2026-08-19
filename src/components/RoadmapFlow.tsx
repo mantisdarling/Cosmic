@@ -195,22 +195,15 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Roadmap
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [isReady, setIsReady] = useState(false);
 
-  const { flowNodes, flowEdges } = useMemo(() => {
+  const baseGraph = useMemo(() => {
     const accentColor = roadmap.color || '#F5A623';
-
     const flowNodes: Node[] = roadmap.nodes.map((n) => ({
       id: n.id,
       type: 'flowNode',
       position: { x: 0, y: 0 },
-      data: {
-        label: n.label,
-        isRoot: n.type === 'root',
-        accent: accentColor,
-        done: doneNodes?.has(n.id) ?? false,
-      },
+      data: { label: n.label, isRoot: n.type === 'root', accent: accentColor, done: false },
       draggable: false,
     }));
-
     const flowEdges: Edge[] = roadmap.nodes
       .filter((n) => n.parentId !== null)
       .map((n) => ({
@@ -219,19 +212,30 @@ export default function RoadmapFlow({ roadmap, onNodeClick, doneNodes }: Roadmap
         target: n.id,
         type: 'smoothstep',
         style: { stroke: '#2A3147', strokeWidth: 1.5 },
-        animated: doneNodes?.has(n.id) ?? false,
+        animated: false,
       }));
-
     return { flowNodes, flowEdges };
-  }, [roadmap, doneNodes]);
+  }, [roadmap]);
+
+  const layoutNodes = useMemo(
+    () => calculateLayout(baseGraph.flowNodes, baseGraph.flowEdges),
+    [baseGraph]
+  );
+  const displayNodes = useMemo(
+    () => layoutNodes.map((node) => ({ ...node, data: { ...node.data, done: doneNodes?.has(node.id) ?? false } })),
+    [layoutNodes, doneNodes]
+  );
+  const displayEdges = useMemo(
+    () => baseGraph.flowEdges.map((edge) => ({ ...edge, animated: doneNodes?.has(edge.target) ?? false })),
+    [baseGraph, doneNodes]
+  );
 
   useEffect(() => {
-    const laidOutNodes = calculateLayout(flowNodes, flowEdges);
-    setNodes(laidOutNodes);
-    setEdges(flowEdges);
+    setNodes(displayNodes);
+    setEdges(displayEdges);
     const timer = setTimeout(() => setIsReady(true), 60);
     return () => clearTimeout(timer);
-  }, [flowNodes, flowEdges]);
+  }, [displayNodes, displayEdges, setNodes, setEdges]);
 
   const handleNodeClick: NodeMouseHandler = (_, node) => onNodeClick(node.id);
 

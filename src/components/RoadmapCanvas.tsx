@@ -1,10 +1,10 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import RoadmapFlow from './RoadmapFlow';
+import { lazy, Suspense, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+const RoadmapFlow = lazy(() => import('./RoadmapFlow'));
 import TopicPanel from './TopicPanel';
-import { NodeIdSchema } from '../lib/security';
 import type { Roadmap } from '../lib/security';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+
+const isValidNodeId = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value.length <= 64 && /^[a-z0-9-]+$/.test(value);
 
 interface TopicContent {
   nodeId: string;
@@ -51,9 +51,8 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
   const topicMap = useMemo(() => {
     const map = new Map<string, TopicContent>();
     topicContents.forEach((topic) => {
-      const parsedId = NodeIdSchema.safeParse(topic.nodeId);
-      if (parsedId.success) {
-        map.set(parsedId.data, topic);
+      if (isValidNodeId(topic.nodeId)) {
+        map.set(topic.nodeId, topic);
       }
     });
     return map;
@@ -61,9 +60,8 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
 
   // Handles node selection on the canvas or mobile list
   const handleNodeClick = useCallback((rawNodeId: string) => {
-    const parsedId = NodeIdSchema.safeParse(rawNodeId);
-    if (!parsedId.success) return;
-    setActiveNodeId(parsedId.data);
+    if (!isValidNodeId(rawNodeId)) return;
+    setActiveNodeId(rawNodeId);
     setIsPanelOpen(true);
   }, []);
 
@@ -104,12 +102,17 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
     setShowExportMenu(false);
     
     try {
+      // Load export-only dependencies on demand so normal roadmap browsing stays light.
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       // Small delay to allow menu to hide
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const canvas = await html2canvas(canvasRef.current, {
         backgroundColor: '#0B0C10',
-        scale: 2,
+        scale: Math.min(window.devicePixelRatio || 1, 1.5),
         useCORS: true,
         logging: false
       });
@@ -139,7 +142,7 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
   // Render linear list view for small mobile viewports
   if (isMobileViewport) {
     return (
-      <div style={{ background: '#0B0C10', minHeight: '100%', padding: '16px' }}>
+      <div className="mobile-roadmap-list" style={{ background: '#0B0C10', minHeight: '100%', padding: '16px' }}>
         {/* Progress Header */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -265,12 +268,14 @@ export default function RoadmapCanvas({ roadmap, topicContents }: RoadmapCanvasP
         </div>
       )}
 
-      <RoadmapFlow
-        roadmap={roadmap}
-        progress={{}}
-        onNodeClick={handleNodeClick}
-        doneNodes={doneNodes}
-      />
+      <Suspense fallback={<div style={{ display: 'grid', placeItems: 'center', height: '100%', color: '#737373', fontFamily: 'Space Mono, monospace', fontSize: '0.72rem' }}>Preparing roadmap canvas…</div>}>
+        <RoadmapFlow
+          roadmap={roadmap}
+          progress={{}}
+          onNodeClick={handleNodeClick}
+          doneNodes={doneNodes}
+        />
+      </Suspense>
 
       {/* Export Button */}
       <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>

@@ -1,4 +1,4 @@
-import { cleanAndParseJSON } from './security';
+import { cleanAndParseJSON } from './clientSecurity';
 
 export interface ChallengeTest {
   input: unknown[];

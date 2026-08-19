@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { marked } from 'marked';
-import { sanitizeHtml, cleanAndParseJSON } from '../lib/security';
+import { sanitizeHtml, cleanAndParseJSON } from '../lib/clientSecurity';
 import { fallbackChallenge, requestCodingChallenge, runCodingChallenge, type CodingChallenge, type ChallengeRun } from '../lib/challenges';
 
 interface Resource {
