@@ -1,0 +1,229 @@
+<div class="anime-three-scene" data-anime-three-scene aria-hidden="true">
+  <canvas class="anime-three-canvas" id="anime-three-canvas"></canvas>
+</div>
+
+<style>
+  .anime-three-scene {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: .78;
+    mix-blend-mode: screen;
+    contain: strict;
+  }
+
+  .anime-three-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (pointer: coarse), (max-width: 820px) {
+    .anime-three-scene { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .anime-three-scene { display: none; }
+  }
+</style>
+
+<script>
+  type ThreeModule = typeof import('three');
+  type IdleWindow = Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
+
+  const root = document.querySelector<HTMLElement>('[data-anime-three-scene]');
+  const canvas = document.getElementById('anime-three-canvas') as HTMLCanvasElement | null;
+  const hero = document.querySelector<HTMLElement>('.hero-container');
+  const motionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = window.matchMedia('(pointer: fine)').matches;
+  const canAffordMotion = !motionMedia.matches && finePointer && (navigator.hardwareConcurrency || 8) > 4;
+
+  if (root && canvas && hero && canAffordMotion) {
+    const idleWindow = window as IdleWindow;
+    const schedule = idleWindow.requestIdleCallback
+      ? (callback: () => void) => idleWindow.requestIdleCallback?.(callback, { timeout: 420 })
+      : (callback: () => void) => window.setTimeout(callback, 140);
+
+    schedule(async () => {
+      let THREE: ThreeModule;
+      try {
+        THREE = await import('three');
+      } catch {
+        root.remove();
+        return;
+      }
+
+      let renderer: InstanceType<ThreeModule['WebGLRenderer']>;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: false,
+          powerPreference: 'high-performance',
+          premultipliedAlpha: true,
+        });
+      } catch {
+        root.remove();
+        return;
+      }
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, 1, .1, 100);
+      camera.position.set(0, .05, 7.2);
+      camera.lookAt(0, 0, 0);
+
+      const stage = new THREE.Group();
+      stage.position.x = .78;
+      stage.position.y = .08;
+      scene.add(stage);
+
+      const orbitalField = new THREE.Group();
+      stage.add(orbitalField);
+
+      const cyan = new THREE.Color('#00E5FF');
+      const amber = new THREE.Color('#F5A623');
+      const violet = new THREE.Color('#A78BFA');
+      const shardGeometry = new THREE.OctahedronGeometry(.11, 0);
+      const shardMaterials = [
+        new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: .62 }),
+        new THREE.MeshBasicMaterial({ color: amber, transparent: true, opacity: .58 }),
+        new THREE.MeshBasicMaterial({ color: violet, transparent: true, opacity: .52 }),
+      ];
+
+      const shards: Array<{ mesh: InstanceType<ThreeModule['Mesh']>; angle: number; radius: number; height: number; speed: number; phase: number }> = [];
+      for (let index = 0; index < 18; index += 1) {
+        const angle = (index / 18) * Math.PI * 2;
+        const radius = 1.18 + (index % 4) * .18;
+        const mesh = new THREE.Mesh(shardGeometry, shardMaterials[index % shardMaterials.length]);
+        mesh.position.set(Math.cos(angle) * radius, Math.sin(angle) * (.68 + (index % 3) * .1), -1.1 + (index % 5) * .32);
+        mesh.rotation.set(angle * .7, angle, angle * .35);
+        mesh.scale.setScalar(.7 + (index % 3) * .14);
+        orbitalField.add(mesh);
+        shards.push({ mesh, angle, radius, height: .68 + (index % 3) * .1, speed: .12 + (index % 5) * .018, phase: index * .47 });
+      }
+
+      const ringGeometry = new THREE.TorusGeometry(1.36, .012, 6, 64);
+      const cyanRing = new THREE.Mesh(ringGeometry, new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: .32 }));
+      cyanRing.rotation.set(.84, -.24, -.52);
+      stage.add(cyanRing);
+      const amberRing = new THREE.Mesh(new THREE.TorusGeometry(1.72, .009, 6, 64), new THREE.MeshBasicMaterial({ color: amber, transparent: true, opacity: .24 }));
+      amberRing.rotation.set(-.46, .72, .3);
+      stage.add(amberRing);
+
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.34, 1), new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: .14, wireframe: true }));
+      stage.add(core);
+      const coreHalo = new THREE.Mesh(new THREE.SphereGeometry(.56, 16, 16), new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: .055 }));
+      stage.add(coreHalo);
+
+      const resize = () => {
+        const bounds = root.getBoundingClientRect();
+        const width = Math.max(1, bounds.width);
+        const height = Math.max(1, bounds.height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+
+      let targetX = 0;
+      let targetY = 0;
+      let springX = 0;
+      let springY = 0;
+      let velocityX = 0;
+      let velocityY = 0;
+      let frame = 0;
+      let visible = true;
+      let lastTime = performance.now();
+
+      const handlePointerMove = (event: PointerEvent) => {
+        const bounds = hero.getBoundingClientRect();
+        targetX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+        targetY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+      };
+      const resetPointer = () => { targetX = 0; targetY = 0; };
+      const render = (now: number) => {
+        frame = 0;
+        if (!visible) return;
+        const elapsed = Math.min(48, now - lastTime);
+        lastTime = now;
+        const time = now * .001;
+        const delta = elapsed / 16.67;
+        velocityX += (targetX - springX) * .028 * delta;
+        velocityY += (targetY - springY) * .028 * delta;
+        velocityX *= Math.pow(.78, delta);
+        velocityY *= Math.pow(.78, delta);
+        springX += velocityX * delta;
+        springY += velocityY * delta;
+
+        stage.rotation.y = springX * .11 + Math.sin(time * .24) * .018;
+        stage.rotation.x = springY * .06 + Math.cos(time * .2) * .012;
+        stage.position.x = .78 + springX * .22;
+        stage.position.y = .08 - springY * .12;
+        orbitalField.rotation.z += .0008 * delta;
+        cyanRing.rotation.z += .0012 * delta;
+        amberRing.rotation.z -= .0007 * delta;
+        core.rotation.x += .003 * delta;
+        core.rotation.y -= .004 * delta;
+        core.scale.setScalar(1 + Math.sin(time * 1.35) * .08);
+        coreHalo.scale.setScalar(1 + Math.sin(time * .9 + 1.4) * .12);
+
+        shards.forEach(({ mesh, angle, radius, height, speed, phase }) => {
+          const orbitAngle = angle + time * speed;
+          mesh.position.x = Math.cos(orbitAngle) * radius;
+          mesh.position.y = Math.sin(orbitAngle * 1.07 + phase) * height;
+          mesh.position.z = -1.1 + Math.sin(time * .7 + phase) * .28 + (angle % .9);
+          mesh.rotation.x += .006 * delta;
+          mesh.rotation.y += .009 * delta;
+        });
+
+        renderer.render(scene, camera);
+        frame = window.requestAnimationFrame(render);
+      };
+
+      const setVisible = (nextVisible: boolean) => {
+        visible = nextVisible;
+        if (visible && !frame) {
+          lastTime = performance.now();
+          frame = window.requestAnimationFrame(render);
+        }
+      };
+
+      const observer = new IntersectionObserver(([entry]) => setVisible(Boolean(entry?.isIntersecting)), { threshold: .01 });
+      observer.observe(hero);
+      const visibilityHandler = () => setVisible(!document.hidden && visible);
+      const handleDocumentVisibility = () => {
+        if (document.hidden) {
+          if (frame) window.cancelAnimationFrame(frame);
+          frame = 0;
+          visible = false;
+        } else {
+          visible = true;
+          if (!frame) frame = window.requestAnimationFrame(render);
+        }
+      };
+
+      resize();
+      hero.addEventListener('pointermove', handlePointerMove, { passive: true });
+      hero.addEventListener('pointerleave', resetPointer, { passive: true });
+      window.addEventListener('resize', resize, { passive: true });
+      document.addEventListener('visibilitychange', handleDocumentVisibility, { passive: true });
+      window.addEventListener('beforeunload', () => {
+        observer.disconnect();
+        hero.removeEventListener('pointermove', handlePointerMove);
+        hero.removeEventListener('pointerleave', resetPointer);
+        window.removeEventListener('resize', resize);
+        document.removeEventListener('visibilitychange', handleDocumentVisibility);
+        if (frame) window.cancelAnimationFrame(frame);
+        renderer.dispose();
+        shardGeometry.dispose();
+        shardMaterials.forEach((material) => material.dispose());
+        ringGeometry.dispose();
+      }, { once: true });
+
+      void visibilityHandler;
+      frame = window.requestAnimationFrame(render);
+    });
+  }
+</script>
