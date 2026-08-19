@@ -42,6 +42,25 @@ test.describe('Roadmap Viewer', () => {
     await expect(page.locator('button:has-text("Challenge")')).toBeVisible();
   });
 
+  test('should reject tampered custom roadmap storage', async ({ page }) => {
+    await page.addInitScript(() => {
+      sessionStorage.setItem('custom_roadmap_data', JSON.stringify({
+        id: 'custom',
+        title: '<img src=x onerror=alert(1)>',
+        description: 'tampered',
+        icon: 'x',
+        color: '#F5A623',
+        nodes: [
+          { id: 'root', label: 'Root', parentId: null, status: 'todo', type: 'root' },
+          { id: 'child', label: 'Child', parentId: 'missing-parent', status: 'todo', type: 'topic' },
+        ],
+      }));
+    });
+    await page.goto('/roadmap/custom');
+    await expect(page.getByText('The generated roadmap format was invalid. Please try generating it again.')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('custom_roadmap_data'))).toBeNull();
+  });
+
   test('should run an AI coding challenge and persist study notes for a topic', async ({ page }) => {
     let challengeRequests = 0;
     await page.route('**/api/ai', async route => {

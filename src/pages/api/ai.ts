@@ -1,11 +1,17 @@
 import type { APIRoute } from 'astro';
+import { checkRateLimit, sanitizeText } from '../../lib/security';
 
 export const prerender = false;
 
 // Groq API endpoint URL for supported OpenAI-compatible inference.
 const GROQ_API_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const CHALLENGE_CACHE_TTL_MS = 15 * 60 * 1000;
+const MAX_CHALLENGE_CACHE_ENTRIES = 128;
+const MAX_REQUEST_BYTES = 32_000;
 const challengeCache = new Map<string, { text: string; expiresAt: number }>();
+
+const boundedInput = (value: unknown, max: number) =>
+  typeof value === 'string' ? sanitizeText(value.slice(0, max)) : '';
 
 const getChallengeCacheKey = (topic: string, roadmap: string) =>
   `${roadmap.trim().toLowerCase()}::${topic.trim().toLowerCase()}`.slice(0, 300);
@@ -25,12 +31,20 @@ export const POST: APIRoute = async ({ request }) => {
   let customPrompt = '';
   let action = '';
 
+  const contentLength = Number(request.headers.get('content-length') || 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+    return new Response(
+      JSON.stringify({ error: 'Request payload is too large.' }),
+      { status: 413, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
+    );
+  }
+
   try {
     const payload = await request.json();
-    topic = String(payload?.topic ?? '').slice(0, 200);
-    roadmap = String(payload?.roadmap ?? '').slice(0, 100);
-    customPrompt = String(payload?.prompt ?? '').slice(0, 600);
-    action = String(payload?.action ?? '');
+    topic = boundedInput(payload?.topic, 200);
+    roadmap = boundedInput(payload?.roadmap, 100);
+    customPrompt = boundedInput(payload?.prompt, 600);
+    action = String(payload?.action ?? '').trim().slice(0, 40);
   } catch {
     return new Response(
       JSON.stringify({ error: 'Invalid JSON request payload.' }),
@@ -41,7 +55,34 @@ export const POST: APIRoute = async ({ request }) => {
   if (!topic) {
     return new Response(
       JSON.stringify({ error: 'The topic parameter is required.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
+    );
+  }
+
+  const allowedActions = new Set(['', 'generate', 'quiz', 'challenge']);
+  if (!allowedActions.has(action) && !topic.startsWith('next-after-')) {
+    return new Response(
+      JSON.stringify({ error: 'Unsupported AI action.' }),
+      { status: 400, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }
+    );
+  }
+
+  const forwardedFor = request.headers.get('x-vercel-forwarded-for')
+    || request.headers.get('x-real-ip')
+    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || 'anonymous';
+  const rateLimit = checkRateLimit(`ai:${forwardedFor}`);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'Too many AI requests. Please wait before trying again.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+          'Retry-After': String(Math.max(1, Math.ceil((rateLimit.retryAfterMs ?? 60000) / 1000))),
+        },
+      }
     );
   }
 
@@ -215,6 +256,10 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
     }
 
     if (action === 'challenge') {
+      if (challengeCache.size >= MAX_CHALLENGE_CACHE_ENTRIES) {
+        const oldestKey = challengeCache.keys().next().value;
+        if (oldestKey) challengeCache.delete(oldestKey);
+      }
       challengeCache.set(getChallengeCacheKey(topic, roadmap), {
         text: generatedText,
         expiresAt: Date.now() + CHALLENGE_CACHE_TTL_MS,

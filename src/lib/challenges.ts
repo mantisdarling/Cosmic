@@ -121,7 +121,9 @@ export async function requestCodingChallenge(topic: string, roadmap: string): Pr
   }
 }
 
-const blockedTokens = /\b(document|window|parent|top|fetch|localStorage|sessionStorage|XMLHttpRequest|WebSocket|import|eval|Function)\b/;
+const MAX_SOLUTION_LENGTH = 12000;
+const MAX_TEST_PAYLOAD_LENGTH = 8000;
+const blockedTokens = /\b(document|window|parent|top|self|globalThis|global|location|navigator|fetch|localStorage|sessionStorage|indexedDB|caches|XMLHttpRequest|WebSocket|Worker|SharedWorker|BroadcastChannel|MessageChannel|importScripts|import|eval|WebAssembly|Atomics|postMessage|setTimeout|setInterval|requestAnimationFrame)\b|\b(?:new\s+Function|Function\s*\()/i;
 
 /**
  * Execute learner code as a real script inside a sandboxed iframe. This avoids
@@ -130,6 +132,8 @@ const blockedTokens = /\b(document|window|parent|top|fetch|localStorage|sessionS
  */
 export async function runCodingChallenge(challenge: CodingChallenge, sourceCode: string): Promise<ChallengeRun> {
   if (!sourceCode.trim()) throw new Error('Write a solution before running the tests.');
+  if (sourceCode.length > MAX_SOLUTION_LENGTH) throw new Error('Keep the solution under 12,000 characters.');
+  if (JSON.stringify(challenge.tests).length > MAX_TEST_PAYLOAD_LENGTH) throw new Error('This challenge test payload is too large to run safely.');
   if (blockedTokens.test(sourceCode)) {
     throw new Error('This runner only supports pure JavaScript functions without browser or network access.');
   }
@@ -190,7 +194,7 @@ export async function runCodingChallenge(challenge: CodingChallenge, sourceCode:
     frame.setAttribute('sandbox', 'allow-scripts');
     frame.setAttribute('aria-hidden', 'true');
     frame.style.display = 'none';
-    frame.srcdoc = `<!doctype html><html><body><script>${runnerScript.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
+    frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; style-src 'none';" /></head><body><script>${runnerScript.replace(/<\/script/gi, '<\\/script')}</script></body></html>`;
     document.body.appendChild(frame);
   });
 }

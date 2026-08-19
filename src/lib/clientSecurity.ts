@@ -1,4 +1,53 @@
 // Client-safe helpers kept separate from the server-side Zod schemas.
+import type { Roadmap } from './security';
+
+const CLIENT_NODE_ID = /^[a-z0-9-]{1,64}$/;
+const CLIENT_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value));
+
+const boundedString = (value: unknown, max: number): string | null =>
+  typeof value === 'string' && value.length > 0 && value.length <= max ? value : null;
+
+export function parseClientRoadmap(value: unknown): Roadmap | null {
+  if (!isRecord(value)) return null;
+  const id = boundedString(value.id, 64);
+  const title = boundedString(value.title, 80);
+  const description = boundedString(value.description, 300);
+  const icon = typeof value.icon === 'string' && value.icon.length <= 4 ? value.icon : null;
+  const color = typeof value.color === 'string' && CLIENT_COLOR.test(value.color) ? value.color : null;
+  const rawNodes = Array.isArray(value.nodes) && value.nodes.length >= 1 && value.nodes.length <= 200 ? value.nodes : null;
+  if (!id || !CLIENT_NODE_ID.test(id) || !title || !description || icon === null || !color || !rawNodes) return null;
+
+  const seenIds = new Set<string>();
+  const nodes = [];
+  let rootCount = 0;
+  for (const rawNode of rawNodes) {
+    if (!isRecord(rawNode)) return null;
+    const nodeId = boundedString(rawNode.id, 64);
+    const label = boundedString(rawNode.label, 80);
+    const nodeType = rawNode.type;
+    const status = rawNode.status;
+    const parentId = rawNode.parentId;
+    if (!nodeId || !CLIENT_NODE_ID.test(nodeId) || seenIds.has(nodeId) || !label) return null;
+    if (nodeType !== 'root' && nodeType !== 'topic' && nodeType !== 'optional') return null;
+    if (status !== 'todo' && status !== 'in-progress' && status !== 'done' && status !== 'bookmarked') return null;
+    if (parentId !== null && (typeof parentId !== 'string' || !CLIENT_NODE_ID.test(parentId))) return null;
+    if (nodeType === 'root') {
+      rootCount += 1;
+      if (parentId !== null) return null;
+    } else if (parentId === null) {
+      return null;
+    }
+    seenIds.add(nodeId);
+    nodes.push({ id: nodeId, label, parentId, status, type: nodeType });
+  }
+
+  if (rootCount !== 1 || nodes.some((node) => node.parentId !== null && !seenIds.has(node.parentId))) return null;
+  return { id, title, description, icon, color, nodes } as Roadmap;
+}
+
 
 export async function sanitizeHtml(htmlContent: string): Promise<string> {
   if (typeof window === 'undefined') return '';

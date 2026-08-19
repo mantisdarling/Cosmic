@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import RoadmapCanvas from './RoadmapCanvas';
-import { RoadmapSchema, type Roadmap } from '../lib/security';
+import { parseClientRoadmap } from '../lib/clientSecurity';
+import type { Roadmap } from '../lib/security';
 
 export default function CustomRoadmapLoader() {
   const [roadmapData, setRoadmapData] = useState<Roadmap | null>(null);
@@ -15,17 +16,18 @@ export default function CustomRoadmapLoader() {
       }
 
       const parsedData = JSON.parse(storedData);
-      const validationResult = RoadmapSchema.safeParse(parsedData);
+      const validatedRoadmap = parseClientRoadmap(parsedData);
 
-      if (!validationResult.success) {
-        console.error('Validation errors:', validationResult.error.issues);
+      if (!validatedRoadmap) {
         setError('The generated roadmap format was invalid. Please try generating it again.');
+        sessionStorage.removeItem('custom_roadmap_data');
         return;
       }
 
-      setRoadmapData(validationResult.data);
-    } catch (err: any) {
-      setError(err.message || 'An unknown error occurred while loading the roadmap.');
+      setRoadmapData(validatedRoadmap);
+    } catch {
+      sessionStorage.removeItem('custom_roadmap_data');
+      setError('The generated roadmap data could not be loaded. Please try generating it again.');
     }
   }, []);
 

@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [react()],
   output: 'static',
   adapter: vercel(),
-  site: 'https://cosmic-nu-ebonvercel.app',
+  site: 'https://cosmic-nu-ebon.vercel.app',
   vite: {
     plugins: [tailwindcss()],
     build: { sourcemap: false },

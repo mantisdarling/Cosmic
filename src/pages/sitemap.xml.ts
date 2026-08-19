@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { RoadmapSchema, type Roadmap } from '../lib/security';
 
 export const GET: APIRoute = async ({ site }) => {
-  const baseUrl = site ?? 'https://cosmic-roadmap.vercel.app';
+  const baseUrl = site ?? 'https://cosmic-nu-ebon.vercel.app';
   
   // Load all roadmaps dynamically
   const modules = import.meta.glob('../content/roadmaps/*.json', { eager: true });

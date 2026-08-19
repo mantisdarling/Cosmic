@@ -14,7 +14,7 @@ const {
   ogImage = '/og-default.png',
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-roadmap.vercel.app');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-nu-ebon.vercel.app');
 ---
 
 <!DOCTYPE html>
@@ -27,7 +27,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
   <link rel="canonical" href={canonicalURL} />
 
   <!-- Security and content headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://generativelanguage.googleapis.com https://*.googleapis.com https://api.groq.com; object-src 'none'; base-uri 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;" />
   <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
