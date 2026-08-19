@@ -166,7 +166,7 @@ const topicContents = roadmap.nodes.map((node) => {
     </style>
 
     <!-- Interactive Canvas (React island) -->
-    <div class="canvas-wrap">
+    <div class="canvas-wrap" style="flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden;">
       <RoadmapCanvas
         roadmap={roadmap}
         topicContents={topicContents}
