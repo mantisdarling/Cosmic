@@ -35,18 +35,26 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   /* ── NAV ─────────────────────────────────────────────── */
   .nav {
     position: sticky; top: 0; z-index: 50;
-    height: 56px;
+    height: 62px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 32px;
-    background: rgba(11,12,16,0.94);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid #1E2333;
+    background: rgba(7, 9, 16, 0.84);
+    backdrop-filter: blur(18px) saturate(130%);
+    border-bottom: 1px solid rgba(91, 106, 148, 0.28);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.22);
+  }
+  .nav::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.6) 28%, rgba(245,166,35,0.8) 68%, transparent 100%);
+    opacity: .7;
   }
   .nav-left { display: flex; align-items: center; gap: 28px; }
   .nav-logo {
-    font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em;
+    font-weight: 900; font-size: 1.08rem; letter-spacing: -0.04em;
     color: #F5A623; text-decoration: none;
+    text-shadow: 0 0 22px rgba(245,166,35,0.24);
   }
+  .nav-logo::first-letter { color: #00E5FF; }
   .nav-links { display: flex; gap: 2px; }
   .nav-links a {
     padding: 6px 12px; border-radius: 6px;
@@ -72,31 +80,59 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     transition: all .15s;
   }
   #theme-toggle:hover { border-color: #404040; background: #1a1a1a; color: #F5F5F5; }
+  @media (max-width: 760px) {
+    .nav { height: 58px; padding: 0 18px; }
+    .nav-links { display: none; }
+    .hero { min-height: 0; padding: 76px 22px 42px; text-align: center; align-items: center; }
+    .hero h1 { font-size: clamp(2.55rem, 13vw, 4rem); }
+    .hero p { margin-left: auto; margin-right: auto; }
+    .hero-actions { justify-content: center; }
+    .hero-signal { justify-content: center !important; }
+    .search-container { margin: 0 auto; }
+    .hero-container { background-position: 68% center; }
+    .hero-container::after { width: 280px; height: 280px; right: -80px; top: 18%; }
+  }
   @media (max-width: 640px) { .nav-links { display: none; } }
 
   /* ── HERO CONTAINER ─────────────────────────────────── */
   .hero-container {
-    position: relative;
+    position: relative; overflow: hidden;
     background-image:
-      radial-gradient(circle at 50% 30%, rgba(11,12,16,0.55) 0%, rgba(11,12,16,0.92) 70%, #0B0C10 100%),
-      url('/zenitsu-hero.jpg');
+      linear-gradient(90deg, rgba(6,9,18,0.96) 0%, rgba(6,9,18,0.86) 34%, rgba(6,9,18,0.36) 66%, rgba(6,9,18,0.78) 100%),
+      linear-gradient(180deg, rgba(7,9,16,0.18) 0%, rgba(7,9,16,0.12) 45%, #0B0C10 100%),
+      url('/cosmic-anime-hero.png');
     background-size: cover;
-    background-position: center 25%;
+    background-position: center right;
     border-bottom: 1px solid #1E2333;
+    isolation: isolate;
+  }
+  .hero-container::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+    background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,0.012) 4px 5px);
+    mix-blend-mode: screen; opacity: .45;
+  }
+  .hero-container::after {
+    content: ''; position: absolute; width: 420px; height: 420px; right: 8%; top: 12%;
+    border: 1px solid rgba(0,229,255,0.14); border-radius: 50%;
+    box-shadow: 0 0 0 22px rgba(0,229,255,0.025), 0 0 0 52px rgba(245,166,35,0.018);
+    pointer-events: none; z-index: -1;
   }
 
   /* ── HERO ─────────────────────────────────────────────── */
   .hero {
-    max-width: 780px; margin: 0 auto;
-    padding: 72px 24px 48px;
-    text-align: center;
+    max-width: 1200px; margin: 0 auto;
+    padding: 96px 32px 64px;
+    text-align: left;
+    min-height: 540px;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
   }
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 4px 12px 4px 8px; border-radius: 999px;
-    background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25);
-    font-size: 0.75rem; font-weight: 500; color: #F5A623;
-    margin-bottom: 22px; cursor: default;
+    padding: 6px 13px 6px 9px; border-radius: 999px;
+    background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.3);
+    box-shadow: 0 0 24px rgba(245,166,35,0.08);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; color: #F5C45F;
+    margin-bottom: 20px; cursor: default; text-transform: uppercase;
   }
   .eyebrow-dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -104,16 +140,23 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   @keyframes eyebrow-pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
   .hero h1 {
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
-    color: #F5F5F5; margin-bottom: 18px;
+    max-width: 720px;
+    font-size: clamp(2.8rem, 7vw, 5.25rem);
+    font-weight: 900; letter-spacing: -0.065em; line-height: 0.98;
+    color: #F8FAFF; margin-bottom: 22px;
+    text-wrap: balance;
+    text-shadow: 0 12px 40px rgba(0,0,0,0.45);
   }
-  .hero h1 span { color: #F5A623; }
+  .hero h1 span {
+    color: #F5A623;
+    background: linear-gradient(105deg, #F5A623 12%, #FCD068 48%, #00E5FF 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
   .hero p {
-    font-size: 1.05rem; line-height: 1.7; color: #8A8F9A;
-    max-width: 560px; margin: 0 auto 32px;
+    font-size: 1.03rem; line-height: 1.75; color: #A8B0C2;
+    max-width: 600px; margin: 0 0 18px;
   }
-  .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+  .hero-actions { display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap; margin-bottom: 30px; }
   .hero-actions a, .hero-actions button {
     padding: 11px 22px; border-radius: 9px;
     font-size: 0.9rem; font-weight: 600; text-decoration: none;
@@ -128,7 +171,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   /* ── SEARCH ──────────────────────────────────────────── */
   .search-container {
-    width: min(100%, 680px); max-width: 680px; margin: 0 auto 56px;
+    width: min(100%, 680px); max-width: 680px; margin: 0 0 0;
     display: flex; align-items: center; gap: 10px;
   }
   .search-box {
@@ -200,14 +243,17 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   /* ── STATS ────────────────────────────────────────────── */
   .stats-bar {
-    border-top: 1px solid #1E2333; border-bottom: 1px solid #1E2333;
-    background: #0E1017; padding: 20px 32px;
+    position: relative; border-top: 1px solid #1E2333; border-bottom: 1px solid #1E2333;
+    background: linear-gradient(90deg, #0B0C10, #101522 45%, #0B0C10); padding: 22px 32px;
     display: flex; align-items: center; justify-content: center;
-    gap: 40px; flex-wrap: wrap;
+    gap: 56px; flex-wrap: wrap;
   }
+  .stats-bar::before, .stats-bar::after { content: ''; position: absolute; width: 7px; height: 7px; border: 1px solid #00E5FF; transform: rotate(45deg); opacity: .7; }
+  .stats-bar::before { left: 32px; }
+  .stats-bar::after { right: 32px; border-color: #F5A623; }
   .stat { text-align: center; }
-  .stat-num { font-size: 1.6rem; font-weight: 800; color: #F5A623; letter-spacing: -0.04em; display: block; }
-  .stat-lbl { font-size: 0.75rem; color: #737783; font-weight: 500; }
+  .stat-num { font-size: 1.75rem; font-weight: 900; color: #F5A623; letter-spacing: -0.05em; display: block; text-shadow: 0 0 18px rgba(245,166,35,0.2); }
+  .stat-lbl { font-size: 0.68rem; color: #8992A8; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 
   /* ── SECTION ──────────────────────────────────────────── */
   .section { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
@@ -216,7 +262,8 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     display: flex; align-items: flex-end; justify-content: space-between;
     margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
   }
-  .section-title { font-size: 1.15rem; font-weight: 700; color: #F5F5F5; letter-spacing: -0.02em; }
+  .section-title { position: relative; padding-left: 15px; font-size: 1.15rem; font-weight: 800; color: #F5F5F5; letter-spacing: -0.03em; }
+  .section-title::before { content: ''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px; border-radius: 99px; background: linear-gradient(#00E5FF, #F5A623); box-shadow: 0 0 12px rgba(0,229,255,0.45); }
   .section-count {
     font-size: 0.75rem; color: #525252; font-weight: 500;
     background: #1a1a1a; border: 1px solid #262626;
@@ -233,20 +280,27 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   /* ── CARD ─────────────────────────────────────────────── */
   .card {
     display: flex; flex-direction: column;
-    padding: 18px 20px 18px 22px;
-    background: #141722;
-    border: 1px solid #1E2333;
-    border-radius: 10px;
+    min-height: 190px;
+    padding: 19px 20px 18px 22px;
+    background: linear-gradient(145deg, rgba(20,23,34,0.98), rgba(14,18,29,0.98));
+    border: 1px solid rgba(55,67,98,0.62);
+    border-radius: 14px;
     text-decoration: none;
-    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    transition: border-color .24s, background .24s, transform .24s, box-shadow .24s;
     position: relative; overflow: hidden;
   }
-  .card:hover {
-    border-color: #2A3147;
-    background: #1B1F30;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,229,255,0.08), 0 8px 24px rgba(0,0,0,0.6);
+  .card::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: linear-gradient(120deg, rgba(0,229,255,0.06), transparent 38%, rgba(245,166,35,0.04));
+    transition: opacity .24s;
   }
+  .card:hover {
+    border-color: rgba(0,229,255,0.52);
+    background: linear-gradient(145deg, #1A2032, #121A2C);
+    transform: translateY(-5px);
+    box-shadow: 0 18px 46px rgba(0,0,0,0.55), 0 0 28px rgba(0,229,255,0.09);
+  }
+  .card:hover::after { opacity: 1; }
   /* Left accent bar always visible, glows on hover */
   .card-accent {
     position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
@@ -336,7 +390,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       <p data-reveal>
         Community created roadmaps, guides and resources to help you choose your path and grow in your developer career.
       </p>
-      <p data-reveal style="font-size:0.9rem;color:#525252;margin:0 auto 24px;font-family:'Space Mono',monospace;min-height:1.4em;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <p data-reveal class="hero-signal" style="font-size:0.78rem;color:#737B8F;margin:0 0 28px;font-family:'Space Mono',monospace;min-height:1.4em;display:flex;align-items:center;justify-content:flex-start;gap:8px;">
         Built for <span id="scramble-text" style="color:#F5A623;font-weight:700;">Frontend Developers.</span>
       </p>
       <div class="hero-actions" data-reveal>
