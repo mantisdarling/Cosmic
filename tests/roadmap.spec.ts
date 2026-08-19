@@ -43,6 +43,7 @@ test.describe('Roadmap Viewer', () => {
   });
 
   test('should run an AI coding challenge and persist study notes for a topic', async ({ page }) => {
+    let challengeRequests = 0;
     await page.route('**/api/ai', async route => {
       const request = route.request();
       const payload = request.postDataJSON?.() as { action?: string } | null;
@@ -50,6 +51,7 @@ test.describe('Roadmap Viewer', () => {
         await route.continue();
         return;
       }
+      challengeRequests += 1;
       await route.fulfill({
         json: {
           text: JSON.stringify({
@@ -83,5 +85,8 @@ test.describe('Roadmap Viewer', () => {
     await page.getByRole('button', { name: 'Close panel' }).click();
     await page.locator('.react-flow__node:not([data-id="fe-root"])').first().click({ force: true });
     await expect(page.locator('#topic-notes')).toHaveValue('Use map to project each roadmap topic into a label.');
+    await page.getByRole('button', { name: 'Challenge' }).click();
+    await expect(page.getByText('Normalize a topic queue')).toBeVisible();
+    expect(challengeRequests).toBe(1);
   });
 });

@@ -2,8 +2,13 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-// Groq API endpoint URL for Llama 3.1 inference
+// Groq API endpoint URL for supported OpenAI-compatible inference.
 const GROQ_API_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const CHALLENGE_CACHE_TTL_MS = 15 * 60 * 1000;
+const challengeCache = new Map<string, { text: string; expiresAt: number }>();
+
+const getChallengeCacheKey = (topic: string, roadmap: string) =>
+  `${roadmap.trim().toLowerCase()}::${topic.trim().toLowerCase()}`.slice(0, 300);
 
 export const POST: APIRoute = async ({ request }) => {
   const apiKey = import.meta.env.GROQ_API_KEY;
@@ -38,6 +43,18 @@ export const POST: APIRoute = async ({ request }) => {
       JSON.stringify({ error: 'The topic parameter is required.' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
+  }
+
+  if (action === 'challenge') {
+    const cacheKey = getChallengeCacheKey(topic, roadmap);
+    const cached = challengeCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return new Response(JSON.stringify({ text: cached.text, cached: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, max-age=900' },
+      });
+    }
+    if (cached) challengeCache.delete(cacheKey);
   }
 
   let promptText = customPrompt;
@@ -119,55 +136,66 @@ Bullet list of the 4–6 most important things to understand.
 Be friendly, practical, and motivating. Use markdown. Around 400–500 words total.`;
   }
 
-  try {
-    const response = await fetch(GROQ_API_ENDPOINT, {
+    try {
+    const model = import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+    const challengeFormat = action === 'challenge' ? {
+      type: 'json_schema',
+      json_schema: {
+        name: 'coding_challenge',
+        strict: true,
+        schema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            brief: { type: 'string' },
+            functionName: { type: 'string', enum: ['solve'] },
+            starterCode: { type: 'string' },
+            tests: {
+              type: 'array',
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                type: 'object',
+                properties: { input: { type: 'array', items: {} }, expected: {} },
+                required: ['input', 'expected'],
+                additionalProperties: false,
+              },
+            },
+            hint: { type: 'string' },
+          },
+          required: ['title', 'brief', 'functionName', 'starterCode', 'tests', 'hint'],
+          additionalProperties: false,
+        },
+      },
+    } : undefined;
+    const requestBody = {
+      model,
+      messages: [{ role: 'user', content: promptText }],
+      max_completion_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
+      temperature: action === 'challenge' ? 0.2 : 0.7,
+      ...(challengeFormat ? { response_format: challengeFormat } : {}),
+      ...(String(model).startsWith('openai/gpt-oss/') ? { include_reasoning: false } : {}),
+    };
+    const requestGroq = (body: typeof requestBody) => fetch(GROQ_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-        body: JSON.stringify({
-          model: import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b',
-          messages: [{ role: 'user', content: promptText }],
-          max_completion_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
-          temperature: action === 'challenge' ? 0.2 : 0.7,
-          ...(action === 'challenge' ? {
-            response_format: {
-              type: 'json_schema',
-              json_schema: {
-                name: 'coding_challenge',
-                strict: true,
-                schema: {
-                  type: 'object',
-                  properties: {
-                    title: { type: 'string' },
-                    brief: { type: 'string' },
-                    functionName: { type: 'string', enum: ['solve'] },
-                    starterCode: { type: 'string' },
-                    tests: {
-                      type: 'array',
-                      minItems: 3,
-                      maxItems: 3,
-                      items: {
-                        type: 'object',
-                        properties: { input: { type: 'array', items: {} }, expected: {} },
-                        required: ['input', 'expected'],
-                        additionalProperties: false,
-                      },
-                    },
-                    hint: { type: 'string' },
-                  },
-                  required: ['title', 'brief', 'functionName', 'starterCode', 'tests', 'hint'],
-                  additionalProperties: false,
-                },
-              },
-            },
-          } : {}),
-          ...(String(import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b').startsWith('openai/gpt-oss/') ? { include_reasoning: false } : {}),
-        }),
+      body: JSON.stringify(body),
     });
 
-    const responseData = await response.json();
+    let response = await requestGroq(requestBody);
+    let responseData = await response.json();
+    const upstreamMessage = String(responseData?.error?.message ?? '');
+    if (action === 'challenge' && !response.ok && /validate JSON|failed_generation/i.test(upstreamMessage)) {
+      response = await requestGroq({
+        ...requestBody,
+        response_format: { type: 'json_object' },
+        max_completion_tokens: 1600,
+      } as typeof requestBody);
+      responseData = await response.json();
+    }
 
     if (!response.ok) {
       const errorMessage = responseData?.error?.message ?? 'Upstream Groq API error.';
@@ -186,13 +214,19 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
       );
     }
 
+    if (action === 'challenge') {
+      challengeCache.set(getChallengeCacheKey(topic, roadmap), {
+        text: generatedText,
+        expiresAt: Date.now() + CHALLENGE_CACHE_TTL_MS,
+      });
+    }
     return new Response(
       JSON.stringify({ text: generatedText }),
       {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-store',
+          'Cache-Control': action === 'challenge' ? 'private, max-age=900' : 'no-store',
         },
       }
     );

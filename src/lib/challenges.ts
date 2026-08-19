@@ -20,6 +20,44 @@ export interface ChallengeRun {
   outputs: { passed: boolean; expected: unknown; actual?: unknown; error?: string }[];
 }
 
+const CHALLENGE_CACHE_TTL_MS = 30 * 60 * 1000;
+const inFlightChallenges = new Map<string, Promise<CodingChallenge>>();
+
+type CachedChallenge = { savedAt: number; challenge: CodingChallenge };
+
+const challengeCacheKey = (topic: string, roadmap: string) =>
+  `cosmic-challenge-${roadmap.trim().toLowerCase()}-${topic.trim().toLowerCase()}`
+    .replace(/[^a-z0-9-]+/g, '-')
+    .slice(0, 180);
+
+const readCachedChallenge = (topic: string, roadmap: string): CodingChallenge | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(challengeCacheKey(topic, roadmap));
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CachedChallenge;
+    if (!cached || Date.now() - cached.savedAt > CHALLENGE_CACHE_TTL_MS) {
+      window.localStorage.removeItem(challengeCacheKey(topic, roadmap));
+      return null;
+    }
+    return cached.challenge;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedChallenge = (topic: string, roadmap: string, challenge: CodingChallenge) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(
+      challengeCacheKey(topic, roadmap),
+      JSON.stringify({ savedAt: Date.now(), challenge } satisfies CachedChallenge),
+    );
+  } catch {
+    // Storage may be unavailable or full; the live request still succeeds.
+  }
+};
+
 const asText = (value: unknown, fallback: string, limit: number) => {
   const text = typeof value === 'string' ? value.trim() : '';
   return text.slice(0, limit) || fallback;
@@ -55,14 +93,32 @@ export function parseChallengePayload(raw: string, topic: string, roadmap: strin
 }
 
 export async function requestCodingChallenge(topic: string, roadmap: string): Promise<CodingChallenge> {
-  const response = await fetch('/api/ai', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ topic, roadmap, action: 'challenge' }),
-  });
-  const data = await response.json();
-  if (!response.ok || data.error) throw new Error(data.error ?? 'AI challenge service is unavailable.');
-  return parseChallengePayload(String(data.text ?? ''), topic, roadmap);
+  const cached = readCachedChallenge(topic, roadmap);
+  if (cached) return cached;
+
+  const key = challengeCacheKey(topic, roadmap);
+  const existingRequest = inFlightChallenges.get(key);
+  if (existingRequest) return existingRequest;
+
+  const request = (async () => {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, roadmap, action: 'challenge' }),
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) throw new Error(data.error ?? 'AI challenge service is unavailable.');
+    const challenge = parseChallengePayload(String(data.text ?? ''), topic, roadmap);
+    writeCachedChallenge(topic, roadmap, challenge);
+    return challenge;
+  })();
+
+  inFlightChallenges.set(key, request);
+  try {
+    return await request;
+  } finally {
+    inFlightChallenges.delete(key);
+  }
 }
 
 const blockedTokens = /\b(document|window|parent|top|fetch|localStorage|sessionStorage|XMLHttpRequest|WebSocket|import|eval|Function)\b/;
