@@ -64,6 +64,21 @@ test.describe('Cosmic Home Page', () => {
     await expect(modalHeading).not.toBeVisible();
   });
 
+  test('should launch the Frostwarden circuit and cast an ice ability', async ({ page }) => {
+    await page.goto('/');
+
+    await expect(page.locator('#frost-heading')).toContainText('Frostwarden: Frostbound Circuit');
+    await expect(page.locator('.frost-roster-card.frost')).toHaveAttribute('aria-current', 'true');
+    await expect(page.locator('#frostbound-canvas')).toBeVisible();
+
+    await page.locator('#frost-launch').click();
+    await expect(page.locator('#frost-status')).toContainText('Circuit live');
+
+    await page.locator('#frostbound-arena').focus();
+    await page.keyboard.press('2');
+    await expect(page.locator('#frost-status')).toContainText('Glacial Lock');
+  });
+
   test('should open AI generator panel and successfully redirect to custom roadmap', async ({ page }) => {
     // Intercept /api/ai and mock custom roadmap response
     await page.route('**/api/ai', async route => {
