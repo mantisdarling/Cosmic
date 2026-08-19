@@ -129,7 +129,7 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
         body: JSON.stringify({
           model: import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b',
           messages: [{ role: 'user', content: promptText }],
-          max_completion_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 900 : 900,
+          max_completion_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
           temperature: action === 'challenge' ? 0.2 : 0.7,
           ...(action === 'challenge' ? {
             response_format: {
@@ -163,7 +163,7 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
               },
             },
           } : {}),
-          ...(String(import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b').startsWith('openai/gpt-oss/') ? { include_reasoning: false, reasoning_effort: 'low' } : {}),
+          ...(String(import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b').startsWith('openai/gpt-oss/') ? { include_reasoning: false } : {}),
         }),
     });
 
