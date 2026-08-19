@@ -110,7 +110,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   .hero h1 span { color: #F5A623; }
   .hero p {
-    font-size: 1.05rem; line-height: 1.7; color: #737373;
+    font-size: 1.05rem; line-height: 1.7; color: #8A8F9A;
     max-width: 560px; margin: 0 auto 32px;
   }
   .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
@@ -128,7 +128,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   /* ── SEARCH ──────────────────────────────────────────── */
   .search-container {
-    max-width: 580px; margin: 0 auto 56px;
+    width: min(100%, 680px); max-width: 680px; margin: 0 auto 56px;
     display: flex; align-items: center; gap: 10px;
   }
   .search-box {
@@ -152,7 +152,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     transition: border-color .2s, box-shadow .2s;
     outline: none; box-sizing: border-box;
   }
-  #search-input::placeholder { color: #525252; }
+  #search-input::placeholder { color: #666B78; }
   #search-input:focus { border-color: rgba(245,166,35,0.5); box-shadow: 0 0 0 3px rgba(245,166,35,0.08); }
   #search-count {
     position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -181,7 +181,21 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   #no-results {
     display: none; text-align: center;
-    padding: 48px 24px; color: #525252; font-size: 0.9rem;
+    padding: 64px 24px; color: #737783; font-size: 0.9rem;
+  }
+  .clear-filters {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 14px; padding: 8px 14px; border-radius: 8px;
+    border: 1px solid #2A3147; background: #141722; color: #F5A623;
+    font: 600 0.8rem/1.2 inherit; cursor: pointer;
+    transition: background .2s, border-color .2s, transform .2s;
+  }
+  .clear-filters:hover { background: #1B1F30; border-color: #F5A623; transform: translateY(-1px); }
+  .clear-filters:focus-visible, .filter-btn:focus-visible, .hero-actions a:focus-visible, .hero-actions button:focus-visible, #search-input:focus-visible {
+    outline: 2px solid #FCD068; outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-container *, .card, .clear-filters { animation: none !important; transition: none !important; }
   }
 
   /* ── STATS ────────────────────────────────────────────── */
@@ -193,7 +207,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   .stat { text-align: center; }
   .stat-num { font-size: 1.6rem; font-weight: 800; color: #F5A623; letter-spacing: -0.04em; display: block; }
-  .stat-lbl { font-size: 0.75rem; color: #525252; font-weight: 500; }
+  .stat-lbl { font-size: 0.75rem; color: #737783; font-weight: 500; }
 
   /* ── SECTION ──────────────────────────────────────────── */
   .section { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
@@ -257,10 +271,10 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     margin-bottom: 6px; letter-spacing: -0.01em; transition: color .2s;
   }
   .card:hover .card-title { color: #fff; }
-  .card-desc { font-size: 0.78rem; color: #525252; line-height: 1.6; flex: 1; margin-bottom: 14px; }
+  .card-desc { font-size: 0.78rem; color: #737783; line-height: 1.6; flex: 1; margin-bottom: 14px; }
   .card-footer {
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 0.72rem; font-weight: 600; color: #404040; transition: color .2s;
+    font-size: 0.72rem; font-weight: 600; color: #737783; transition: color .2s;
   }
   .card:hover .card-footer { color: #F5A623; }
   .card-arrow { font-size: 0.8rem; transition: transform .2s; }
@@ -373,7 +387,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
           />
           <span id="search-count" aria-live="polite"></span>
         </div>
-        <button id="favorites-filter-btn" class="filter-btn" aria-label="Toggle favorites">
+        <button id="favorites-filter-btn" class="filter-btn" aria-label="Toggle favorites" aria-pressed="false">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
@@ -405,7 +419,8 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   <div id="roadmaps">
     <div id="no-results" role="status">
-      No roadmaps found for "<span id="no-results-query"></span>" — try a different keyword.
+      <span id="no-results-copy">No roadmaps found for "<span id="no-results-query"></span>" — try a different keyword.</span>
+      <button id="clear-filters" class="clear-filters" type="button">Clear filters</button>
     </div>
 
     <!-- ── ROLE-BASED ──────────────────────────────────── -->
@@ -590,7 +605,9 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   const favoritesBtn = document.getElementById('favorites-filter-btn') as HTMLButtonElement;
   const searchCountElement = document.getElementById('search-count')!;
   const noResultsElement = document.getElementById('no-results')!;
+  const noResultsCopyElement = document.getElementById('no-results-copy')!;
   const noResultsQueryElement = document.getElementById('no-results-query')!;
+  const clearFiltersButton = document.getElementById('clear-filters') as HTMLButtonElement | null;
   const allCardElements = Array.from(document.querySelectorAll<HTMLAnchorElement>('.card'));
 
   let showFavoritesOnly = false;
@@ -622,18 +639,25 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       if (isMatch) visibleCardCount++;
     });
 
-    searchCountElement.textContent = searchQuery ? `${visibleCardCount} found` : '';
-    noResultsElement.style.display = searchQuery && visibleCardCount === 0 ? 'block' : 'none';
+    const isFiltering = Boolean(searchQuery || showFavoritesOnly);
+    searchCountElement.textContent = isFiltering ? `${visibleCardCount} found` : '';
+    noResultsElement.style.display = isFiltering && visibleCardCount === 0 ? 'block' : 'none';
     noResultsQueryElement.textContent = searchQuery;
+    if (showFavoritesOnly && !searchQuery) {
+      noResultsCopyElement.textContent = 'No favorite roadmaps yet — save a roadmap to see it here.';
+    } else {
+      noResultsCopyElement.textContent = `No roadmaps found for "${searchQuery}" — try a different keyword.`;
+    }
 
-    // Toggle section visibility based on matching cards
+    // Toggle section visibility and keep section totals accurate while filtering.
     ['role', 'skill', 'other'].forEach((sectionId) => {
       const sectionElement = document.getElementById(`section-${sectionId}`);
       if (!sectionElement) return;
-      const hasVisibleCards = Array.from(sectionElement.querySelectorAll('.card')).some(
-        (card) => !card.classList.contains('hidden')
-      );
-      sectionElement.style.display = hasVisibleCards ? '' : 'none';
+      const sectionCards = Array.from(sectionElement.querySelectorAll<HTMLAnchorElement>('.card'));
+      const matchingCount = sectionCards.filter((card) => !card.classList.contains('hidden')).length;
+      const countElement = sectionElement.querySelector<HTMLElement>('.section-count');
+      if (countElement) countElement.textContent = isFiltering ? `${matchingCount} of ${sectionCards.length}` : `${sectionCards.length} roadmaps`;
+      sectionElement.style.display = matchingCount > 0 ? '' : 'none';
     });
   }
 
@@ -711,9 +735,19 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     favoritesBtn.addEventListener('click', () => {
       showFavoritesOnly = !showFavoritesOnly;
       favoritesBtn.classList.toggle('active', showFavoritesOnly);
+      favoritesBtn.setAttribute('aria-pressed', String(showFavoritesOnly));
       filterRoadmaps();
     });
   }
+
+  clearFiltersButton?.addEventListener('click', () => {
+    searchInput.value = '';
+    showFavoritesOnly = false;
+    favoritesBtn?.classList.remove('active');
+    favoritesBtn?.setAttribute('aria-pressed', 'false');
+    filterRoadmaps();
+    searchInput.focus();
+  });
 
   window.addEventListener('cosmic-bookmarks-updated', filterRoadmaps);
 </script>

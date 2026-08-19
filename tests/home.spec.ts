@@ -28,6 +28,24 @@ test.describe('Cosmic Home Page', () => {
     await expect(searchCount).toContainText('found');
   });
 
+  test('should clear combined search and Favorites filters', async ({ page }) => {
+    await page.goto('/');
+
+    const searchInput = page.locator('#search-input');
+    const favoritesButton = page.locator('#favorites-filter-btn');
+    await searchInput.fill('python');
+    await favoritesButton.click();
+
+    const clearButton = page.locator('#clear-filters');
+    await expect(clearButton).toBeVisible();
+    await clearButton.click();
+
+    await expect(searchInput).toHaveValue('');
+    await expect(favoritesButton).toHaveAttribute('aria-pressed', 'false');
+    await expect(clearButton).not.toBeVisible();
+    await expect(page.locator('#role-count')).toHaveText('15 roadmaps');
+  });
+
   test('should open keyboard shortcuts modal on pressing ?', async ({ page }) => {
     await page.goto('/');
     

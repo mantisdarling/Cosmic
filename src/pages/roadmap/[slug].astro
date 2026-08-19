@@ -45,6 +45,9 @@ const topicContents = roadmap.nodes.map((node) => {
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
     .page { display: flex; flex-direction: column; height: 100dvh; background: #0D0D0D; }
+    /* The canvas is a flex child; without an explicit flex basis the 100% canvas
+       inside RoadmapCanvas collapses to zero height on the deployed route. */
+    .canvas-wrap { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; }
 
     /* ── Top Bar ── */
     .topbar {
@@ -85,6 +88,23 @@ const topicContents = roadmap.nodes.map((node) => {
       text-decoration: none; transition: all .15s ease;
     }
     .topbar-btn:hover { color: #A3A3A3; border-color: #2a2a2a; background: #141722; }
+    .topbar-btn:focus-visible, .back-link:focus-visible {
+      outline: 2px solid #FCD068;
+      outline-offset: 2px;
+    }
+    @media (max-width: 640px) {
+      .topbar { height: 52px; padding: 0 10px; }
+      .topbar-left { gap: 7px; min-width: 0; }
+      .topbar-sep { display: none; }
+      .back-link { padding: 4px 2px; font-size: 0.72rem; white-space: nowrap; }
+      .topbar-title { gap: 6px; min-width: 0; }
+      .topbar-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+      .topbar-count { display: none; }
+      .topbar-right { gap: 4px; }
+      .topbar-btn { padding: 0 7px; }
+      .topbar-right > .topbar-btn:last-child { font-size: 0; }
+      .topbar-right > .topbar-btn:last-child svg { width: 14px; height: 14px; }
+    }
   </style>
 
   <div class="page">
