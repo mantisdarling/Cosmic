@@ -39,5 +39,49 @@ test.describe('Roadmap Viewer', () => {
     await expect(page.locator('button:has-text("Content")')).toBeVisible();
     await expect(page.locator('button:has-text("AI Tutor")')).toBeVisible();
     await expect(page.locator('button:has-text("Quiz")')).toBeVisible();
+    await expect(page.locator('button:has-text("Challenge")')).toBeVisible();
+  });
+
+  test('should run an AI coding challenge and persist study notes for a topic', async ({ page }) => {
+    await page.route('**/api/ai', async route => {
+      const request = route.request();
+      const payload = request.postDataJSON?.() as { action?: string } | null;
+      if (payload?.action !== 'challenge') {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        json: {
+          text: JSON.stringify({
+            title: 'Normalize a topic queue',
+            brief: 'Return the topic labels in a stable order.',
+            functionName: 'solve',
+            starterCode: 'function solve(items) {\\n  return items.map((item) => item.label);\\n}',
+            tests: [
+              { input: [[{ label: 'HTML' }, { label: 'CSS' }]], expected: ['HTML', 'CSS'] },
+              { input: [[{ label: 'React' }]], expected: ['React'] },
+              { input: [[]], expected: [] },
+            ],
+            hint: 'Map each item to its label.',
+          }),
+        },
+      });
+    });
+
+    await page.goto('/roadmap/frontend');
+    await page.waitForSelector('.react-flow__node');
+    await page.locator('.react-flow__node:not([data-id="fe-root"])').first().click({ force: true });
+    await page.getByRole('button', { name: 'Challenge' }).click();
+    await expect(page.getByText('Live JavaScript lab')).toBeVisible();
+    await page.locator('#challenge-code').fill('function solve(items) { return items.map((item) => item.label); }');
+    await page.getByRole('button', { name: 'Run tests' }).click();
+    await expect(page.locator('[role="status"]')).toContainText('3/3 tests passing');
+
+    await page.getByRole('button', { name: 'Content' }).click();
+    const notes = page.locator('#topic-notes');
+    await notes.fill('Use map to project each roadmap topic into a label.');
+    await page.getByRole('button', { name: 'Close panel' }).click();
+    await page.locator('.react-flow__node:not([data-id="fe-root"])').first().click({ force: true });
+    await expect(page.locator('#topic-notes')).toHaveValue('Use map to project each roadmap topic into a label.');
   });
 });

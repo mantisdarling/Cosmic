@@ -74,6 +74,26 @@ Return ONLY a valid JSON array. Each object in the array must have:
 - "answerIndex": number (0-3) indicating the correct option
 - "explanation": string explaining why the answer is correct
 DO NOT wrap the response in \`\`\`json. Return ONLY the raw JSON string.`;
+  } else if (action === 'challenge') {
+    promptText = `Create one practical JavaScript coding challenge for a learner studying "${topic}" in the "${roadmap}" roadmap.
+Return ONLY one valid JSON object with exactly these fields:
+{
+  "title": "short challenge title",
+  "brief": "2-3 sentence task description",
+  "functionName": "solve",
+  "starterCode": "valid JavaScript defining function solve(...args) with a TODO body",
+  "tests": [
+    { "input": ["JSON-compatible argument 1", 2], "expected": "JSON-compatible expected return value" }
+  ],
+  "hint": "one concise hint"
+}
+Rules:
+- Use JavaScript only and make the solution runnable in a browser without imports.
+- The function MUST be named solve and MUST return a JSON-compatible value.
+- Include exactly 3 deterministic tests with small values.
+- Keep the challenge solvable in 10–15 minutes and connected to the topic.
+- Do not include markdown fences, HTML, or extra keys.
+DO NOT wrap the response in \`\`\`json. Return ONLY the raw JSON string.`;
   } else if (topic.startsWith('next-after-')) {
     promptText = customPrompt; // Using the provided custom prompt for recommendations
   } else if (!promptText) {
@@ -109,7 +129,7 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           messages: [{ role: 'user', content: promptText }],
-          max_tokens: action === 'generate' ? 2500 : 900,
+          max_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
           temperature: 0.7,
         }),
     });

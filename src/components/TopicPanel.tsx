@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { marked } from 'marked';
 import { sanitizeHtml, cleanAndParseJSON } from '../lib/security';
+import { fallbackChallenge, requestCodingChallenge, runCodingChallenge, type CodingChallenge, type ChallengeRun } from '../lib/challenges';
 
 interface Resource {
   label: string;
@@ -77,7 +78,7 @@ const TopicPanel = memo(function TopicPanel({
 }: TopicPanelProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [contentHtml, setContentHtml] = useState('');
-  const [activeTab, setActiveTab] = useState<'content' | 'ai' | 'quiz'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'ai' | 'quiz' | 'challenge'>('content');
   const [aiHtml, setAiHtml] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState('');
@@ -87,6 +88,12 @@ const TopicPanel = memo(function TopicPanel({
   const [isQuizLoading, setIsQuizLoading] = useState(false);
   const [quizError, setQuizError] = useState('');
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
+  const [challengeData, setChallengeData] = useState<CodingChallenge | null>(null);
+  const [isChallengeLoading, setIsChallengeLoading] = useState(false);
+  const [challengeError, setChallengeError] = useState('');
+  const [challengeCode, setChallengeCode] = useState('');
+  const [challengeRun, setChallengeRun] = useState<ChallengeRun | null>(null);
+  const [studyNotes, setStudyNotes] = useState('');
 
   // Reset tab state when selected node changes
   useEffect(() => {
@@ -96,8 +103,17 @@ const TopicPanel = memo(function TopicPanel({
     setQuizData(null);
     setQuizError('');
     setQuizAnswers({});
+    setChallengeData(null);
+    setChallengeError('');
+    setChallengeCode('');
+    setChallengeRun(null);
+    try {
+      setStudyNotes(localStorage.getItem(`cosmic-notes-${encodeURIComponent(roadmapTitle)}-${encodeURIComponent(nodeLabel)}`) ?? '');
+    } catch {
+      setStudyNotes('');
+    }
     setActiveTab('content');
-  }, [nodeLabel]);
+  }, [nodeLabel, roadmapTitle]);
 
   // Render provided static topic markdown
   useEffect(() => {
@@ -205,6 +221,36 @@ const TopicPanel = memo(function TopicPanel({
       setQuizError(err?.message ?? 'Failed to generate quiz.');
     }
     setIsQuizLoading(false);
+  };
+
+  const handleAskChallenge = async () => {
+    setActiveTab('challenge');
+    if (challengeData || isChallengeLoading) return;
+    setIsChallengeLoading(true);
+    setChallengeError('');
+    setChallengeRun(null);
+    try {
+      const challenge = await requestCodingChallenge(nodeLabel, roadmapTitle);
+      setChallengeData(challenge);
+      setChallengeCode(challenge.starterCode);
+    } catch (error) {
+      setChallengeData(fallbackChallenge(nodeLabel, roadmapTitle));
+      setChallengeCode(fallbackChallenge(nodeLabel, roadmapTitle).starterCode);
+      setChallengeError(error instanceof Error ? `${error.message} Showing a local practice challenge instead.` : 'AI is unavailable. Showing a local practice challenge instead.');
+    } finally {
+      setIsChallengeLoading(false);
+    }
+  };
+
+  const handleRunChallenge = async () => {
+    if (!challengeData) return;
+    try {
+      setChallengeError('');
+      setChallengeRun(await runCodingChallenge(challengeData, challengeCode));
+    } catch (error) {
+      setChallengeRun(null);
+      setChallengeError(error instanceof Error ? error.message : 'Unable to run this solution.');
+    }
   };
 
   const safeResources = resources.filter(
@@ -416,6 +462,21 @@ const TopicPanel = memo(function TopicPanel({
               <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>🎯</span>
               <span>Quiz</span>
             </button>
+
+            <button
+              onClick={handleAskChallenge}
+              style={{
+                padding: '8px 16px', borderRadius: '8px 8px 0 0', cursor: 'pointer',
+                border: activeTab === 'challenge' ? '1px solid rgba(98,244,190,0.3)' : '1px solid transparent',
+                borderBottom: activeTab === 'challenge' ? '1px solid #141722' : '1px solid transparent',
+                background: activeTab === 'challenge' ? 'rgba(98,244,190,0.06)' : 'transparent',
+                color: activeTab === 'challenge' ? '#62F4BE' : '#737373', fontSize: '0.82rem', fontWeight: 600,
+                display: 'inline-flex', alignItems: 'center', gap: 6, transition: 'color 0.15s ease', fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ fontSize: '0.9rem', lineHeight: 1 }}>⌘</span>
+              <span>Challenge</span>
+            </button>
           </div>
         </div>
 
@@ -425,6 +486,14 @@ const TopicPanel = memo(function TopicPanel({
           {activeTab === 'content' && (
             <>
               <div className="prose" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+
+              <div style={{ marginTop: 24, padding: 16, borderRadius: 10, border: '1px solid rgba(0,229,255,0.16)', background: 'rgba(0,229,255,0.035)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 9 }}>
+                  <label htmlFor="topic-notes" style={{ color: '#9EEBFF', fontFamily: '"Space Mono", monospace', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Study notes</label>
+                  <span style={{ color: '#6F7B95', fontSize: '0.68rem' }}>Saved on this device</span>
+                </div>
+                <textarea id="topic-notes" value={studyNotes} onChange={(event) => { const value = event.target.value.slice(0, 4000); setStudyNotes(value); try { localStorage.setItem(`cosmic-notes-${encodeURIComponent(roadmapTitle)}-${encodeURIComponent(nodeLabel)}`, value); } catch { /* storage can be unavailable */ } }} placeholder={`Capture the key idea, an example, or a question about ${nodeLabel}…`} style={{ width: '100%', minHeight: 120, resize: 'vertical', padding: '12px', border: '1px solid #2A3550', borderRadius: 8, outline: 'none', background: '#0B101B', color: '#DCE4F5', fontFamily: 'inherit', fontSize: '0.82rem', lineHeight: 1.6 }} />
+              </div>
 
               {safeResources.length > 0 && (
                 <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #1E2333' }}>
@@ -527,6 +596,47 @@ const TopicPanel = memo(function TopicPanel({
                 </p>
               </div>
             </>
+          )}
+
+            {/* Coding Challenge Tab */}
+          {activeTab === 'challenge' && (
+            <div style={{ animation: 'fadeUp 0.3s ease both' }}>
+              {isChallengeLoading ? (
+                <div style={{ padding: '46px 0', textAlign: 'center' }}>
+                  <div style={{ width: 30, height: 30, margin: '0 auto 14px', border: '2px solid rgba(98,244,190,0.2)', borderTopColor: '#62F4BE', borderRadius: '50%', animation: 'challengeSpin 0.75s linear infinite' }} />
+                  <p style={{ color: '#A3A3A3', fontSize: '0.88rem' }}>Designing a JavaScript challenge for {nodeLabel}…</p>
+                  <style>{`@keyframes challengeSpin { to { transform: rotate(360deg); } }`}</style>
+                </div>
+              ) : challengeData ? (
+                <>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 9px', borderRadius: 99, background: 'rgba(98,244,190,0.08)', border: '1px solid rgba(98,244,190,0.22)', color: '#62F4BE', fontFamily: '"Space Mono", monospace', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <span aria-hidden="true">●</span> Live JavaScript lab
+                  </div>
+                  <h3 style={{ margin: '16px 0 8px', color: '#F5F5F5', fontSize: '1.18rem', letterSpacing: '-0.03em' }}>{challengeData.title}</h3>
+                  <p style={{ margin: '0 0 18px', color: '#AAB7D0', fontSize: '0.88rem', lineHeight: 1.65 }}>{challengeData.brief}</p>
+                  {challengeError && <p role="status" style={{ margin: '0 0 14px', padding: '10px 12px', borderRadius: 8, color: '#FCD068', background: 'rgba(245,166,35,0.07)', border: '1px solid rgba(245,166,35,0.18)', fontSize: '0.76rem', lineHeight: 1.5 }}>{challengeError}</p>}
+                  <label htmlFor="challenge-code" style={{ display: 'block', marginBottom: 7, color: '#6F7B95', fontFamily: '"Space Mono", monospace', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Your solution · function solve</label>
+                  <textarea id="challenge-code" value={challengeCode} onChange={(event) => { setChallengeCode(event.target.value); setChallengeRun(null); }} spellCheck={false} aria-label="Coding challenge solution" style={{ width: '100%', minHeight: 180, resize: 'vertical', padding: '14px', border: '1px solid #2A3550', borderRadius: 10, outline: 'none', background: '#0B101B', color: '#DCE4F5', fontFamily: '"Space Mono", monospace', fontSize: '0.74rem', lineHeight: 1.6 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                    <button type="button" onClick={handleRunChallenge} style={{ padding: '9px 14px', border: '1px solid #62F4BE', borderRadius: 8, background: '#62F4BE', color: '#08110F', fontSize: '0.76rem', fontWeight: 800, cursor: 'pointer' }}>Run tests</button>
+                    <button type="button" onClick={() => { setChallengeData(null); setChallengeRun(null); setChallengeError(''); handleAskChallenge(); }} style={{ padding: '9px 12px', border: '1px solid #2A3550', borderRadius: 8, background: 'transparent', color: '#AAB7D0', fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer' }}>New challenge</button>
+                    <span style={{ marginLeft: 'auto', color: '#6F7B95', fontFamily: '"Space Mono", monospace', fontSize: '0.62rem' }}>{challengeData.tests.length} tests · browser only</span>
+                  </div>
+                  {challengeRun && (
+                    <div role="status" style={{ marginTop: 16, padding: 14, borderRadius: 10, border: `1px solid ${challengeRun.passed === challengeRun.total ? 'rgba(98,244,190,0.35)' : 'rgba(245,166,35,0.25)'}`, background: challengeRun.passed === challengeRun.total ? 'rgba(98,244,190,0.08)' : 'rgba(245,166,35,0.06)' }}>
+                      <strong style={{ display: 'block', color: challengeRun.passed === challengeRun.total ? '#62F4BE' : '#FCD068', fontSize: '0.88rem' }}>{challengeRun.passed}/{challengeRun.total} tests passing</strong>
+                      <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
+                        {challengeRun.outputs.map((result, index) => <div key={index} style={{ color: result.passed ? '#62F4BE' : '#FCA5A5', fontFamily: '"Space Mono", monospace', fontSize: '0.65rem' }}>{result.passed ? '✓' : '×'} Test {index + 1}{result.error ? ` · ${result.error}` : ''}</div>)}
+                      </div>
+                    </div>
+                  )}
+                  <details style={{ marginTop: 16, color: '#8B98B3', fontSize: '0.78rem' }}>
+                    <summary style={{ cursor: 'pointer', color: '#F5A623', fontWeight: 700 }}>Need a hint?</summary>
+                    <p style={{ margin: '10px 0 0', lineHeight: 1.6 }}>{challengeData.hint}</p>
+                  </details>
+                </>
+              ) : null}
+            </div>
           )}
 
           {/* Quiz Tab */}

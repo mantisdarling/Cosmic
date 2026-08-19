@@ -108,6 +108,10 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   @media (max-width: 640px) { .nav-links { display: none; } }
 
+  .optional-labs { margin-top: 36px; padding: 30px 0 70px; border-top: 1px solid rgba(55,67,98,.42); background: linear-gradient(180deg, rgba(12,17,29,.22), rgba(8,11,18,.7)); }
+  .optional-labs-intro { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .optional-labs-intro p { max-width: 660px; margin: 12px 0 0; color: #78859E; font-size: .9rem; line-height: 1.7; }
+
   /* ── HERO CONTAINER ─────────────────────────────────── */
   .hero-container {
     --pointer-x: 0;
@@ -636,9 +640,6 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     </div>
   </section>
 
-  <StoryMode />
-  <StormbladeArena />
-  <FrostboundCircuit />
   <RoadmapUtilities roadmaps={all.map(({ id, title }) => ({ id, title }))} />
 
   <div id="roadmaps">
@@ -752,6 +753,17 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
       </>
     )}
   </div>
+
+  <section class="optional-labs" aria-labelledby="labs-heading">
+    <div class="optional-labs-intro">
+      <div class="control-kicker">Optional practice labs // 006</div>
+      <h2 class="section-title" id="labs-heading">Turn the roadmap into reps</h2>
+      <p>When you want a change of pace, use the story simulation or battle labs to practice the same focus, routing, and decision-making skills in a lighter format.</p>
+    </div>
+    <StoryMode />
+    <StormbladeArena />
+    <FrostboundCircuit />
+  </section>
 </main>
 
 <!-- ── FOOTER ──────────────────────────────────────────── -->
