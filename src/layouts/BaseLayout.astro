@@ -79,11 +79,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-n
 
   <!-- Scroll reveal handler: skip observation on low-power or reduced-motion devices -->
   <script>
-    const lowPowerReveal = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      || window.matchMedia('(pointer: coarse)').matches
-      || (navigator.hardwareConcurrency || 8) <= 4;
-    const revealTargets = document.querySelectorAll('[data-reveal]');
-    if (lowPowerReveal) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowPowerDevice = (navigator.hardwareConcurrency || 8) <= 4;
+    const revealTargets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    document.documentElement.classList.toggle('motion-live', !prefersReducedMotion);
+    document.documentElement.classList.toggle('motion-reduced', prefersReducedMotion);
+    revealTargets.forEach((element, index) => {
+      const parent = element.closest('section, main, header, footer');
+      const siblingIndex = parent ? Array.from(parent.querySelectorAll('[data-reveal]')).indexOf(element) : index;
+      element.style.setProperty('--reveal-delay', `${Math.min(Math.max(siblingIndex, 0), 7) * (lowPowerDevice ? 45 : 85)}ms`);
+    });
+    if (prefersReducedMotion) {
       revealTargets.forEach((element) => element.classList.add('in'));
     } else {
       const scrollObserver = new IntersectionObserver(
@@ -93,7 +99,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-n
             scrollObserver.unobserve(entry.target);
           }
         }),
-        { threshold: 0.06, rootMargin: '0px 0px -16px 0px' }
+        { threshold: 0.08, rootMargin: '0px 0px -10% 0px' }
       );
       requestAnimationFrame(() => revealTargets.forEach((element) => scrollObserver.observe(element)));
     }
