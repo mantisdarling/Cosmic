@@ -60,7 +60,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://cosmic-r
   <!-- Deferred font activation and service worker registration -->
   <script is:inline>
     window.addEventListener('load', () => {
-      document.querySelectorAll<HTMLLinkElement>('[data-deferred-font]').forEach((link) => { link.media = 'all'; });
+      document.querySelectorAll('[data-deferred-font]').forEach((link) => { link.media = 'all'; });
     }, { once: true });
   </script>
   <script is:inline>

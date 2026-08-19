@@ -34,14 +34,15 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
 <style>
   /* ── NAV ─────────────────────────────────────────────── */
+  header { position: sticky; top: 0; z-index: 50; height: 86px; padding: 12px 16px 0; box-sizing: border-box; pointer-events: none; }
   .nav {
-    position: sticky; top: 0; z-index: 50;
-    height: 62px;
+    position: relative; z-index: 50; width: min(1240px, 100%); height: 62px; margin: 0 auto;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 32px;
-    background: rgba(7, 9, 16, 0.84);
+    padding: 0 24px;
+    background: rgba(7, 9, 16, 0.72);
     backdrop-filter: blur(18px) saturate(130%);
-    border-bottom: 1px solid rgba(91, 106, 148, 0.28);
+    border: 1px solid rgba(91, 106, 148, 0.32); border-radius: 16px;
+    border-bottom-color: rgba(91, 106, 148, 0.28); pointer-events: auto;
     box-shadow: 0 10px 40px rgba(0,0,0,0.22);
   }
   .nav::after {
@@ -82,21 +83,26 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   }
   #theme-toggle:hover { border-color: #404040; background: #1a1a1a; color: #F5F5F5; }
   @media (max-width: 760px) {
-    .nav { height: 58px; padding: 0 18px; }
+    header { height: 74px; padding: 10px 10px 0; }
+    .nav { height: 54px; padding: 0 16px; border-radius: 14px; }
     .nav-links { display: none; }
-    .hero { min-height: 0; padding: 76px 22px 42px; text-align: center; align-items: center; }
+    .hero { min-height: 0; padding: 86px 22px 44px; text-align: center; align-items: center; }
     .hero h1 { font-size: clamp(2.55rem, 13vw, 4rem); }
     .hero p { margin-left: auto; margin-right: auto; }
     .hero-actions { justify-content: center; }
     .hero-signal { justify-content: center !important; }
     .search-container { margin: 0 auto; }
-    .hero-container { background-position: 68% center; }
+    .hero-art-layer img { object-position: 70% center; opacity: .62; }
+    .hero-art-layer::after { background: linear-gradient(180deg, rgba(6,9,18,.42), rgba(6,9,18,.7)), linear-gradient(90deg, rgba(6,9,18,.55), transparent 70%); }
+    .hero-container { min-height: 0; }
     .hero-container::after { width: 280px; height: 280px; right: -80px; top: 18%; }
     .hero-badges { opacity: .68; }
     .hero-badge-frontend { top: 12%; left: 8%; }
     .hero-badge-ai { top: 22%; right: 5%; }
     .hero-badge-cloud { bottom: 14%; left: 7%; }
     .hero-badge-devops { bottom: 22%; right: 7%; }
+    .hero-bottom-rail { grid-template-columns: 1fr; gap: 8px; margin-top: 28px; text-align: center; }
+    .hero-bottom-rail .rail-line { width: 100%; }
   }
   @media (max-width: 640px) { .nav-links { display: none; } }
 
@@ -104,11 +110,9 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
   .hero-container {
     --pointer-x: 0;
     --pointer-y: 0;
-    position: relative; overflow: hidden;
-    background-image:
-      linear-gradient(90deg, rgba(6,9,18,0.96) 0%, rgba(6,9,18,0.86) 34%, rgba(6,9,18,0.36) 66%, rgba(6,9,18,0.78) 100%),
-      linear-gradient(180deg, rgba(7,9,16,0.18) 0%, rgba(7,9,16,0.12) 45%, #0B0C10 100%),
-      url('/cosmic-anime-hero.webp');
+    position: relative; overflow: hidden; min-height: 640px;
+    background-color: #060912;
+    background-image: linear-gradient(90deg, rgba(6,9,18,0.97) 0%, rgba(6,9,18,0.84) 34%, rgba(6,9,18,0.32) 66%, rgba(6,9,18,0.76) 100%), linear-gradient(180deg, rgba(7,9,16,0.16) 0%, rgba(7,9,16,0.08) 45%, #0B0C10 100%);
     background-size: cover;
     background-position: center right;
     border-bottom: 1px solid #1E2333;
@@ -127,9 +131,12 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     transform: translate3d(calc(var(--pointer-x) * 18px), calc(var(--pointer-y) * 12px), 0);
     transition: transform .35s ease-out;
   }
-  .hero-particle-field { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .hero-art-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .hero-art-layer img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center right; opacity: .9; filter: saturate(.92) contrast(1.04); }
+  .hero-art-layer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6,9,18,.28), transparent 46%, rgba(6,9,18,.24)), linear-gradient(180deg, rgba(6,9,18,.08), transparent 45%, rgba(6,9,18,.54)); }
+  .hero-particle-field { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
   #hero-particles { width: 100%; height: 100%; display: block; opacity: .9; }
-  .hero-badges { position: absolute; inset: 0; max-width: 1260px; margin: 0 auto; z-index: 2; pointer-events: none; }
+  .hero-badges { position: absolute; inset: 0; max-width: 1260px; margin: 0 auto; z-index: 3; pointer-events: none; }
   .hero-badge {
     --badge-shift-x: 0px; --badge-shift-y: 0px;
     position: absolute; display: inline-flex; padding: 6px 10px;
@@ -157,10 +164,10 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 
   /* ── HERO ─────────────────────────────────────────────── */
   .hero {
-    max-width: 1200px; margin: 0 auto;
-    padding: 96px 32px 64px;
+    position: relative; z-index: 4; max-width: 1200px; margin: 0 auto;
+    padding: 128px 32px 76px;
     text-align: left;
-    min-height: 540px;
+    min-height: 640px;
     display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
   }
   .hero-eyebrow {
@@ -193,6 +200,9 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
     font-size: 1.03rem; line-height: 1.75; color: #A8B0C2;
     max-width: 600px; margin: 0 0 18px;
   }
+  .hero-bottom-rail { width: min(680px, 100%); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; margin-top: 34px; color: #6E7B95; font: 700 .61rem/1 'Space Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .hero-bottom-rail .rail-line { height: 1px; background: linear-gradient(90deg, rgba(0,229,255,.75), rgba(245,166,35,.35), transparent); }
+  .hero-bottom-rail strong { color: #B7C9E8; font-weight: 700; }
   .hero-actions { display: flex; gap: 10px; justify-content: flex-start; flex-wrap: wrap; margin-bottom: 30px; }
   .hero-actions a, .hero-actions button {
     padding: 11px 22px; border-radius: 9px;
@@ -474,6 +484,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
 <main>
   <!-- ── HERO ─────────────────────────────────────────── -->
   <div class="hero-container">
+    <div class="hero-art-layer" aria-hidden="true"><img src="/cosmic-anime-hero.webp" width="1440" height="810" alt="" fetchpriority="high" decoding="async" /></div>
     <div class="hero-particle-field" aria-hidden="true"><canvas id="hero-particles"></canvas></div>
     <div class="hero-badges" aria-hidden="true">
       <span class="hero-badge hero-badge-frontend" data-depth="1.2"><span>FRONTEND // 01</span></span>
@@ -550,6 +561,7 @@ const other = all.filter(r => !roleIds.includes(r.id) && !skillIds.includes(r.id
           <span>Favorites</span>
         </button>
       </div>
+      <div class="hero-bottom-rail" data-reveal><span>Scroll to explore</span><span class="rail-line" aria-hidden="true"></span><span><strong>50</strong> paths / <strong>952+</strong> topics</span></div>
     </section>
   </div>
 
