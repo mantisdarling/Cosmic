@@ -127,7 +127,7 @@ Be friendly, practical, and motivating. Use markdown. Around 400–500 words tot
         Authorization: `Bearer ${apiKey}`,
       },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: import.meta.env.GROQ_MODEL || 'openai/gpt-oss-20b',
           messages: [{ role: 'user', content: promptText }],
           max_tokens: action === 'generate' ? 2500 : action === 'challenge' ? 1400 : 900,
           temperature: 0.7,
