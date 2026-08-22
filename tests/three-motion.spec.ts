@@ -29,8 +29,32 @@ test.describe('Cosmic Three.js motion layer', () => {
     if (!bounds) return;
 
     await page.mouse.click(bounds.x + bounds.width * .82, bounds.y + bounds.height * .28);
-    await expect(scene).toHaveAttribute('data-impact-count', '1');
-    await expect(scene).toHaveAttribute('data-impact-active', 'true');
+    await expect(scene).toHaveAttribute('data-burst-count', '1');
+  });
+
+  test('supports grabbing and throwing a live energy shard', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(1800);
+
+    const scene = page.locator('[data-anime-three-scene]');
+    await expect(scene).toHaveAttribute('data-shard-point', /,/);
+    const point = await scene.getAttribute('data-shard-point');
+    expect(point).not.toBeNull();
+    if (!point) return;
+    const [x, y] = point.split(',').map(Number);
+    expect(Number.isFinite(x)).toBe(true);
+    expect(Number.isFinite(y)).toBe(true);
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await expect(scene).toHaveAttribute('data-grabbed', 'true');
+    await page.mouse.move(x + 72, y + 38, { steps: 4 });
+    await page.mouse.up();
+
+    await expect(scene).toHaveAttribute('data-grabbed', 'false');
+    await expect(scene).toHaveAttribute('data-throw-count', '1');
+    const burstCount = Number(await scene.getAttribute('data-burst-count'));
+    expect(burstCount).toBeGreaterThanOrEqual(2);
   });
 
   test('keeps content available and hides 3D decoration on reduced mobile motion', async ({ page }) => {

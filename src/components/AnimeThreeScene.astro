@@ -92,7 +92,8 @@
         new THREE.MeshBasicMaterial({ color: violet, transparent: true, opacity: .52 }),
       ];
 
-      const shards: Array<{ mesh: InstanceType<ThreeModule['Mesh']>; angle: number; radius: number; height: number; speed: number; phase: number; baseScale: number; offsetX: number; offsetY: number; offsetZ: number; velocityX: number; velocityY: number; velocityZ: number }> = [];
+      type Shard = { mesh: InstanceType<ThreeModule['Mesh']>; angle: number; radius: number; height: number; speed: number; phase: number; baseScale: number; offsetX: number; offsetY: number; offsetZ: number; velocityX: number; velocityY: number; velocityZ: number; dragX: number; dragY: number; dragZ: number };
+      const shards: Shard[] = [];
       for (let index = 0; index < 18; index += 1) {
         const angle = (index / 18) * Math.PI * 2;
         const radius = 1.18 + (index % 4) * .18;
@@ -102,7 +103,7 @@
         const baseScale = .7 + (index % 3) * .14;
         mesh.scale.setScalar(baseScale);
         orbitalField.add(mesh);
-        shards.push({ mesh, angle, radius, height: .68 + (index % 3) * .1, speed: .12 + (index % 5) * .018, phase: index * .47, baseScale, offsetX: 0, offsetY: 0, offsetZ: 0, velocityX: 0, velocityY: 0, velocityZ: 0 });
+        shards.push({ mesh, angle, radius, height: .68 + (index % 3) * .1, speed: .12 + (index % 5) * .018, phase: index * .47, baseScale, offsetX: 0, offsetY: 0, offsetZ: 0, velocityX: 0, velocityY: 0, velocityZ: 0, dragX: mesh.position.x, dragY: mesh.position.y, dragZ: mesh.position.z });
       }
 
       const ringGeometry = new THREE.TorusGeometry(1.36, .012, 6, 64);
@@ -123,6 +124,17 @@
       impactRing.rotation.x = .86;
       impactRing.visible = false;
       stage.add(impactRing);
+      const burstCount = 42;
+      const burstPositions = new Float32Array(burstCount * 3);
+      const burstColors = new Float32Array(burstCount * 3);
+      const burstGeometry = new THREE.BufferGeometry();
+      burstGeometry.setAttribute('position', new THREE.BufferAttribute(burstPositions, 3));
+      burstGeometry.setAttribute('color', new THREE.BufferAttribute(burstColors, 3));
+      const burstMaterial = new THREE.PointsMaterial({ size: .055, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+      const burstParticles = new THREE.Points(burstGeometry, burstMaterial);
+      stage.add(burstParticles);
+      const burstVelocities = Array.from({ length: burstCount }, () => new THREE.Vector3());
+      const burstLifetimes = new Float32Array(burstCount);
 
       const resize = () => {
         const bounds = root.getBoundingClientRect();
@@ -146,15 +158,89 @@
       let impactEnergy = 0;
       let impactCooldown = 0;
       let impactCount = 0;
+      let throwCount = 0;
+      let grabbedShard: Shard | null = null;
+      let dragPointerId: number | null = null;
+      let dragMoved = false;
+      let lastDragX = 0;
+      let lastDragY = 0;
+      let audioContext: AudioContext | null = null;
       const impactPoint = new THREE.Vector3();
+      const dragPoint = new THREE.Vector3();
+      const dragOffset = new THREE.Vector3();
+      const shardScreenPoint = new THREE.Vector3();
       const raycaster = new THREE.Raycaster();
       const pointer = new THREE.Vector2();
       const impactPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 
-      const handlePointerMove = (event: PointerEvent) => {
+      const playCue = (type: 'grab' | 'throw' | 'burst') => {
+        try {
+          audioContext ??= new AudioContext();
+          if (audioContext.state === 'suspended') void audioContext.resume();
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          const now = audioContext.currentTime;
+          const frequency = type === 'throw' ? 210 : type === 'burst' ? 420 : 300;
+          oscillator.type = type === 'burst' ? 'triangle' : 'sine';
+          oscillator.frequency.setValueAtTime(frequency, now);
+          oscillator.frequency.exponentialRampToValueAtTime(frequency * (type === 'throw' ? 1.55 : .72), now + .12);
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(type === 'burst' ? .045 : .028, now + .012);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + .14);
+          oscillator.connect(gain).connect(audioContext.destination);
+          oscillator.start(now);
+          oscillator.stop(now + .16);
+        } catch { /* Audio is an enhancement and may be unavailable. */ }
+      };
+
+      const emitBurst = (point: InstanceType<ThreeModule['Vector3']>, color: InstanceType<ThreeModule['Color']>, strength = 1) => {
+        const rgb = color.toArray();
+        for (let index = 0; index < burstCount; index += 1) {
+          const offset = index * 3;
+          const theta = (index / burstCount) * Math.PI * 2 + Math.random() * .6;
+          const spread = .02 + Math.random() * .05;
+          burstPositions[offset] = point.x;
+          burstPositions[offset + 1] = point.y;
+          burstPositions[offset + 2] = point.z;
+          burstVelocities[index].set(Math.cos(theta) * spread * strength, Math.sin(theta) * spread * strength, (Math.random() - .5) * .055 * strength);
+          burstLifetimes[index] = .72 + Math.random() * .35;
+          burstColors[offset] = rgb[0] ?? 1;
+          burstColors[offset + 1] = rgb[1] ?? 1;
+          burstColors[offset + 2] = rgb[2] ?? 1;
+        }
+        burstGeometry.attributes.position.needsUpdate = true;
+        burstGeometry.attributes.color.needsUpdate = true;
+        burstMaterial.opacity = .92;
+        root.dataset.burstCount = String((Number(root.dataset.burstCount) || 0) + 1);
+        playCue('burst');
+      };
+
+      const updatePointerTarget = (event: PointerEvent) => {
         const bounds = hero.getBoundingClientRect();
         targetX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
         targetY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+      };
+      const handlePointerMove = (event: PointerEvent) => {
+        updatePointerTarget(event);
+        if (!grabbedShard || dragPointerId !== event.pointerId) return;
+        const bounds = hero.getBoundingClientRect();
+        pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -(((event.clientY - bounds.top) / bounds.height) * 2 - 1));
+        raycaster.setFromCamera(pointer, camera);
+        if (!raycaster.ray.intersectPlane(impactPlane, dragPoint)) return;
+        stage.worldToLocal(dragPoint);
+        dragPoint.add(dragOffset);
+        const deltaX = dragPoint.x - lastDragX;
+        const deltaY = dragPoint.y - lastDragY;
+        grabbedShard.dragX = dragPoint.x;
+        grabbedShard.dragY = dragPoint.y;
+        grabbedShard.dragZ = dragPoint.z - .12;
+        grabbedShard.velocityX = deltaX * 1.35;
+        grabbedShard.velocityY = deltaY * 1.35;
+        grabbedShard.velocityZ = -.02;
+        lastDragX = dragPoint.x;
+        lastDragY = dragPoint.y;
+        dragMoved ||= Math.abs(deltaX) + Math.abs(deltaY) > .018;
+        root.dataset.grabbed = 'true';
       };
       const resetPointer = () => { targetX = 0; targetY = 0; };
       const handlePointerDown = (event: PointerEvent) => {
@@ -163,6 +249,29 @@
         const bounds = hero.getBoundingClientRect();
         pointer.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -(((event.clientY - bounds.top) / bounds.height) * 2 - 1));
         raycaster.setFromCamera(pointer, camera);
+        const hit = raycaster.intersectObjects(shards.map((shard) => shard.mesh), false)[0];
+        if (hit) {
+          grabbedShard = shards.find((shard) => shard.mesh === hit.object) ?? null;
+          if (grabbedShard && raycaster.ray.intersectPlane(impactPlane, dragPoint)) {
+            stage.worldToLocal(dragPoint);
+            dragOffset.copy(grabbedShard.mesh.position).sub(dragPoint);
+            grabbedShard.dragX = grabbedShard.mesh.position.x;
+            grabbedShard.dragY = grabbedShard.mesh.position.y;
+            grabbedShard.dragZ = grabbedShard.mesh.position.z;
+            lastDragX = grabbedShard.mesh.position.x;
+            lastDragY = grabbedShard.mesh.position.y;
+            dragMoved = false;
+            dragPointerId = event.pointerId;
+            hero.setPointerCapture?.(event.pointerId);
+            grabbedShard.velocityX = 0;
+            grabbedShard.velocityY = 0;
+            grabbedShard.velocityZ = 0;
+            root.dataset.grabbed = 'true';
+            emitBurst(grabbedShard.mesh.position, shardMaterials[shards.indexOf(grabbedShard) % shardMaterials.length].color, .7);
+            playCue('grab');
+          }
+          return;
+        }
         if (!raycaster.ray.intersectPlane(impactPlane, impactPoint)) return;
         stage.worldToLocal(impactPoint);
         impactEnergy = Math.min(1.2, impactEnergy + .82);
@@ -174,6 +283,7 @@
         impactRing.scale.setScalar(.22);
         impactRingMaterial.opacity = .88;
         impactRing.visible = true;
+        emitBurst(impactPoint, cyan, .82);
         shards.forEach((shard) => {
           const orbitAngle = shard.angle + performance.now() * .001 * shard.speed;
           const baseX = Math.cos(orbitAngle) * shard.radius;
@@ -191,6 +301,34 @@
         });
         if (!frame && visible) frame = window.requestAnimationFrame(render);
       };
+      const handlePointerUp = (event: PointerEvent) => {
+        if (!grabbedShard || dragPointerId !== event.pointerId) return;
+        const shard = grabbedShard;
+        const throwX = Math.max(-.34, Math.min(.34, shard.velocityX * (dragMoved ? 1.8 : .4)));
+        const throwY = Math.max(-.34, Math.min(.34, shard.velocityY * (dragMoved ? 1.8 : .4)));
+        const releaseTime = performance.now() * .001;
+        const releaseOrbitAngle = shard.angle + releaseTime * shard.speed;
+        const releaseBaseX = Math.cos(releaseOrbitAngle) * shard.radius;
+        const releaseBaseY = Math.sin(releaseOrbitAngle * 1.07 + shard.phase) * shard.height;
+        const releaseBaseZ = -1.1 + Math.sin(releaseTime * .7 + shard.phase) * .28 + (shard.angle % .9);
+        shard.offsetX = shard.mesh.position.x - releaseBaseX;
+        shard.offsetY = shard.mesh.position.y - releaseBaseY;
+        shard.offsetZ = shard.mesh.position.z - releaseBaseZ;
+        shard.velocityX = throwX;
+        shard.velocityY = throwY;
+        shard.velocityZ = Math.max(.04, Math.min(.22, Math.abs(shard.velocityZ) + (dragMoved ? .08 : .04)));
+        if (dragMoved) {
+          throwCount += 1;
+          root.dataset.throwCount = String(throwCount);
+          emitBurst(shard.mesh.position, shardMaterials[shards.indexOf(shard) % shardMaterials.length].color, 1.2);
+          playCue('throw');
+        }
+        root.dataset.grabbed = 'false';
+        grabbedShard = null;
+        dragPointerId = null;
+        dragMoved = false;
+        hero.releasePointerCapture?.(event.pointerId);
+      };
       const render = (now: number) => {
         frame = 0;
         if (!visible) return;
@@ -206,6 +344,20 @@
           impactRing.visible = false;
           root.dataset.impactActive = 'false';
         }
+        let activeBursts = 0;
+        for (let index = 0; index < burstCount; index += 1) {
+          if (burstLifetimes[index] <= 0) continue;
+          const offset = index * 3;
+          const velocity = burstVelocities[index];
+          burstPositions[offset] += velocity.x * delta;
+          burstPositions[offset + 1] += velocity.y * delta;
+          burstPositions[offset + 2] += velocity.z * delta;
+          velocity.multiplyScalar(Math.pow(.93, delta));
+          burstLifetimes[index] -= .024 * delta;
+          activeBursts += 1;
+        }
+        burstMaterial.opacity = activeBursts ? Math.min(.92, activeBursts / burstCount) : 0;
+        burstGeometry.attributes.position.needsUpdate = activeBursts > 0;
         velocityX += (targetX - springX) * .028 * delta;
         velocityY += (targetY - springY) * .028 * delta;
         velocityX *= Math.pow(.78, delta);
@@ -231,20 +383,34 @@
           const baseX = Math.cos(orbitAngle) * radius;
           const baseY = Math.sin(orbitAngle * 1.07 + phase) * height;
           const baseZ = -1.1 + Math.sin(time * .7 + phase) * .28 + (angle % .9);
-          shard.velocityX += -shard.offsetX * .024 * delta;
-          shard.velocityY += -shard.offsetY * .024 * delta;
-          shard.velocityZ += -shard.offsetZ * .024 * delta;
+          if (shard === grabbedShard) {
+            mesh.position.set(shard.dragX, shard.dragY, shard.dragZ);
+            shard.velocityX *= Math.pow(.72, delta);
+            shard.velocityY *= Math.pow(.72, delta);
+            shard.velocityZ *= Math.pow(.72, delta);
+          } else {
+            shard.velocityX += -shard.offsetX * .024 * delta;
+            shard.velocityY += -shard.offsetY * .024 * delta;
+            shard.velocityZ += -shard.offsetZ * .024 * delta;
+          }
           shard.velocityX *= Math.pow(.84, delta);
           shard.velocityY *= Math.pow(.84, delta);
           shard.velocityZ *= Math.pow(.84, delta);
-          shard.offsetX += shard.velocityX * delta;
-          shard.offsetY += shard.velocityY * delta;
-          shard.offsetZ += shard.velocityZ * delta;
-          mesh.position.set(baseX + shard.offsetX, baseY + shard.offsetY, baseZ + shard.offsetZ);
+          if (shard !== grabbedShard) {
+            shard.offsetX += shard.velocityX * delta;
+            shard.offsetY += shard.velocityY * delta;
+            shard.offsetZ += shard.velocityZ * delta;
+            mesh.position.set(baseX + shard.offsetX, baseY + shard.offsetY, baseZ + shard.offsetZ);
+          }
           const impactScale = 1 + Math.min(.42, Math.hypot(shard.offsetX, shard.offsetY, shard.offsetZ) * .22);
           mesh.scale.setScalar(baseScale * impactScale);
           mesh.rotation.x += (.006 + Math.abs(shard.velocityY) * .012) * delta;
           mesh.rotation.y += (.009 + Math.abs(shard.velocityX) * .012) * delta;
+          if (shard === shards[0]) {
+            const projected = mesh.getWorldPosition(shardScreenPoint).project(camera);
+            const bounds = root.getBoundingClientRect();
+            root.dataset.shardPoint = `${bounds.left + (projected.x + 1) * bounds.width * .5},${bounds.top + (1 - projected.y) * bounds.height * .5}`;
+          }
         });
 
         renderer.render(scene, camera);
@@ -276,6 +442,8 @@
       hero.addEventListener('pointermove', handlePointerMove, { passive: true });
       hero.addEventListener('pointerleave', resetPointer, { passive: true });
       hero.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      hero.addEventListener('pointerup', handlePointerUp, { passive: true });
+      hero.addEventListener('pointercancel', handlePointerUp, { passive: true });
       window.addEventListener('resize', resize, { passive: true });
       document.addEventListener('visibilitychange', handleDocumentVisibility, { passive: true });
       window.addEventListener('beforeunload', () => {
@@ -283,6 +451,8 @@
         hero.removeEventListener('pointermove', handlePointerMove);
         hero.removeEventListener('pointerleave', resetPointer);
         hero.removeEventListener('pointerdown', handlePointerDown);
+        hero.removeEventListener('pointerup', handlePointerUp);
+        hero.removeEventListener('pointercancel', handlePointerUp);
         window.removeEventListener('resize', resize);
         document.removeEventListener('visibilitychange', handleDocumentVisibility);
         if (frame) window.cancelAnimationFrame(frame);
@@ -292,6 +462,8 @@
         ringGeometry.dispose();
         impactRingGeometry.dispose();
         impactRingMaterial.dispose();
+        burstGeometry.dispose();
+        burstMaterial.dispose();
         amberRing.geometry.dispose();
         (amberRing.material as InstanceType<ThreeModule['MeshBasicMaterial']>).dispose();
         (core.geometry as InstanceType<ThreeModule['IcosahedronGeometry']>).dispose();
